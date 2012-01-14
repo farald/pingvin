@@ -1,0 +1,599 @@
+<?php
+
+/**
+ * Gets the definition for a country from wikipedia.
+ *
+ * NOTE: Not directly in use. Because of very bad descriptions at norwegian wikipedia
+ * we are forced to use english description, which again looks ugly on a norwegian page.
+ * I found this out while working on it, and then abandoned the idea.
+ * The definition still gets saved in the taxonomy, but it is not shown on the pages.
+ * 
+ * Code gotten from
+ * http://codeinclude.blogspot.com/2010/12/php-bot-to-get-wikipedia-definitions.html
+ *
+ */
+function wikidefinition($s) {
+    $url = "http://en.wikipedia.org/w/api.php?action=opensearch&search=" . urlencode($s) . "&format=xml&limit=1";
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_HTTPGET, TRUE);
+    curl_setopt($ch, CURLOPT_POST, FALSE);
+    curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_NOBODY, FALSE);
+    curl_setopt($ch, CURLOPT_VERBOSE, FALSE);
+    curl_setopt($ch, CURLOPT_REFERER, "");
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 4);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 6.1; he; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8");
+    $page = curl_exec($ch);
+    $xml = simplexml_load_string($page);
+    if ((string) $xml->Section->Item->Description) {
+        return array((string) $xml->Section->Item->Text, (string) $xml->Section->Item->Description, (string) $xml->Section->Item->Url);
+    } else {
+        return "";
+    }
+}
+
+/**
+ * Implementation of hook_node_load.
+ *
+ * This hook is sitting here just in case we need it.
+ *
+ * @param <type> $node
+ * The node ID
+ *
+ * @param <type> $build_mode
+ * The built mode (teaser, full etc)
+ */
+function pingvindatabasen_node_load($node, $build_mode) {
+    
+}
+
+/**
+ * Implementation of hook_menu_taxonomy_alter
+ *
+ * Alter the menu to hide the home link sitting on top of pages, when it sits alone
+ * and is not a part of the menu trail.
+ *
+ * TODO There are implications using this (it removes some other breadcrumbs that we want to keep).
+ *
+ * @param <type> $active_trail
+ * @param <type> $item
+ */
+function pingvindatabasen_menu_breadcrumb_alter(&$active_trail, $item) {
+    // Quick hack. Let's pretend we initiate taxonomy_term_page
+    $current = (object) array(
+                'tid' => arg(2),
+    );
+    // TODO This overrides any other possible breadcrumb and is a pure hard-coded
+    // presumption. Make this behavior configurable per vocabulary or term.
+
+    $breadcrumb = array();
+    while ($parents = taxonomy_get_parents($current->tid)) {
+        $current = array_shift($parents);
+        $breadcrumb[] = l($current->name . "b", 'taxonomy/term/' . $current->tid);
+    }
+    $breadcrumb[] = l(t('Home'), NULL);
+    $breadcrumb = array_reverse($breadcrumb);
+    drupal_set_breadcrumb($breadcrumb);
+//    if (count($active_trail) < 3){            // The main executing code sits here in these comments.
+//    unset($active_trail[0]);                  // As you may see, its disabled.
+//    }
+}
+
+/**
+ * Search for a term in a specific taxonomy.
+ * Used in combination with views. Do not delete.
+ * 
+ * @param <type> $item
+ * @param <type> $level
+ * @return <type> 
+ */
+function pingvindatabasen_tax_search($item, $level = 0) {
+    $result = db_query(
+            "SELECT termdata.name, termdata.tid FROM `taxonomy_term_data` termdata
+                    INNER JOIN taxonomy_term_hierarchy termhi ON termdata.tid = termhi.tid
+                    WHERE termdata.name = :name AND termdata.vid = 7 AND termhi.parent = :level ;", array(
+        ':name' => $item,
+        ':level' => (is_numeric($level)) ? $level : 0
+            )
+    );
+    foreach ($result as $record) {
+        $tid = $record->tid;
+    };
+    return $tid;
+}
+
+/**
+ * This is a geonames caller. It calls geonames module and retrieves the data for a location.
+ * We are then served the country and region (administrative region 1)
+ *
+ * @param <type> $lat
+ * The search point's latitude
+ *
+ * @param <type> $lon
+ * The search point's longitude
+ *
+ * @return array
+ * An array consisting of two values, 'latitude and longitude'.
+ */
+function pingvindatabasen_get_c_and_r($lat, $lon) {
+    $query = array('lat' => $lat, 'lng' => $lon, 'radius' => 100, 'maxrows' => 1);
+    $result = geonames_query('countrysubdivision', $query); // Call geonames.module
+    if (!empty($result->results)) {
+        foreach ($result->results as $place) {
+            $region_value = $place[adminname1];
+            $country_value = $place[countryname];
+        }
+    } else {
+        $country_value = "Unknown country";
+        $region_value = "Unknown region";
+    };
+    return array(
+        'country' => $country_value,
+        'region' => $region_value,
+    );
+}
+
+/**
+ * Implementation of hook_node_presave.
+ *
+ * This enables us to add the post to a taxonomy programmatically.
+ * We then call geonames to help us populate the countries array.
+ *
+ * Every content is with a location, so we dont need to differ between node types.
+ * There are some without, but we do not want to trash into the code every time
+ * we want to develop something new, so we leave it out.
+ *
+ * TODO This function should implement pingvindatabasen_get_c_and_r. Will be less code.
+ *
+ * @param <type> $node
+ * The node object that is about to be saved. Passed to function by reference.
+ *
+ */
+function pingvindatabasen_node_presave($node) {
+
+    // Get needed value from the node.
+    $point_lat = $node->field_map_point['und']['0']['locpick']['user_latitude'];
+    $point_lon = $node->field_map_point['und']['0']['locpick']['user_longitude'];
+
+    // We need fresh geonames data. TODO replace with pingvindatabasen_get_c_and_r
+    $query = array('lat' => $node->field_map_point[und][0][locpick][user_latitude],
+        'lng' => $node->field_map_point[und][0][locpick][user_longitude],
+        'radius' => 100, 'maxrows' => 1);
+    $me = array();
+    $result = geonames_query('countrysubdivision', $query);
+    if (!empty($result->results)) {
+        foreach ($result->results as $place) {
+            $region_value = $place[adminname1];
+            $country_value = $place[countryname];
+        }
+    } else {
+        $country_value = "Unknown country";
+        $region_value = "Unknown region";
+    };
+    $node->field_map_region_1['und']['0']['value'] = $region_value;
+    $node->field_map_country_1['und']['0']['value'] = $country_value;
+
+
+
+    $country_tid = pingvindatabasen_tax_search($country_value);
+    //$desc = wikidefinition($country_value);
+    // Add the country to hidden text field. Its a double save, but enables many features.
+    // If term doesn't exist, create one.
+    if (!is_numeric($country_tid)) {
+        $Cterms = new stdClass();
+        $Cterms->vid = 7;
+        $Cterms->name = $country_value;
+        $Cterms->description = $desc[1];
+        taxonomy_term_save($Cterms);
+        $country_tid = $Cterms->tid;
+    }
+
+    // Now that we've created a term for country,
+    // let's do this for region as well. Now we need the country's parent.
+    $region_tid = pingvindatabasen_tax_search($region_value, $country_tid);
+
+
+    // If none, create one.
+    if (!is_numeric($region_tid)) {
+        $Rterms = new stdClass();
+        $Rterms->vid = 7;
+        $Rterms->name = $region_value;
+        $Rterms->description = t("Et administrativt område i ") . l($country_value, "taxonomy/");
+        $Rterms->format = "full_html";
+        $Rterms->parent = $country_tid;
+        taxonomy_term_save($Rterms);
+        $region_tid = $Rterms->tid;
+    }
+    // Now, we have created a taxonomy item of the fields.
+    // One thing remaining is to connect to the terms, I reckon this is best done in views.
+    // We save the term to the node before it is saved in the database.
+    $node->field_map_name_browser['und']['0']['tid'] = $region_tid;
+}
+
+/**
+ * Workaround for limitations in location.module 7.x-3.x-dev - for saving data
+ *
+ * This function serves TWO purposes.
+ *
+ * The location module does not support user locations yet.
+ * Therefore we take data from the form and saves it into separate fields.
+ * It will not be searchable in views (exept for static map views),
+ * but at least we have locations.
+ *
+ * This function also saves the location information from geonames, just as in node_presave.
+ *
+ * @param <type> $edit
+ * The form being saved
+ *
+ * @param <type> $account
+ * The account being altered
+ *
+ * @param <type> $category
+ */
+function pingvindatabasen_user_presave(&$edit, $account, $category) {
+    // Collect some values
+    $user_lat = $edit['field_map_point']['und']['0']['locpick']['user_latitude'];
+    $user_lon = $edit['field_map_point']['und']['0']['locpick']['user_longitude'];
+    $c_r = pingvindatabasen_get_c_and_r($user_lat, $user_lon);
+
+    $edit['field_map_region_1']['und']['0']['value'] = $c_r['region'];
+    $edit['field_map_country_1']['und']['0']['value'] = $c_r['country'];
+
+    $edit['field_user_latitude']['und']['0']['value'] = $user_lat;
+    $edit['field_user_longitude']['und']['0']['value'] = $user_lon;
+}
+
+/**
+ * Workaround for limitations in location.module 7.x-3.x-dev
+ *
+ * Location does not support user locations yet.
+ * Therefore we take data from some other fields and passes it to the location form.
+ * Result of this function is locations working fine in user front end.
+ *
+ * It will not be searchable in views, but at least we have locations.
+ *
+ * @param array $form
+ * The form being altered
+ *
+ * @param <type> $form_state
+ * The state the form is in right now
+ *
+ * @param <type> $form_id
+ * The form id string
+ */
+function pingvindatabasen_form_user_profile_form_alter(&$form, $form_state, $form_id) {
+
+    $default_value = array(// #default_value
+        'lid' => '',
+        'name' => '',
+        'street' => '',
+        'additional' => '',
+        'city' => '',
+        'province' => '',
+        'postal_code' => '',
+        'country' => 'no',
+        'latitude' => $form['field_user_latitude']['und']['0']['value'],
+        'longitude' => $form['field_user_longitude']['und']['0']['value'],
+        'source' => '1',
+        'is_primary' => '0',
+        'locpick' =>
+        array(
+            'user_latitude' => (float) $form['field_user_latitude']['und']['0']['value']['#default_value'],
+            'user_longitude' => (float) $form['field_user_longitude']['und']['0']['value']['#default_value'],
+        ),
+        'province_name' => '',
+        'country_name' => 'Norway',
+    );
+
+    $form['field_map_point']['und']['0']['#default_value'] = $default_value;
+}
+
+/*
+ * Implementation of hook_page_build
+ *
+ * This adds modification CSS to all pages, file is located in ./pingvindatabasen/css/mod.css.
+ * We use this to collect all modification css for the site.
+ *
+ * This also adds a hack to prevent double submissions to forms.
+ * http://stackoverflow.com/questions/4473173/how-can-i-disable-a-drupal-form-submit-button-when-it-is-clicked-to-prevent-doubl
+ */
+
+function pingvindatabasen_page_build($page) {
+    drupal_add_css(
+            drupal_get_path('module', 'pingvindatabasen') . '/css/mod.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE)
+    );
+    drupal_add_css(
+            drupal_get_path('module', 'pingvindatabasen') . '/css/views.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE)
+    );
+    drupal_add_js(drupal_get_path('module', 'pingvindatabasen') . '/css/script.js');
+
+    $js = "
+         $.fn.prevent_double_submission = function() {
+         $(this).live('submit',function(){
+         $(this).find('button[type=submit], input[type=submit]').attr('disabled',true);
+         });";
+    drupal_add_js($js, 'inline');
+}
+
+/**
+ * Implementation of hook_form_alter
+ *
+ * Hide the region selection fields sitewide. These are used by functions,
+ * so we don't want the users messing with them.
+ * We program these to gather information according to _node_presave above.
+ *
+ * @param object $form
+ * The form we are disabling stuff on
+ *
+ * @param array $form_state
+ * Current state of the form
+ *
+ * @param string $form_id
+ * The form ID of current form
+ *
+ */
+function pingvindatabasen_form_alter(&$form, &$form_state, $form_id) {
+    // TODO: We need an IF-statement here,
+    // once we know all the forms which will use it
+    $form['field_map_name_browser']['#access'] = FALSE;
+    $form['field_map_country_1']['#access'] = FALSE;
+    $form['field_map_region_1']['#access'] = FALSE;
+    $form['field_user_latitude']['#access'] = FALSE;
+    $form['field_user_longitude']['#access'] = FALSE;
+}
+
+/**
+ * Implementation of hook_user_login
+ *
+ * We want the user dashboard to serve as the main entry point to the site.
+ *
+ * @param array $edit
+ * @param array $account
+ */
+function pingvindatabasen_user_login($edit, $account) {
+    drupal_goto("user/" . $account->uid . "/dashboard");
+}
+
+
+
+/**
+ * Implementation of hook_form_alter
+ * 
+ * WORKAROUND for implementation errors regarding the translation system.
+ * 
+ * A collection of changes made to the menu router system.
+ * We do this to alter weight and style of items in core,
+ * 
+ * @param array $items
+ * The menu router table. Contains every drupal path.
+ */
+function pingvindatabasen_menu_alter(&$items) {
+    $items['user/%user/dashboard']['weight'] = -50;
+    $items['user/%user/edit']['weight'] = 50;
+    $items['user/%user/edit']['title'] = t('Innstillinger');
+    $items['user/%user/view']['title'] = t('Om meg');
+    $items['taxonomy/term/%term']['title'] = t('Utdrag');
+}
+
+/**
+ * A custom theme modification, for usability.
+ * The project consists of many content types,
+ * and we want everybody to know what type of item we are viewing.
+ * So we make a link next to the title with description, and a link upwards in the hiearchy
+ * It may be a user, a klub, or a parent term.
+ *
+ * @param string $content_type
+ * @return <type>
+ */
+function pingvindatabasen_custom_theme_mod($content_type, $entity_id = null) {
+
+
+    // For taxonomy
+    if ($content_type == 'taxonomy') {
+        $entity_id = (isset($entity_id) ? $entity_id : arg(2));
+        $term = taxonomy_term_load($entity_id);
+        $parents = taxonomy_get_parents($entity_id);
+        switch ($term->vocabulary_machine_name) {
+            case 'countries':
+                // Do we have a parent?
+                if (is_array($parents)) {
+                    foreach ($parents AS $parent) {
+                        $l_attr = array('attributes' => array('class' => 'grey-link'));
+                        return "Et fylke i " . l($parent->name, "taxonomy/term/" . $parent->tid, $l_attr);
+                    }
+                }
+
+                return "Et land " . l("av  mange", "country");
+                break;
+            default:
+                $vocab_name = taxonomy_vocabulary_get_names();
+                return "En kategori i " . $vocab_name[($term->vocabulary_machine_name)]->name;
+                break;
+        }
+        return $term->name;
+    }
+
+    // For nodes
+    if ($content_type == 'node') {
+        $entity_id = (isset($entity_id) ? $entity_id : arg(1));
+        $node = node_load($entity_id);
+        switch ($node->type) {
+            case "log":
+                $n_user = user_load($node->uid);
+                $uname = $n_user->name;
+                $l_attr = array('attributes' => array('class' => 'grey-link'));
+                return t("Loggført av ") . l($uname, "user/" . $node->uid . "/log", $l_attr) . t("");
+                break;
+            case "divetrip":
+                $node = node_load(arg(1));
+                $etids = $node->group_audience[LANGUAGE_NONE];
+
+                foreach ($etids AS $item_id => $item) {
+                    if ($item['state'] == 1) {
+                        //$group = og_get_entity_groups('node', $user);
+                        $group = og_get_group('group', $item['gid']);
+                        if (!empty($group->label)) {
+                            return ("Arrangert av " . l($group->label, "node/" . $group->etid));
+                        } else {
+                            return "Arrangert av privatperson";
+                        }
+                        //print var_export(og_get_group_ids('group', $item['gid']));
+                    };
+                }
+                break;
+            case "club":
+                return t("Dykkerklubb i " . pingvin_country_get_links(node_load(arg(1))));
+                break;
+            case "divesite":
+                return "Dykkested i " . pingvin_country_get_links(node_load(arg(1)));
+                break;
+            case "asset":
+                $node = node_load(arg(1));
+                $etids = $node->group_audience[LANGUAGE_NONE];
+
+                foreach ($etids AS $item_id => $item) {
+                    if ($item['state'] == 1) {
+                        //$group = og_get_entity_groups('node', $user);
+                        $group = og_get_group('group', $item['gid']);
+                        if (!empty($group->label)) {
+                            return ("Båt / ting som tilhører " . l($group->label, "node/" . $group->etid . "/assets"));
+                        } else {
+                            return "Løsøre som ingen eier. Slett meg takk.";
+                        }
+                    };
+                }
+                break;
+            case "help":
+                return "Hjelp til selvhjelp";
+                break;
+            case "request":
+                return l('En teknisk forespørsel eller feilmelding', 'developer/requests');
+                break;
+            case "gallery":
+                $gallery_conn = field_get_items('node', $node, 'field_gallery_trip');
+                if (is_numeric((int) $gallery_conn[0]['nid'])) {
+                    $gallery_node = node_load($gallery_conn[0][nid]);
+                    $gallery_text = " fra turen " . l($gallery_node->title, "node/" . $gallery_node->nid);
+                }
+
+                return "Et bildegalleri$gallery_text, tatt av " . l($node->name, 'user/' . $node->uid);
+                break;
+        }
+    }
+    // For users
+    if ($content_type == 'user' && is_numeric(arg(1))) {
+        $user = user_load(arg(1));
+        $etids = $user->group_audience[LANGUAGE_NONE];
+        if (is_array($etids)) {
+            foreach ($etids AS $item_id => $item) {
+                if ($item['state'] == 1) {
+                    //$group = og_get_entity_groups('node', $user);
+                    $group = og_get_group('group', $item['gid']);
+                    if (!empty($group->label)) {
+                        return ("Medlem av " . l($group->label, "node/" . $group->etid));
+                    }
+                };
+            }
+        } else {
+            return "Ikke medlem av noen klubb, ergo anonym.";
+        }
+    }
+}
+
+function pingvin_country_get_links($nid) {
+    $node = node_load(arg(1));
+    $field = field_get_items('node', $node, 'field_map_name_browser');
+    foreach ($field AS $inst) {
+        $tid = $inst['tid'];
+        $term = taxonomy_term_load($tid);
+        $text = l($term->name, 'taxonomy/term/' . $term->tid) . ", ";
+        $terms = taxonomy_get_parents($tid);
+        foreach ($terms AS $term) {
+            $text .= l($term->name, 'taxonomy/term/' . $term->tid);
+        }
+    }
+    return $text;
+}
+
+/**
+ * Gmap log marker. Misplaced, should really be under gmap_mods.
+ *
+ * In the various nodes you have a field called field_map_marker.
+ * This is a formatting function used to format these names.
+ *
+ * @param integer $warn
+ * 0 Or 1
+ *
+ * @param integer $photo
+ * 0 or 1
+ *
+ * @param integer $depth
+ * 1-100
+ *
+ * @return string
+ * A string that corresponds to the custom markers.
+ */
+function pingvindatabasen_marker_log($warn = 0, $photo = 0, $depth = 10) {
+    switch ($depth) {
+        case ($depth < 10):
+            $dimg = 0;
+            break;
+        case ($depth < 20):
+            $dimg = 1;
+            break;
+        default:
+            $dimg = 2;
+    }
+    return "log-warn$warn-photo$photo-depth$dimg";
+}
+
+function pingvindatabasen_marker_nodetype($ntype) {
+    $arr = array(
+        'log' => 'white',
+        'divesite' => 'green',
+        'divetrip' => 'blue'
+    );
+    foreach ($arr AS $nodetype => $marker) {
+        if ($ntype == $nodetype) {
+            return $marker;
+        }
+    }
+}
+
+/*
+ * LOCATION MOVING
+ * Add error if user is regular and she tries to move it very far.
+ *
+ * TODO: This now only stops regular users from editing the site geo, should add date criteria.
+ * Location closed after first submit, no edit exept for moderators and admins.
+ */
+
+function pingvindatabasen_form_divesite_node_form_alter(&$form, &$form_state, &$form_id) {
+    $access = false;
+
+    // Add validate func to form
+    $form['#validate'][] = 'pingvindatabasen_loc_move_authorize';
+    global $user;
+    if (in_array('administrator', $user->roles) || in_array('moderator', $user->roles)) {
+        $access = true;
+    };
+    if (!is_numeric($form->nid)) {
+        $access = true;
+    }
+    drupal_set_message($form_state['values']['nid']);
+    if ($access == false) {
+        drupal_set_message("Lengdegrad og breddegrad er låst.\nKun folk i samme region og moderatorer
+                            kan endre på lokaliteten når artikkelen er over 1 mnd gammel.");
+        drupal_set_message("Og du: <b>Skriv i revisjonsloggen!</b>");
+        $form['field_map_point']['#access'] = false;
+    }
+}
+
+function pingvindatabasen_loc_move_authorize(&$form, &$form_state) {
+    global $user;
+    if (!in_array('moderator', $user->roles) || !in_array('administrat', $user->roles)) {
+        
+    }
+}

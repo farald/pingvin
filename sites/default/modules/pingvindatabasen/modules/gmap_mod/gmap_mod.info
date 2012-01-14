@@ -1,0 +1,7 @@
+name = Gmap modifications
+description = Special marker handling mechanisms.
+package = Pingvindatabasen
+version = VERSION
+core = 7.x
+
+files[] = gmap_mod.module

@@ -1,0 +1,7 @@
+name = Organic groups mods
+description = Adds permissions and stuff to organic groups.
+package = Pingvindatabasen
+version = VERSION
+core = 7.x
+
+files[] = og_pingvin.module

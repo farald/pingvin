@@ -1,0 +1,79 @@
+<?php
+// $Id: apc.module,v 1.1.2.2 2010/01/13 00:08:14 rmuilwijk Exp $
+
+/**
+ * Implementation of hook_init().
+ * 
+ * Used for displaying the APC stats for debug purposes.
+ */
+function apc_init() {
+  global $user;
+
+  if (($user->uid == 0) || !variable_get('apc_show_debug', FALSE)
+      || !user_access('access apc statistics') || strstr($_SERVER['PHP_SELF'], 'update.php')
+      || strstr($_GET['q'], 'autocomplete')) {
+    return;
+  }
+  
+  register_shutdown_function('apc_shutdown');
+}
+
+/**
+ * @file
+ * This integrates the drupal APC cache module.
+ */
+
+/**
+ * Implementation of hook_permission().
+ */
+function apc_permission() {
+  return array(
+    'access apc statistics' =>  array(
+      'title' => t('Access apc statistics'),
+      'description' => t('Allows access to the statistics reports of APC.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_requirements().
+ */
+function apc_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break at install time
+  $t = get_t();
+
+  // Test APC.
+  $apc_version = phpversion('apc');
+  $requirements['apc'] = array(
+    'title' => $t('APC'),
+    'value' => empty($apc_version) ? $t('Not available') : $apc_version,
+    'description' => $t('The APC module needs the apc extension see: http://www.php.net/apc.'),
+    'severity' => empty($apc_version) ? REQUIREMENT_ERROR : REQUIREMENT_OK,
+  );
+
+  return $requirements;
+}
+
+/**
+ * See apc_init() which registers this function as a shutdown function.
+ * Displays apc stats in the footer.
+ */
+function apc_shutdown() {
+  global $apc_statistics;
+
+  // Try not to break non-HTML pages.
+  if (function_exists('drupal_get_headers')) {
+    $headers = drupal_get_headers();
+    if(strstr($headers, 'xml') || strstr($headers, 'javascript') || strstr($headers, 'plain')) {
+      return;
+    }
+  }
+
+  print '<div id="apc-devel"><h2>' . t('APC statistics') . '</h2>';
+  print theme('table', array(
+    'header' => array(('Type'), t('Bin'), t('Cid'), t('Hit / Wildcard')),
+    'rows' => $apc_statistics
+  ));
+  print '</div>';
+}

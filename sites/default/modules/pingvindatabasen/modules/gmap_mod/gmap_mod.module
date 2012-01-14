@@ -1,0 +1,432 @@
+<?php
+
+/**
+ *
+ * Implementation of hook_form_alter
+ *
+ * We want to hide the map marker field, just as we do with various fields in
+ * pingvindatabasen.module. We will save a marker ID into this field, and whenever
+ * we initiate a gmap, we:
+ *
+ * - Get the field from database using views
+ * - Hide it from the view
+ * - Use extended gmap display mode to set the marker to this field.
+ *
+ * @param array $form
+ * The form being modified
+ *
+ * @param <type> $form_state
+ * The state of the form right now
+ *
+ * @param <type> $form_id
+ * The form id
+ *
+ */
+function gmap_mod_form_alter(&$form, &$form_state, $form_id) {
+    // TODO: We need an IF-statement here,
+    // once we know all the forms which will use it
+    $form['field_map_marker']['#access'] = FALSE;
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * This function hooks into drupal workflow and analyzes the node.
+ * It then saves an adequate marker ID into the field.
+ *
+ * TODO Add more marker analyze options, not only for logs, but for divesites and other.
+ *
+ * @param <type> $node
+ */
+function gmap_mod_node_presave($node) {
+
+    if ($node->type !== 'log') {
+        $marker = pingvindatabasen_marker_nodetype($node->type);
+    } else {
+        $warn = ($node->field_log_problem_report_check['und'][0]['value']) ? 1 : 0;
+        $photo = (is_numeric($node->field_log_images[und][0][fid])) ? 1 : 0;
+        $depth = $node->field_log_depth['und'][0]['value'];
+        $marker = pingvindatabasen_marker_log($warn, $photo, $depth);
+    }
+    $node->field_map_marker['und']['0']['value'] = $marker;
+}
+
+/**
+ * Source for this function:
+ * http://www.corecoding.com/php-geocode-calculator_c25.html
+ *
+ * Calculates the radians for use on North / south fields used to describe direction
+ * between two points.
+ *
+ * @param <type> $lat1
+ * Latitude source
+ *
+ * @param <type> $lon1
+ * Longitude source
+ *
+ * @param <type> $lat2
+ * Latitude destination
+ *
+ * @param <type> $lon2
+ * Longitude destination
+ *
+ * @param <type> $unit
+ * Units, we use meter in this case
+ *
+ * @return <type>
+ */
+function distance($lat1, $lon1, $lat2, $lon2, $unit = 'M') {
+    $theta = $lon1 - $lon2;
+    $dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) + cos(deg2rad($lat1)) *
+    cos(deg2rad($lat2)) * cos(deg2rad($theta));
+    $dist = acos($dist);
+    $dist = rad2deg($dist);
+    $dist = $dist * 60 * 1.1515;
+
+    if ($unit == "K") {
+        $dist *= 1.609344;
+    } else if ($unit == "N") {
+        $dist *= 0.8684;
+    }
+
+    return round($dist, 1);
+}
+
+/**
+ * Source for this function:
+ * http://www.corecoding.com/php-geocode-calculator_c25.html
+ *
+ * Formatting of the North south east fields.
+ * Used together with distance()
+ *
+ * @param <type> $lat1
+ * Latitude source
+ *
+ * @param <type> $lon1
+ * Longitude source
+ *
+ * @param <type> $lat2
+ * Latitude destination
+ *
+ * @param <type> $lon2
+ * Longitude destination
+ *
+ * @return string
+ */
+function bearing($lat1, $lon1, $lat2, $lon2) {
+    if (round($lon1, 1) == round($lon2, 1)) {
+        if ($lat1 < $lat2) {
+            $bearing = 0;
+        } else {
+            $bearing = 180;
+        }
+    } else {
+        $dist = distance($lat1, $lon1, $lat2, $lon2, 'N');
+        $arad = acos((sin(deg2rad($lat2)) - sin(deg2rad($lat1)) * 
+                cos(deg2rad($dist / 60))) / (sin(deg2rad($dist
+                / 60)) * cos(deg2rad($lat1))));
+        $bearing = $arad * 180 / pi();
+        if (sin(deg2rad($lon2 - $lon1)) < 0) {
+            $bearing = 360 - $bearing;
+        }
+    }
+
+    $dirs = array("Nord", "Øst", "Sør", "Vest");
+
+    $rounded = (int) (round($bearing / 22.5) % 16);
+    if (($rounded % 4) == 0) {
+        $dir = $dirs[$rounded / 4];
+    } else {
+        $dir = $dirs[2 * floor(((floor($rounded / 4) + 1) % 4) / 2)];
+        $dir .= $dirs[1 + 2 * floor($rounded / 8)];
+        #if ($rounded % 2 == 1)
+        #  $dir = $dirs[round_to_int($rounded/4) % 4] . "-" . $dir;
+    }
+
+
+    return $dir;
+    #return $bearing;
+}
+
+/**
+ *
+ * VIEWS helper, for NODE and USER views only.
+ *
+ * Takes a row from a view result (using php field), fetches node from arg(1)
+ * and returns direction from arg to item in current row.
+ *
+ * TODO This has weakness because it is dependent on ARG() (Where we get node ID from).
+ * In addition, it will only work on items residing on node/* or user/*
+ * It is sufficent for our use, but is not very reusable.
+ *
+ * @param array $row
+ * A row from a view. Uses $row->field_map_point, latitude and longitude.
+ *
+ * @return <type>
+ * Returns a direction (North, NorthWest etc).
+ *
+ */
+
+function pingvindatabasen_get_direction_from_geo($row) {
+    if (is_numeric(arg(1))) {
+        switch (arg(0)) {
+            case 'node':
+                $node = node_load(arg(1));
+                $s_lat = $node->field_map_point[und][0][locpick][user_latitude];
+                $s_lon = $node->field_map_point[und][0][locpick][user_longitude];
+                $d_lat = $row->latitude;
+                $d_lon = $row->longitude;
+                return bearing($s_lat, $s_lon, $d_lat, $d_lon);
+                break;
+            case 'user':
+                $user = user_load(arg(1));
+                $s_lat = $user->field_user_latitude[und][0][value];
+                $d_lat = $user->field_user_longitude[und][0][value];
+                $d_lat = $row->latitude;
+                $d_lon = $row->longitude;
+                return bearing($s_lat, $s_lon, $d_lat, $d_lon);
+                break;
+        }
+    }
+}
+
+/**
+ * VIEWS helper (filter).
+ * Takes a nid from a views row and compares it to current URL
+ *
+ * @param array $row
+ * A row from a view
+ *
+ * @return boolean
+ * True if match, False if not.
+ */
+function pingvindatbasen_is_current_nid($row) {
+    return ($row->nid == arg(1)) ? true : false;
+}
+
+/**
+ * VIEWS helper
+ * Returns array of lat and lon from user, using a views row
+ *
+ * @global int $user
+ * Fetches global user object
+ *
+ * @param <type> $uid
+ * The uid of the user. if no user, current is used.
+ *
+ * @return array
+ * Returns array wilth 'latitude' and 'longitude'.
+ */
+function gmap_mod_loc_from_user($uid = null) {
+    global $user;
+    $user = (($uid) ? user_load($uid) : user_load($user->uid));
+    return array(
+        'latitude' => $user->field_user_latitude[und][0][value],
+        'longitude' => $user->field_user_longitude[und][0][value],
+    );
+}
+
+/**
+ * VIEWS helper.
+ * Return array of lat and lon from user object, using a views row.
+ *
+ * @param <type> $row
+ * Current views row
+ *
+ * @return <type>
+ * An array of latitude and longitude.
+ */
+function gmap_mod_loc_from_node($row) {
+    $node = node_load(arg(1));
+    return array(
+        'latitude' => $node->field_map_point[und][0][locpick][user_latitude],
+        'longitude' => $node->field_map_point[und][0][locpick][user_longitude],
+    );
+}
+
+/**
+ * VIEWS helper.
+ *
+ * Test distance against current node to see how near it is.
+ * Output a text field depending on  what distance is gathered.
+ *
+ * This is used mainly to get the distance of a divesite in relation to a logpage.
+ *
+ * In a view row, test distance to see if we are on-site or nearby.
+ * @param <type> $row
+ *
+ * @return string
+ * Returns a formatted string containing a adequate formatted (meaningful)
+ * sentence.
+ */
+function gmap_mod_nearest_site($row) {
+    switch ($row->distance) {
+        case "0":
+            return t("På dykkestedet ");
+            break;
+        case $row->distance < 500 :
+            return round($row->distance) . t(" meter fra ");
+            break;
+        default:
+            return t(" Mindre enn ") . gmap_mod_dist_to_rounded($row) . t(" km fra stedet ");
+            break;
+    }
+}
+
+/**
+ * Views helper.
+ * Format a raw distance field from views row into kilometre count.
+ *
+ * @param <type> $row
+ * The views row. Uses $row->distance.
+ *
+ * @return int
+ * Returns a rounded value in Km.
+ */
+function gmap_mod_dist_to_rounded($row) {
+    $dist = is_numeric($row->distance) ? floor($row->distance / 1000) : 0;
+    return $dist;
+}
+
+/**
+ * TODO There was a good idea behind this. Right now I cant remember what it was.
+ * Meanwhile it will sit here doing nothing.
+ *
+ * @param array $form
+ * The form being modified
+ *
+ * @param array $form_state
+ * Current state of the form
+ *
+ * @param string $form_id
+ * The form ID
+ */
+function pingvindatabasen_form_user_register_form_alter(&$form, $form_state, $form_id) {
+    //drupal_set_message('Debug: user_register');
+}
+
+/**
+ * Views helper.
+ * Takes the current nid, fetches range and returns it as lat,lon_dist.
+ * Used on divesites to do aerial searches by contextual filter in views.
+ *
+ * TODO Tracerse through all views in relation to sites to see it is used.
+ * It is the fastest solution, better than using regular filter.
+ *
+ * @param int $nid
+ * The nid of the node to search around
+ *
+ * @return <type>
+ * A formatted, valid search pattern acceptable to location contextual filter (69.8,6.7_500)
+ */
+function pingvindatabasen_filter_as_lat_lon_range($nid) {
+    if (is_numeric($nid)) {
+        $node = node_load($nid);
+        $lat = $node->field_map_point[und][0][locpick][user_latitude];
+        $lon = $node->field_map_point[und][0][locpick][user_longitude];
+        $range = $node->field_place_radius[und][0][value];
+        return $lat . "," . $lon . "_" . $range;
+    }
+}
+
+/**
+ * Views helper (PHP filter).
+ * Test if node is current OR trip_target contains node.
+ *
+ * @param array $row
+ * The views row
+ *
+ * @return <type>
+ * True if node is either same as current OR node is seen in field_trip_target
+ * of the same node.
+ */
+function pingvindatabasen_current_or_nid($row) {
+    static $mynode;
+    if (!is_object($var)) {
+        $mynode = node_load(is_numeric(arg(1)) ? arg(1) : 121); 
+    }
+    $field = $mynode->field_trip_target[LANGUAGE_NONE];
+    if (in_array($mynode->nid, $field) || $mynode->nid == $row->nid) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Views helper (NID contextual filter)
+ * Returns nid from current arg, and nids from current trip, together as "120,121,122"
+ * 
+ * Return true if nid is either current content OR inside nid array of node.
+ * Used to gather the nid of trip plus the trip targets.
+ * That way, we can print them out on the same map.
+ *
+ * These items have such complicated relations that we cannot build a map of
+ * them all using just views. This is mainly because the same nid will be
+ * viewed more than once (Node location, then node's relative node's location). 
+ * So, instead of doing the argumenting inside views, we pass on a list of
+ * nids to display.
+ *
+ * TODO: Also get locations from comment, but same situation with comments as with users.
+ * TODO: This function takes no nids, aka it cannot be used elsewhere than on node/%nid trail.
+ * 
+ * @return <type>
+ *
+ */
+function pingvindatabasen_trip_special_map_nids() {
+    $nids = "";
+    if (is_numeric(arg(1))) {
+        $node = node_load(arg(1));
+        $field = $node->field_trip_target[LANGUAGE_NONE];
+        IF (is_array($field)) {
+            foreach ($field AS $fid => $fval) {
+                $nids .= $fval['nid'] . ",";
+            }
+        }
+        $nids .= $node->nid;
+    }
+    return $nids;
+}
+
+/**
+ * Views helper
+ * Check if current node is the same as $row->nid and return marker if yes.
+ * For trip page map.
+ *
+ * @param <type> $row
+ * The views row
+ *
+ * @return <type>
+ * Returns a marker type.
+ */
+function pingvindatabasen_trip_nid_arg_match($row) {
+    if ($row->nid == arg(1)) {
+        return "blue";
+    } else {
+        return "small green";
+    };
+}
+
+/**
+ * Views filter helper.
+ * Get all logs from people within a dive club.
+ * @param <type> $row
+ */
+function pingvindatabasen_logged_trip_dives($row) {
+    $return = true;
+    $node = (is_numeric(arg(1))) ? node_load(arg(1)) : node_load(89);
+    $group = field_get_items('node', $node, 'group_group');
+    $gid = $group['0']['value'];
+    //dpm(node_load(89));
+    //static $uids;
+
+        $uids = array();
+        $view = views_get_view('cron_club_members');
+        $view->execute_display('default', array($gid)); // <----- Check this!!
+        $view->render();
+        foreach ($view->result as $account) {
+            $return = ($account->uid == $row->uid) ? false : true;
+            //dpm($account);
+        }
+
+    return $return;
+};

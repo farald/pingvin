@@ -1,0 +1,7 @@
+name = General PingvinDB stuff
+description = Collection parts needed for Pingvindatabasen. The .info-file refers further to the necessary files.
+package = Pingvindatabasen
+version = VERSION
+core = 7.x
+
+files[] = pingvindatabasen.module

@@ -1,0 +1,17 @@
+; $Id: smart_ip.info,v 1.1.2.1 2010/10/16 00:42:32 arpeggio Exp $
+name = Smart IP
+description = Smart IP identify visitor's geographical location (longitude/latitude), country, region, city and postal code based on the IP address of the visitor
+package = Location
+core = 7.x
+files[] = smart_ip.install
+files[] = smart_ip.module
+files[] = includes/smart_ip.utility.inc
+files[] = includes/smart_ip.admin.inc
+files[] = includes/smart_ip.region_lookup.inc
+configure = admin/config/people/smart_ip
+; Information added by drupal.org packaging script on 2010-12-16
+version = "7.x-1.4-alpha1"
+core = "7.x"
+project = "smart_ip"
+datestamp = "1292535683"
+

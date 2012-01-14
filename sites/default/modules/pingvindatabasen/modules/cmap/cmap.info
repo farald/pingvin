@@ -1,0 +1,5 @@
+name = jVectorMap block
+description = "Adds a Vector map."
+package = Fields
+core = 7.x
+files[] = cmap.module

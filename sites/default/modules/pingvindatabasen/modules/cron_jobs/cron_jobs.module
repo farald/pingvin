@@ -1,0 +1,575 @@
+<?php
+
+/**
+ * 0: Check cache 'trip_mail' to see if cron has run the last 24 hrs.
+ * 1: Load nids of all trips bound two months from now.
+ * 2: Traverse trough them. We are interested in which day they go.
+ *
+ * -- Mailsenders --
+ * 3: T-30 days to start, mail the Dykkeleder.
+ * 4: T-07 days to start: mail everyone in the club.
+ * 5: T-04 days to start: today's summary
+ * 6: T-02 days to start: today's summary
+ * 7: T-01 days to start: today's summary
+ *
+ * Always: If trip time changes.
+ *
+ */
+function cron_jobs_cron() {
+    if (date("H") == 20) { // Cron runs per hour. Run only at 22 hours.
+//cron_jobs_cron_dowork();
+    }
+}
+
+/**
+ * The actual worker function. Shortcut for debug purpose.
+ * $params['account'] -> The user object recieving the mail
+ * $params['node'] -> The actual trip node, will find member group automatically.
+ *
+ */
+function cron_jobs_cron_dowork() {
+
+    // T-30. Mail dykkeleder.
+    foreach (cron_jobs_trip_results('t30') AS $node) {
+        foreach (field_get_items('node', $node, 'field_trip_manager') AS $userid) {
+
+            // Users getting this mail
+            $account = user_load($userid['uid']);
+            $params['account'] = $account;
+            $params['node'] = $node;
+
+            // The T30 mail, we just send node and user, and voila!
+            drupal_mail('cron_jobs', 't30', $account->mail, user_preferred_language($account), $params);
+        }
+    }
+
+    // T-07. Mail alle 7 dager før en tur. Finn klubb. For hvert medlem, send mail.
+    foreach (cron_jobs_trip_results('t07') AS $node) {
+
+        // The group
+        $gid = field_get_items('node', $node, 'group_audience');
+        $gid = $gid[0][gid];
+
+        // The list of uids from group
+        $uids = array();
+        $view = views_get_view('cron_club_members');
+        $view->execute_display('default', array(2));
+        $view->render();
+        foreach ($view->result as $account) {
+            $params['account'] = $account;
+            $params['node'] = $node;
+            //drupal_mail('cron_jobs', 't07', $account->mail, user_preferred_language($account), $params);
+        }
+        dpm($uids);
+    };
+
+    // T-04. Mail påmeldte 4 dager før en tur. Finn påmeldte. Send mail til hver.
+    foreach (cron_jobs_trip_results('t04') AS $node) {
+
+        // The attending users
+        $uids = field_get_items('node', $node, 'field_trip_people');
+
+        // Send mail to them all
+        foreach ($uids AS $uid) {
+            $account = user_load($uid);
+            $params['account'] = $account;
+            $params['node'] = $node;
+            //drupal_mail('cron_jobs', 't04', $account->mail, user_preferred_language($account), $params);
+        }
+    };
+
+    // T-01. Mail attending with attached data for the trip.
+    foreach (cron_jobs_trip_results('t01') AS $node) {
+
+        // The attending users
+        $uids = field_get_items('node', $node, 'field_trip_people');
+
+        // Send mail to them all
+        foreach ($uids AS $uid) {
+            $pdf = cron_jobs_pdf_create($node);
+            if (is_array($pdf)){
+                $params['attachment'] = $pdf;
+            }
+            $account = user_load($uid);
+            $params['account'] = $account;
+            $params['node'] = $node;
+            drupal_mail('cron_jobs', 't01', $account->mail, user_preferred_language($account), $params);
+        }
+    }
+
+
+
+
+
+    dpm($params);
+
+//    $params['account'] = user_load(1);
+//    $params['node'] = node_load(137);
+//    $account = user_load(1);
+//    $params['attachment'] = array('uri' => '/var/www/test.txt', 'filename' => 'test.txt');
+//    drupal_mail('cron_jobs', 't01', $account->mail, user_preferred_language($account), $params);
+}
+
+/**
+ * Implementation of hook_mail.
+ *
+ * @param <type> $key
+ * @param <type> $message
+ * @param <type> $params
+ */
+function cron_jobs_mail($key, &$message, $params) {
+    $node = $params['node'];
+    $data['user'] = $params['account'];
+    $options['language'] = $message['language'];
+
+    // Define group membership
+    $group_field = field_get_items('node', $node, 'group_audience');
+    $group = og_get_group('group', $group_field['0']['gid']);
+    $group_name = (is_numeric($group_field['0']['gid']) ? $group->label : "(Ingen klubb)");
+
+    // Define real name
+    $realname = field_get_items('user', $params['account'], 'field_user_realname');
+    $realname = (isset($realname[0][value]) ? $realname[0][value] : $params[account]->name);
+
+    // Define date
+    $trip_date = field_get_items('node', $node, 'field_trip_date_range');
+    $trip_date = (isset($trip_date[0][value]) ? $trip_date[0][value] : '???');
+
+    // Define trip details
+    $trip_details = field_get_items('node', $node, 'field_trip_notes');
+    $trip_details = $trip_details[0][value];
+
+    // Define leader info
+    $leader_details = field_get_items('node', $node, 'field_trip_manager');
+    $leader_details = user_load($leader_details['0']['uid']);
+    $leader_details = array(
+        'uid' => $leader_details->uid,
+        'name' => $leader_details->name,
+        'realname' => field_get_items('user', $leader_details, 'field_user_realname'),
+        'phone' => field_get_items('user', $leader_details, 'field_user_phone'),
+    );
+    //dpm($leader_details);
+
+
+    $langcode = $message['language']->language;
+
+    switch ($key) {
+        case 't30':
+            $message['subject'] = t('30-dagers varsel fra @groupname : Du er dykkeleder!', array('@groupname' => $group_name));
+            $message['body'][0] =
+                    t("Heisann @realname!\n\n" .
+                            "Du er satt opp som dykkeleder på @title. \nTuren går @date, altså om 30 dager.\n\n" .
+                            "Verifiser dato og sjekk at du har mulighet til å lede denne turen.\n\n" .
+                            "Hvis du mot formodning ikke kan, vennligst gi beskjed til klubbens tursjef umiddelbart." .
+                            "Da må turleder snarest finne en annen dykkeleder.\n\n" .
+                            "Se over at all informasjon stemmer i turplanleggeren, og foreslå gjerne turmål.\n\n\n" .
+                            "Med vennlig hilsen,\n\n" .
+                            "Gode gamle Pingvindata-mailbotten.\n\n" .
+                            "PS: Link til artikkelen finner du her: @triplink"
+                            , array(
+                        '@realname' => $realname,
+                        '@title' => $node->title,
+                        '@date' => $trip_date,
+                        '@triplink' => url('node/' . $node->nid, array('absolute' => TRUE)),
+                    ));
+            break;
+        case 't07' :
+            $message['subject'] = t('Dykketur: @title om 7 dager.', array('@title' => $node->title));
+            $message['body'][0] =
+                    t("Heisann @realname,\n\n" .
+                            "Denne mailen sendes ut til alle medlemmer av @groupname.\n" .
+                            "Om en uke går turen '@title' av stabelen, tid @date.\n\n" .
+                            "Dykkeleder @leader-name skriver følgende:\n" .
+                            "@trip-details\n\n" .
+                            "For påmelding, bruk din konto på Pingvindata.org og følg linken: " .
+                            "@triplink\n\n\n" .
+                            "Med vennlig hilsen,\n\n" .
+                            "Gode gamle Pingvindata-mailbotten.\n\n",
+                            array(
+                                '@realname' => $realname,
+                                '@title' => $node->title,
+                                '@date' => format_date(convert_datetime($trip_date), $type = 'long'),
+                                '@triplink' => url('node/' . $node->nid, array('absolute' => TRUE)),
+                                '@trip-details' => $trip_details,
+                                '@groupname' => $group_name,
+                                '@leader-name' => $leader_details[realname][0][value],
+                                '@leader-phone' => $leader_details[phone][0][value],
+                            )
+            );
+            break;
+        case 't04':
+            $message['subject'] = t('Til påmeldte: 4 dager til @title', array('@title' => $node->title));
+            $message['body'][0] =
+                    t("Heisann @realname,\n\n" .
+                            "Du står som påmeldt på dykketuren '@title'.\n" .
+                            "Det begynner å nærme seg turtid, og vi ber deg i den anledning " .
+                            "om å ta del i diskusjonen om turmål og andre spørsmål. For at din " .
+                            "deltakelse skal være synlig for resten av folket, ber vi deg om å " .
+                            "sende minst mulig mail, og heller skrible på tursida. Der kan du også dele " .
+                            "koordinater med andre medlemmer i klubben!! Tenk det! \n\n" .
+                            "Skulle du ha spørsmål om turen som det haster å få svar på, " .
+                            "kan du ta kontakt med turleder @leader-name på telefon @leader-phone.\n\n" .
+                            "Bruk ellers din konto på Pingvindata.org og følg linken: " .
+                            "@triplink\n\n\n" .
+                            "Med vennlig hilsen,\n\n" .
+                            "Gode gamle Pingvindata-mailbotten.\n\n",
+                            array(
+                                '@realname' => $realname,
+                                '@title' => $node->title,
+                                '@date' => format_date(convert_datetime($trip_date), $type = 'long'),
+                                '@triplink' => url('node/' . $node->nid, array('absolute' => TRUE)),
+                                '@trip-details' => $trip_details,
+                                '@groupname' => $group_name,
+                                '@leader-name' => $leader_details[realname][0][value],
+                                '@leader-phone' => $leader_details[phone][0][value],
+                            )
+            );
+            break;
+        case 't01':
+            $message['subject'] = t('Til påmeldte: Turdokumenter for @title i morgen', array('@title' => $node->title));
+            $message['body'][0] =
+                    t("Heisann @realname,\n\n" .
+                            "Du står som påmeldt på dykketuren '@title'.\n" .
+                            "Vedlagt denne mailen finner du et pdf-dokument som du kan skrive ut " .
+                            "og ta med deg på dykketuren. Disse inneholder oversikt over deltakere, koordinater, " .
+                            "beskrivelser, kommentarer og annen data som kan være artig å ha med seg inn " .
+                            "i området du skal dykke i.\n\nDen inneholder også hele samtaleloggen " .
+                            "for denne spesifikke turen.\n\n" .
+                            "Med vennlig hilsen,\n" .
+                            "Gode gamle Pingvindata-mailbotten.\n\n",
+                            array(
+                                '@realname' => $realname,
+                                '@title' => $node->title,
+                                '@date' => format_date(convert_datetime($trip_date), $type = 'long'),
+                                '@triplink' => url('node/' . $node->nid, array('absolute' => TRUE)),
+                                '@trip-details' => $trip_details,
+                                '@groupname' => $group_name,
+                                '@leader-name' => $leader_details[realname][0][value],
+                                '@leader-phone' => $leader_details[phone][0][value],
+                            )
+            );
+    }
+
+
+    // Workaround: We want to be able to send attachments.
+    // Lets use custom script IF attachments $params['attachments'] is set.
+
+    if (is_array($params['attachment'])) {
+        require_once('attachment_email.php');
+        $to = $params['account']->mail;
+        $from = "mailbot@pingvindata.org";
+        $subject = $message['subject'];
+        $att_message = $message['body'][0] . "(Debug:w-att)";
+        $att_attachment = $params['attachment'];
+
+        $femail = new AttachmentEmail($to, $from, $subject, $att_message, $att_attachment);
+        $femail->send();
+        //dpm($message['to']);
+        $message['to'] = "non-existent@pingvindata.org";
+    }
+
+    //watchdog("cron_jobs", "Mail sent to " . $params['account']->name . ". Code: $key");
+//----------Testrutine
+//    $params['account'] = user_load(1);
+//    $params['node'] = node_load(137);
+//    $account = user_load(1);
+//    $params['attachment'] = array('uri' => '/var/www/test.txt', 'filename' => 'test.txt');
+//    drupal_mail('cron_jobs', 't01', $account->mail, user_preferred_language($account), $params);
+}
+
+function attachment_tester() {
+    require_once('attachment_email.php');
+
+    $to = "faralds@gmail.com";
+    $from = "ikke-svar@pingvindb.org";
+    $subject = "Dette er en test av mailsystem";
+    $message = "Dette er en test";
+    $attachment = array(
+        'uri' => '/var/www/test.txt',
+        'filename' => 'test.txt',
+    );
+
+    $email = new AttachmentEmail($to, $from, $subject, $message, $attachment);
+    $email->send();
+}
+
+/**
+ * Helper for Cron.
+ * Loads the view and returns array of node objects.
+ * The view cron_trips uses displays t30, t07, t04 t02, t01
+ *
+ * @param string $display_name
+ *
+ * @return array
+ * Returns array of loaded nodes to traverse trough.
+ */
+function cron_jobs_trip_results($display_name) {
+
+    $nids = array();
+    $view = views_get_view('cron_trips');
+    $view->execute_display($display_name);
+    $view->render();
+    foreach ($view->result as $result) {
+        $nids[] = $result->nid;
+    }
+    return (is_array($nids)) ? node_load_multiple($nids) : array();
+}
+
+/**
+ * Create a PDF version of the page based on NID, and return 'uri' & 'filepath' in array.
+ *
+ * 1: create a pdf in /tmp.
+ *
+ */
+
+function cron_jobs_pdf_create($node){
+    $random_text = check_plain("trip" . $node->nid . ".pdf");
+    exec("wkhtmltopdf-amd64 http://pingvindata.org/node/" . $node->nid . " /tmp/" . $random_text);
+
+     //Was it successful? Return stuff.
+    if (file_exists("/tmp/$random_text")){
+        drupal_set_message("We created a file!!");
+        return array(
+            'uri' => '/tmp/' . $random_text,
+            'filename' => 'rapport.pdf'
+        );
+    }
+    return false;
+}
+
+
+
+/**
+ * Backup of working view
+ */
+function cron_jobs_viewbackup() {
+    $view = new view;
+    $view->name = 'cron_trips';
+    $view->description = 'Active trips, within range of 3 months.';
+    $view->tag = 'default';
+    $view->base_table = 'node';
+    $view->human_name = 'cron_trips';
+    $view->core = 7;
+    $view->api_version = '3.0-alpha1';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['access']['type'] = 'perm';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Content: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['label'] = '';
+    $handler->display->display_options['fields']['title']['alter']['alter_text'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['make_link'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['absolute'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['trim'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['strip_tags'] = 0;
+    $handler->display->display_options['fields']['title']['alter']['html'] = 0;
+    $handler->display->display_options['fields']['title']['hide_empty'] = 0;
+    $handler->display->display_options['fields']['title']['empty_zero'] = 0;
+    $handler->display->display_options['fields']['title']['link_to_node'] = 1;
+    /* Field: Content: Nid */
+    $handler->display->display_options['fields']['nid']['id'] = 'nid';
+    $handler->display->display_options['fields']['nid']['table'] = 'node';
+    $handler->display->display_options['fields']['nid']['field'] = 'nid';
+    $handler->display->display_options['fields']['nid']['label'] = '';
+    $handler->display->display_options['fields']['nid']['alter']['alter_text'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['make_link'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['absolute'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['external'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['replace_spaces'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['trim'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['nl2br'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['word_boundary'] = 1;
+    $handler->display->display_options['fields']['nid']['alter']['ellipsis'] = 1;
+    $handler->display->display_options['fields']['nid']['alter']['strip_tags'] = 0;
+    $handler->display->display_options['fields']['nid']['alter']['html'] = 0;
+    $handler->display->display_options['fields']['nid']['element_label_colon'] = 0;
+    $handler->display->display_options['fields']['nid']['element_default_classes'] = 1;
+    $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
+    $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
+    $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
+    /* Field: Content: Turperiode */
+    $handler->display->display_options['fields']['field_trip_date_range']['id'] = 'field_trip_date_range';
+    $handler->display->display_options['fields']['field_trip_date_range']['table'] = 'field_data_field_trip_date_range';
+    $handler->display->display_options['fields']['field_trip_date_range']['field'] = 'field_trip_date_range';
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['alter_text'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['make_link'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['absolute'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['external'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['replace_spaces'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['trim'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['nl2br'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['word_boundary'] = 1;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['ellipsis'] = 1;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['strip_tags'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['alter']['html'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['element_label_colon'] = 1;
+    $handler->display->display_options['fields']['field_trip_date_range']['element_default_classes'] = 1;
+    $handler->display->display_options['fields']['field_trip_date_range']['hide_empty'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['empty_zero'] = 0;
+    $handler->display->display_options['fields']['field_trip_date_range']['settings'] = array(
+        'format_type' => 'long',
+        'fromto' => 'value',
+        'multiple_number' => '',
+        'multiple_from' => '',
+        'multiple_to' => '',
+        'show_repeat_rule' => 'show',
+    );
+    $handler->display->display_options['fields']['field_trip_date_range']['field_api_classes'] = 0;
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 0;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Fields: Turperiode (field_trip_date_range) - value */
+    $handler->display->display_options['filters']['field_trip_date_range_value']['id'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['table'] = 'field_data_field_trip_date_range';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['field'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['operator'] = 'between';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['granularity'] = 'second';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['form_type'] = 'date_select';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_date'] = 'now +6 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_to_date'] = 'now +7 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['year_range'] = '-1:+1';
+
+    /* Display: T30 */
+    $handler = $view->new_display('attachment', 'T30', 't30');
+    $handler->display->display_options['pager']['type'] = 'some';
+    $handler->display->display_options['defaults']['filters'] = FALSE;
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 0;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Fields: Turperiode (field_trip_date_range) - value */
+    $handler->display->display_options['filters']['field_trip_date_range_value']['id'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['table'] = 'field_data_field_trip_date_range';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['field'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['operator'] = 'between';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['granularity'] = 'second';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['form_type'] = 'date_select';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_date'] = 'now +30 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_to_date'] = 'now +31 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['year_range'] = '-1:+1';
+
+    /* Display: T07 */
+    $handler = $view->new_display('attachment', 'T07', 't07');
+    $handler->display->display_options['pager']['type'] = 'some';
+    $handler->display->display_options['defaults']['filters'] = FALSE;
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 0;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Fields: Turperiode (field_trip_date_range) - value */
+    $handler->display->display_options['filters']['field_trip_date_range_value']['id'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['table'] = 'field_data_field_trip_date_range';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['field'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['operator'] = 'between';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['granularity'] = 'second';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['form_type'] = 'date_select';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_date'] = 'now +7 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_to_date'] = 'now +8 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['year_range'] = '-1:+1';
+
+    /* Display: T04 */
+    $handler = $view->new_display('attachment', 'T04', 't04');
+    $handler->display->display_options['pager']['type'] = 'some';
+    $handler->display->display_options['defaults']['filters'] = FALSE;
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 0;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Fields: Turperiode (field_trip_date_range) - value */
+    $handler->display->display_options['filters']['field_trip_date_range_value']['id'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['table'] = 'field_data_field_trip_date_range';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['field'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['operator'] = 'between';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['granularity'] = 'second';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['form_type'] = 'date_select';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_date'] = 'now +4 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_to_date'] = 'now +5 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['year_range'] = '-1:+1';
+
+    /* Display: T02 */
+    $handler = $view->new_display('attachment', 'T02', 't02');
+    $handler->display->display_options['pager']['type'] = 'some';
+    $handler->display->display_options['defaults']['filters'] = FALSE;
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 0;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Fields: Turperiode (field_trip_date_range) - value */
+    $handler->display->display_options['filters']['field_trip_date_range_value']['id'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['table'] = 'field_data_field_trip_date_range';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['field'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['operator'] = 'between';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['granularity'] = 'second';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['form_type'] = 'date_select';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_date'] = 'now +2 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_to_date'] = 'now +3 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['year_range'] = '-1:+1';
+
+    /* Display: T01 */
+    $handler = $view->new_display('attachment', 'T01', 't01');
+    $handler->display->display_options['pager']['type'] = 'some';
+    $handler->display->display_options['defaults']['filters'] = FALSE;
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 0;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Fields: Turperiode (field_trip_date_range) - value */
+    $handler->display->display_options['filters']['field_trip_date_range_value']['id'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['table'] = 'field_data_field_trip_date_range';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['field'] = 'field_trip_date_range_value';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['operator'] = 'between';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['granularity'] = 'second';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['form_type'] = 'date_select';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_date'] = 'now +1 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['default_to_date'] = 'now +2 days';
+    $handler->display->display_options['filters']['field_trip_date_range_value']['year_range'] = '-1:+1';
+    $translatables['cron_trips'] = array(
+        t('Master'),
+        t('more'),
+        t('Apply'),
+        t('Reset'),
+        t('Sort by'),
+        t('Asc'),
+        t('Desc'),
+        t('Items per page'),
+        t('- All -'),
+        t('Offset'),
+        t('Turperiode'),
+        t('T30'),
+        t('T07'),
+        t('T04'),
+        t('T02'),
+        t('T01'),
+    );
+}

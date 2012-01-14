@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * @file
+ * Install file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function ds_extras_install() {
+  $ret = array();
+
+  $schema['node_revision'] = array();
+  ds_extras_schema_alter($schema);
+  foreach ($schema['node_revision']['fields'] as $name => $spec) {
+    db_add_field('node_revision', $name, $spec);
+  }
+}
+
+/**
+ * Implements hook_schema().
+ */
+function ds_extras_schema() {
+
+  $schema['ds_vd'] = array(
+    'description' => 'The base table for views displays.',
+
+    // CTools export definitions.
+    'export' => array(
+      'key' => 'vd',
+      'identifier' => 'ds_vd',
+      'default hook' => 'ds_vd_info',
+      'can disable' => FALSE,
+      'api' => array(
+        'owner' => 'ds_extras',
+        'api' => 'ds_extras',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+
+    'fields' => array(
+      'vd' => array(
+        'description' => 'The primary identifier for the views display.',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'label' => array(
+        'description' => 'The label for the views display.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('vd'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function ds_extras_uninstall() {
+  variable_del('ds_extras_region_to_block');
+  variable_del('ds_extras_region_blocks');
+  variable_del('ds_extras_switch_view_mode');
+  variable_del('ds_extras_vd');
+  db_drop_field('node_revision', 'ds_switch');
+}
+
+/**
+ * Implements hook_schema_alter().
+ */
+function ds_extras_schema_alter(&$schema) {
+
+  // Add a field ds_extras to the node_revision table in order
+  // to store the name of view mode to switch to.
+  if (isset($schema['node_revision'])) {
+    $schema['node_revision']['fields']['ds_switch'] = array(
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    );
+  }
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function ds_extras_update_7001(&$sandbox) {
+  db_change_field('ds_vd', 'vd', 'vd', array('description' => 'The primary identifier for the views display.', 'type' => 'varchar', 'length' => 128, 'not null' => TRUE, 'default' => ''));
+}

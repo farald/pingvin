@@ -1,0 +1,36 @@
+/* 
+    Document   : views
+    Created on : 12.aug.2011, 09:29:54
+    Author     : Faraldur
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+root { 
+    display: block;
+}
+
+.v-align-top {
+    vertical-align: top;
+}
+
+.width-20-percent {
+    width:20%;
+}
+
+.edit-fields .small-description-150 {
+    min-height:125px;
+}
+
+.edit-fields .images-inline-1px img {
+    margin-right:1px;
+}
+
+.edit-fields .images-inline-1px {
+    color:lightgrey !important;
+}

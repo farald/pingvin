@@ -1,0 +1,7 @@
+name = Database cron jobs
+description = Cron jobs, mainly mailsending.
+package = Pingvindatabasen
+version = VERSION
+core = 7.x
+
+files[] = cron_jobs.module

@@ -1,0 +1,15 @@
+; $Id: device_geolocation.info,v 1.1.2.2 2010/10/16 00:42:31 arpeggio Exp $
+name = Device Geolocation
+description = Provides visitor's geographical location using client device location source that implements W3C Geolocation API (with Google Gears as fallback) and Google Geocoding service.
+package = Location
+core = 7.x
+files[] = device_geolocation.module
+files[] = theme/device-geolocation-visitor-info.tpl.php
+dependencies[] = smart_ip
+configure = admin/structure/block
+; Information added by drupal.org packaging script on 2010-12-16
+version = "7.x-1.4-alpha1"
+core = "7.x"
+project = "smart_ip"
+datestamp = "1292535683"
+

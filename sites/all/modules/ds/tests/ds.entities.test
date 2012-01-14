@@ -1,0 +1,139 @@
+<?php
+
+/**
+ * @file
+ * Entities tests
+ */
+
+/**
+ * Test node entity.
+ */
+class dsNodeTests extends dsBaseTest {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Node display'),
+      'description' => t('Tests for display of nodes.'),
+      'group' => t('Display suite'),
+    );
+  }
+
+  function testDSNodeEntity() {
+
+    // Create a node.
+    $settings = array('type' => 'article');
+    $node = $this->drupalCreateNode($settings);
+
+    // Create a token and php field.
+    $token_field = array(
+      'name' => 'Token field',
+      'field' => 'token_field',
+      'entities[node]' => '1',
+      'code[value]' => '<div class="token-class">[node:title]</span>',
+      'use_token' => '1',
+    );
+    $php_field = array(
+      'name' => 'PHP field',
+      'field' => 'php_field',
+      'entities[node]' => '1',
+      'code[value]' => "<?php echo 'I am a PHP field'; ?>",
+      'use_token' => '0',
+    );
+    $this->dsCreateCodeField($token_field);
+    $this->dsCreateCodeField($php_field);
+
+    // Select layout.
+    $this->dsSelectLayout();
+
+    // Configure fields.
+    $fields = array(
+      'fields[token_field][region]' => 'header',
+      'fields[php_field][region]' => 'left',
+      'fields[body][region]' => 'right',
+      'fields[links][region]' => 'footer',
+    );
+    $this->dsConfigureUI($fields);
+
+    // Look at node and verify token and block field.
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertRaw('view-mode-full', 'Template file found (in full view mode)');
+    $this->assertRaw('<div class="token-class">' . $node->title . '</span>', t('Token field found'));
+    $this->assertRaw('I am a PHP field', t('PHP field found'));
+    $this->assertRaw('group-header', 'Template found (region header)');
+    $this->assertRaw('group-footer', 'Template found (region footer)');
+    $this->assertRaw('group-left', 'Template found (region left)');
+    $this->assertRaw('group-right', 'Template found (region right)');
+
+    // Configure teaser layout.
+    $teaser = array(
+      'additional_settings[layout]' => 'ds_2col',
+    );
+    $teaser_assert = array(
+      'regions' => array(
+        'left' => '<td colspan="8">' . t('Left') . '</td>',
+        'right' => '<td colspan="8">' . t('Right') . '</td>',
+      ),
+    );
+    $this->dsSelectLayout($teaser, $teaser_assert, 'admin/structure/types/manage/article/display/teaser');
+
+    $fields = array(
+      'fields[token_field][region]' => 'left',
+      'fields[php_field][region]' => 'left',
+      'fields[body][region]' => 'right',
+      'fields[links][region]' => 'right',
+    );
+    $this->dsConfigureUI($fields, 'admin/structure/types/manage/article/display/teaser');
+
+    // Switch view mode on full node page.
+    $edit = array('ds_switch' => 'teaser');
+    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->assertRaw('view-mode-teaser', 'Switched to teaser mode');
+    $this->assertRaw('group-left', 'Template found (region left)');
+    $this->assertRaw('group-right', 'Template found (region right)');
+    $this->assertNoRaw('group-header', 'Template found (no region header)');
+    $this->assertNoRaw('group-footer', 'Template found (no region footer)');
+
+    $edit = array('ds_switch' => '');
+    $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    $this->assertRaw('view-mode-full', 'Switched to full mode again');
+
+    // Test all options of a block field.
+    $block = array(
+      'name' => 'Test block field',
+      'field' => 'test_block_field',
+      'entities[node]' => '1',
+      'block' => 'node|recent',
+      'block_render' => DS_BLOCK_TEMPLATE,
+    );
+    $this->dsCreateBlockField($block);
+    $fields = array(
+      'fields[test_block_field][region]' => 'left',
+      'fields[token_field][region]' => 'hidden',
+      'fields[php_field][region]' => 'hidden',
+      'fields[body][region]' => 'hidden',
+      'fields[links][region]' => 'hidden',
+    );
+    $this->dsConfigureUI($fields);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertRaw('<h2>Recent content</h2>');
+
+    $block = array(
+      'block_render' => DS_BLOCK_TITLE_CONTENT,
+    );
+    $this->dsCreateBlockField($block, 'admin/structure/ds/fields/manage_block/test_block_field', FALSE);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertNoRaw('<h2>Recent content</h2>');
+    $this->assertRaw('Recent content');
+
+    $block = array(
+      'block_render' => DS_BLOCK_CONTENT,
+    );
+    $this->dsCreateBlockField($block, 'admin/structure/ds/fields/manage_block/test_block_field', FALSE);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertNoRaw('<h2>Recent content</h2>');
+    $this->assertNoRaw('Recent content');
+  }
+}

@@ -1,0 +1,273 @@
+<?php
+
+/*
+ * The main resetting block. The block is the tool to reset logstats data.
+ * We use one single block for this function.
+ * This is shown on node and user, and does the necessary operation when clicked.
+ */
+
+/**
+ * Implementation of hook_block_info
+ *
+ * Information on the main resetting block, provided to the system.
+ * We use one single block for this function.
+ * This is shown on node and user, and does the necessary operation when clicked.
+ *
+ * @return array
+ * Description of the blocks we want to add
+ */
+function logstats_reset_block_info() {
+    // Many options are defined in hook_block_info():
+    $blocks['stats_reset'] = array(
+        'info' => t('Block to reset statistics pages.'),
+        'cache' => DRUPAL_CACHE_PER_USER, // default
+    );
+    return $blocks;
+}
+
+/**
+ * Implementation of hook_block_view.
+ *
+ * If block is viewed, the form logstats_reset_simple_form
+ * is passed to theme build.
+ *
+ * @param <type> $delta
+ * The block delta string. Tells us what block we are handling just now
+ *
+ * @return <type>
+ * Returns an array of block subject and content
+ */
+function logstats_reset_block_view($delta = '') {
+    switch ($delta) {
+        case 'stats_reset':
+            $block['subject'] = t('Data');
+            $block['content'] = drupal_get_form('logstats_reset_simple_form');
+            break;
+    }
+    return $block;
+}
+
+/**
+ * This is the block base form.
+ * Will be called into array, and then modified for the need of the block.
+ *
+ * @return array
+ * Returns the default form.
+ */
+function logstats_reset_simple_form() {
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Oppdater data!',
+    );
+    $form['current_type'] = array(
+        '#type' => 'hidden',
+        '#value' => arg(0),
+    );
+    $form['current_trail'] = array(
+        '#type' => 'hidden',
+        '#value' => arg(1),
+    );
+    $form['description'] = array(
+        '#type' => 'markup',
+        '#markup' => t('Dataene oppdateres hvert døgn. Har du nettopp logget et dykk, kan du trykke her.'),
+    );
+    // If no login, disable button.
+    if (user_is_anonymous ()) {
+        $form['submit']['#disabled'] = TRUE;
+    }
+    return $form;
+}
+
+/**
+ * Form submit function.
+ * This will configure and initiate the batch.
+ * Will not run if user is anonymous.
+ *
+ * @param <type> $form
+ * The form.
+ *
+ * @param <type> $form_state
+ * Current form state.
+ */
+function logstats_reset_simple_form_submit($form, &$form_state) {
+
+    switch (arg(0)) {
+        case 'node':
+            $base_nid = arg(1);
+            //drupal_set_message("base_nid" . $form_state['values']['current_trail']);
+            $node = node_load($base_nid);
+
+            $operations = array();
+            $operations[] = array('logstats_reset_operation_1',
+                array(array('nid' => $base_nid), t('(Operation @operation)', array('@operation' => $base_nid))));
+            $operations[] = array('logstats_reset_operation_2',
+                array(array('nid' => $base_nid), t('(Operation @operation)', array('@operation' => $base_nid))));
+            $operations[] = array('logstats_reset_operation_3',
+                array(array('nid' => $base_nid), t('(Operation @operation)', array('@operation' => $base_nid))));
+            $operations[] = array('logstats_reset_operation_4',
+                array(array('nid' => $base_nid), t('(Operation @operation)', array('@operation' => $base_nid))));
+
+            $batch = array(
+                'title' => 'Oppdaterer statistikk for ' . $node->title,
+                'progress_message' => t('Steg @current av @total.'),
+                'init_message' => t('Starter opp..'),
+                'operations' => $operations,
+                'finished' => 'logstats_reset_finished',
+            );
+            batch_set($batch);
+            break;
+        case 'user':
+
+            $base_uid = arg(1);
+            $operations = array();
+            // We  skip first step. The second step will load data depending on user or nid.
+            $operations[] = array('logstats_reset_operation_2',
+                array(array('nid' => $base_nid), t('(Operation @operation)', array('@operation' => $base_uid))));
+            $operations[] = array('logstats_reset_operation_3',
+                array(array('uid' => $base_uid), t('(Operation @operation)', array('@operation' => $base_uid))));
+            $operations[] = array('logstats_reset_operation_4',
+                array(array('uid' => $base_uid), t('(Operation @operation)', array('@operation' => $base_uid))));
+
+            $batch = array(
+                'title' => 'Oppdaterer statistikk',
+                'progress_message' => t('Steg @current av @total.'),
+                'init_message' => t('Starter opp..'),
+                'operations' => $operations,
+                'finished' => 'logstats_reset_finished',
+            );
+            batch_set($batch);
+            break;
+    }
+}
+
+/**
+ * Step 1:
+ * Load the base node.
+ * This node is the origo of the stats creation area
+ */
+function logstats_reset_operation_1($conf, $operation_details, &$context) {
+    sleep(0.2);
+    $context['results'] = array();
+    $context['results']['node'] = node_load($conf['nid']);
+    $context['message'] = 'Laster base artikkel.';
+    _logstats_reset_update_http_requests();
+}
+
+/**
+ * Step 2:
+ * If node: Get the view handeling the node numbers..
+ */
+function logstats_reset_operation_2($conf, $operation_details, &$context) {
+    if (is_numeric($conf['nid'])) {
+        sleep(0.2);
+        $node = $context['results']['node'];
+        $lat = $node->field_map_point[und][0][locpick][user_latitude];
+        $lon = $node->field_map_point[und][0][locpick][user_longitude];
+        $range = (isset($node->field_place_radius[und][0][value])) ? $node->field_place_radius[und][0][value] : 30;
+        $filter = $lat . "," . $lon . "_" . $range;
+        // Load the view
+        $view = views_get_view('logstats_helper');
+        $view->execute_display('default', array($filter));
+        $view->render();
+        foreach ($view->result as $result) {
+            $nids[] = $result->nid;
+        }
+        $context['results']['nids'] = $nids;
+
+        // Message under the progressbar.
+        $context['message'] = 'Søker etter loggføringer..';
+        _logstats_reset_update_http_requests();
+    } else {
+        $context['message'] = 'Laster alle loggsider. Dette kan ta litt tid.';
+    }
+}
+
+
+
+/**
+ * Step 3:
+ * Load all the the nodes, heavy operation.
+ */
+function logstats_reset_operation_3($conf, $operation_details, &$context) {
+    sleep(0.2);
+    if (is_numeric($conf['nid'])) {
+        $nids = $context['results']['nids'];
+        $context['results']['data'] = node_load_multiple($nids);
+        $context['message'] = 'Laster alle noder. Hvis det er mange loggførte, kan dette ta litt tid. ';
+        _logstats_reset_update_http_requests();
+    } elseif (is_numeric($conf['uid'])) {
+        $context['message'] = 'Laster alle loggsider. Dette kan ta litt tid.';
+        $context['results']['data'] = entity_load('node', FALSE, array('uid' => $conf['uid'], 'type' => 'log'));
+    }
+}
+
+/**
+ * Step 4:
+ * Now we put it into an array, and saves it in a cache.
+ * If there are too few, we will exit here.
+ */
+
+function logstats_reset_operation_4($conf, $operation_details, &$context) {
+    sleep(0.2);
+    // We set the cache name.
+    $data = $context['results']['data'];
+    //drupal_Set_message((is_array($context['results']['data'])) ? "ja" : "nei");
+
+    if (count($data) < 2) {
+        $context['results']['failed'] = true;
+        drupal_set_message('Ennå for få data til å genrere statistikk.');
+    } else {
+        include_once drupal_get_path('module', 'logstats') . '/logstats_crawler.php';
+        $data = logstats_sort_rawdata($data);
+        $data = logstats_sorted_list_to_chart_data($data);
+
+        // Set the relevant cache
+        if (is_numeric($conf['uid'])) {
+            $cache_name = 'logstats_crawler_data_uid_' . $conf['uid'];
+            drupal_set_message("Debug: " . $cache_name);
+            cache_set($cache_name, $data, 'cache', time() + 360);
+            drupal_set_message('Dataene for stedet er oppdatert.');
+        } else {
+            $cache_name = 'logstats_crawler_data_nid_' . $conf['nid'];
+            drupal_set_message("Debug: " . $cache_name);
+            cache_set($cache_name, $data, 'cache', time() + 360);
+            drupal_set_message('Dataene for stedet er oppdatert.');
+        }
+    }
+
+    $context['message'] = t('Laster alle noder og genererer statistikken. Dette kan ta tid..');
+
+    ///pal_set_message($context['results']['num']);
+    _logstats_reset_update_http_requests();
+}
+
+
+/**
+ * Step finished:
+ * Wrap up the batch.
+ *
+ */
+function logstats_reset_finished($success, $results, $operations) {
+    if ($success) {
+        // All is good. We really dont want to do anything when finished.
+    } else {
+        // An error occurred.
+        // $operations contains the operations that remained unprocessed.
+        $error_operation = reset($operations);
+        drupal_set_message(t('An error occurred while processing @operation with arguments : @args',
+                array(
+                    '@operation' => $error_operation[0],
+                    '@args' => print_r($error_operation[0], TRUE))));
+    }
+}
+
+/**
+ * Two functions to count HTTP requests 
+ */
+function _logstats_reset_update_http_requests() {
+    $_SESSION['http_request_count']++;
+}
+
+function _logstats_reset_get_http_requests() {
+    return!empty($_SESSION['http_request_count']) ? $_SESSION['http_request_count'] : 0;
+}

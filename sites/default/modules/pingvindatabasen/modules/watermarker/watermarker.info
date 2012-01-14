@@ -1,0 +1,7 @@
+name = Watermarker for user images
+description = Adds a watermarking option to user profiles, for users to mark their images on the fly.
+package = Pingvindatabasen
+version = VERSION
+core = 7.x
+
+files[] = watermarker.module

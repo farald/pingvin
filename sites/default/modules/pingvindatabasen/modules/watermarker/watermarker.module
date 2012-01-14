@@ -1,0 +1,45 @@
+<?php
+/**
+ * This is just started, it is NOT completed, and the module is therefore not enabled.
+ * This function is NOT self-written.
+ * Waiting for an imagecache module to be ported.
+ *
+ * @param <type> $image
+ * @return <type>
+ */
+
+function watermarker_text_watermark($image) {
+    // specify the file name - you can use a full path, or "../../" type stuff here
+// if the image is not in the same directory as this code file
+    //$image = imagecreatefrompng("gs-banner-sm.png");
+    $font = realpath(drupal_get_path('module', 'pingvindatabasen')). '/fonts/dco.ttf';
+
+
+// specify the font size
+    $font_size = 14;
+
+// in this case, the color is white, but you can replace the numbers with the RGB values
+// of any color you want
+    $color = imagecolorallocate($image, 255, 255, 255);
+
+// make our drop shadow color
+    $black = imagecolorallocate($image, 0, 0, 0);
+
+// and now we do the overlay - the layers of text start top to bottom, so
+// the drop shadow comes first
+// $image - the base image file we specified above
+// $font_size - Well duh. Its the size of the font
+// 0 - the angle of the text - we don't want an angle, so we leave it at 0
+// 55 - pixels to the right from the leftmost part of the image
+// 35 - pixels down from the top of the image
+// $black - the color we defined above
+// "../fonts/ARIALBD.TTF" - the location on the server that the font can be found
+// "Test Text" - the text we're overlaying - you can also use a variable here
+    ImageTTFText($image, $font_size, 0, 56, 36, $black, $font, "Test Text");
+
+// Now add the actual white text "on top"
+    ImageTTFText($image, $font_size, 0, 55, 35, $color, $font, "Test Text");
+    header("Content-type: image/png");
+    return $image;
+    imagedestroy($image);
+}

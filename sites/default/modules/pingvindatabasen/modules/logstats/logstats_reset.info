@@ -1,0 +1,7 @@
+
+name = Log statistics reset function
+description = Function to reset the log data
+package = Pingvindatabasen
+core = 7.x
+
+ 

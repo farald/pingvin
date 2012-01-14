@@ -1,0 +1,7 @@
+
+name = Log statistics
+description = Functions and blocks to generate graphs of content
+package = Pingvindatabasen
+core = 7.x
+
+ 

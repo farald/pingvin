@@ -1,0 +1,524 @@
+<?php
+/**
+ * TODO This module contains one big traversing flaw!
+ * Fields should be retrieved with field_get_items, NOT traversing the array!
+ * Needs to be sorted before localization may begin.
+ */
+
+
+
+/**
+ *
+ * Takes data from NODE_LOAD OR cache, sorts it,
+ * formats it and returns entire array.
+ * If delta is added, only those settings are returned.
+ *
+ * NOTICE:
+ * Uses a view, logstats_helper, that returns list of nids based on proximity of nid element.
+ *
+ * @staticvar arr $data
+ * Cached data is stored here, as this function is usually called numerous times.
+ *
+ * @param string $delta
+ * Delta is the block ID. This is used by Drupal to identify blocks.
+ *
+ * @param int $nid
+ * The nid used as proximity source. The node should have a location field (field_map_marker)
+ *
+ * @param boolean $reset
+ * This param resets the cache, so that cache lifetime is overridden
+ *
+ * @return <type>
+ * If $delta: return only this part
+ * No $delta: return entire array of settings and data.
+ */
+
+function logstats_build_proximity_charts($delta = null, $nid = null, $reset = false) {
+    if (!$nid) { // No nid? Use arg, if any.
+        $nid = (is_numeric(arg(1))) ? arg(1) : null;
+    };
+    $cache_name = 'logstats_crawler_data_nid_' . $nid;
+    $cache = cache_get($cache_name);
+
+    $reset = false;
+    static $data;
+
+    // If no static data.. (We don't want to iterate trought several times when resetting.)
+    if (!isset($data)) {
+        // If no cache (If there are no cache, we need to build one.)
+        // If reset = true, we also need to build.
+        if (empty($cache->data) || $reset == true) {
+            $nids = array();
+            $node = node_load($nid);
+            $lat = $node->field_map_point[und][0][locpick][user_latitude];
+            $lon = $node->field_map_point[und][0][locpick][user_longitude];
+            $range = (isset($node->field_place_radius[und][0][value])) ?
+                    $node->field_place_radius[und][0][value] : 400;
+            $filter = $lat . "," . $lon . "_" . $range;
+
+            // Load the view
+            $view = views_get_view('logstats_helper');
+            $view->execute_display('default', array($filter));
+            $view->render();
+            foreach ($view->result as $result) {
+                $nids[] = $result->nid;
+            }
+
+            $data = node_load_multiple($nids);
+            drupal_set_message("Statistikken for området ble nettopp oppdatert.");
+
+            // We want to quit if there are no values!!
+            // The script will only leave errors.
+            if (count($data) < 2) {
+                return false;
+            } else {
+                $data = logstats_sort_rawdata($data);
+                $data = logstats_sorted_list_to_chart_data($data);
+            }
+        }
+        // If cache is present and reset is false, lets use it.
+        else {
+            $data = $cache->data;
+        }
+    }
+    cache_set($cache_name, $data, 'cache', time() + 360);
+
+
+    if ($delta !== NULL) {
+
+        // Rename delta to a field name
+        $delta = str_replace('_block', '', $delta);
+        
+        return $data[($delta)];
+        
+    };
+    return $data;
+}
+
+/**
+ *
+ * Similar to above proximity function.
+ * 
+ * Takes data from USER_LOAD OR cache, sorts it,
+ * formats it and returns entire array.
+ * If delta is added, only those settings are returned.
+ * 
+ * @staticvar arr $data
+ * Cached data is stored here, as this function is usually called numerous times.
+ * 
+ * @param string $delta
+ * Delta is the block ID. This is used by Drupal to identify blocks.
+ * 
+ * @param int $nid
+ * The nid used as proximity source. The node should have a location field (field_map_marker)
+ * 
+ * @param boolean $reset
+ * This param resets the cache, so that cache lifetime is overridden
+ * 
+ * @return <type> 
+ * If $delta: return only this part
+ * No $delta: return entire array of settings and data.
+ */
+
+function logstats_build_user_charts($delta = null, $uid = null, $reset = false) {
+    if (!$uid) { // No uid? Then no data
+        $uid = 1;
+    };
+    $cache_name = 'logstats_crawler_data_uid_' . $uid;
+    $cache = cache_get($cache_name);
+
+    $reset = false;
+    static $data;
+
+    // If no static data.. (We don't want to iterate trought several times when resetting.)
+    if (!isset($data)) {
+        // If no cache (If there are no cache, we need to build one.)
+        // If reset = true, we also need to build.
+        if (empty($cache->data) || $reset == true) {
+            include_once drupal_get_path('module', 'logstats') . '/logstats_crawler.php';
+            $data = entity_load('node', FALSE, array('uid' => $uid, 'type' => 'log'));
+            //drupal_set_message("Load");
+            // We want to quit if there are no values!!
+            // The script will only leave errors.
+
+            if (count($data) < 2) {
+                return false;
+            } else {
+                // We collect needed rawdata
+                $data = logstats_sort_rawdata($data);
+                $data = logstats_sorted_list_to_chart_data($data);
+            }
+        }
+        // If cache is present and reset is false, lets use it.
+        else {
+            $data = $cache->data;
+        }
+    }
+    cache_set($cache_name, $data, 'cache', time() + 3360);
+
+
+    if ($delta !== NULL) {
+
+        // Rename delta to a field name
+        $delta = str_replace('_block', '', $delta);
+        
+        return $data[($delta)];
+    };
+    return $data;
+}
+
+/**
+ *
+ * Theme a graph returned with _build_proximity_charts or _build_user_charts, 
+ * or return FALSE.
+ * 
+ * 
+ * @return
+ * Formatted chart OR false, if content items is less than 2.
+ *  
+ */
+
+function logstats_theme_single_graph($delta) {
+    if (arg(0) == 'user' && is_numeric(arg(1))) {
+        $data = logstats_build_user_charts($delta, arg(1));
+        $ret = ($data == false) ? false : theme('chart', array('chart' => $data['finished']));
+        return $ret;
+    } elseif (arg(0) == 'node' && is_numeric(arg(1))) {
+        $data = logstats_build_proximity_charts($delta, arg(1));
+        $ret = ($data == false) ? false : theme('chart', array('chart' => $data['finished']));
+        return $ret;
+    }
+}
+
+/**
+ *
+ * Theme a data list returned with _build_user_charts.
+ * DRAWBACK: Drags its knowledge of whereabouts from the url trail.
+ * Cannot be used on other trails than /user/* and /node/* in its current state.
+ * 
+ * @param string $delta
+ * Delta is the block ID. This is used by Drupal to identify blocks.
+ * 
+ * @return <type> 
+ * HTML list OR false.
+ */
+
+function logstats_theme_single_list($delta) {
+    switch (arg(0)) {
+        case 'user':
+            $data = logstats_build_user_charts($delta, arg(1));
+            break;
+        case 'node':
+            $data = logstats_build_proximity_charts($delta, arg(1));
+    };
+    return $data['formatted_list'];
+}
+
+/**
+ *
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ * It adds chart and list in a two-level quicktab
+ *
+ * @param string $delta
+ * Delta is the block ID. This is used by Drupal to identify blocks.
+ *
+ * @return
+ * Drupal block array
+ * False if no graph.
+ *
+ */
+
+function logstats_block_view($delta = '') {
+    //The $delta parameter tells us which block is being requested.
+    foreach (logstats_field_settings () AS $gid => $gdata) {
+        if ($delta == $gid . "_block") {
+
+
+            $tabs['graf'] = array(
+                'title' => t('Graf'),
+                'type' => 'freetext',
+                'text' => logstats_theme_single_graph($delta),
+            );
+            $tabs['data'] = array(
+                'title' => t('Data'),
+                'type' => 'freetext',
+                'text' => logstats_theme_single_list($delta),
+            );
+            $quicktabs->machine_name = 'list_' . $delta;
+            $quicktabs->tabs = $tabs;
+            $quicktabs->style = 'Zen';
+            $quicktabs->ajax = false;
+            $quicktabs->hide_empty_tabs = 1;
+
+
+            $block['subject'] = t($gdata['#title']);
+            $block['content'] = render(quicktabs_render($quicktabs));
+        }
+    };
+    return ($tabs['graf']['text'] == false) ? null : $block;
+}
+
+/**
+ * This is a hard-coded approach for the graph settings.
+ * To add blocks with graphs using elements from the node,
+ * you may add them in this array.
+ *
+ * TODO: This should be stored some other way.
+ * Most of this may be built into drupal's visual config system.
+ * But that's a lot of work, and wont be done in this project.
+ *
+ * @return array
+ * The array that resides in the function
+ *
+ */
+
+function logstats_field_settings() {
+    $settings = array(
+        'field_map_region_0' => array(          // The unique block DELTA name. (Whatever)
+            '#id' => 'field_map_region_0',      // The unique ID for the graph  (Whatever)
+            '#field' => 'field_map_region_1',   // The field name               (Existing field ID)
+            '#title' => 'Regioner',             // Graph title
+            '#type' => 'cake',                  // Type. Currently 'cake' and 'boxes'.
+            'mods' => array(
+            ),
+        ),
+        'field_map_country_0' => array(
+            '#id' => 'field_map_contry_0',
+            '#field' => 'field_map_country_1',
+            '#title' => 'Land',
+            '#type' => 'cake',
+            'mods' => array(
+                '#unknown_title' => 'Ikke oppgitt', // Tittel for ukjente data
+            ),
+        ),
+        'field_log_startpoint_0' => array(
+            '#id' => 'field_log_startpoint_0',
+            '#field' => 'field_log_startpoint',
+            '#title' => 'Startpunkt',
+            '#type' => 'cake',
+            'func' => array(0 => 'logstats_modify_termname'),   // Manipulate data with function
+            'mods' => array(
+                '#unknown_title' => 'Ikke oppgitt',
+            ),
+        ),
+        'field_log_tag_locked_0' => array(
+            '#id' => 'field_log_tag_locked_0',
+            '#field' => 'field_log_tag_locked',
+            '#title' => 'Faste tagger',
+            '#type' => 'cake',
+            'func' => array(0 => 'logstats_modify_termname'),
+            'mods' => array(
+                '#unknown_title' => 'Ikke oppgitt',
+            ),
+        ),
+        'field_log_press_gastype_0' => array(
+            '#id' => 'field_log_press_gastype_0',
+            '#field' => 'field_log_press_gastype',
+            '#title' => 'Luft-typer',
+            '#type' => 'cake',
+            'func' => array(0 => 'logstats_modify_termname'),
+            'mods' => array(
+                '#unknown_title' => 'Ikke oppgitt',
+            ),
+        ),
+        'field_log_seabed_0' => array(
+            '#id' => 'field_log_seabed_0',
+            '#field' => 'field_log_seabed',
+            '#title' => 'Bunntyper',
+            '#type' => 'cake',
+            'func' => array(0 => 'logstats_modify_termname'),
+            'mods' => array(
+                '#unknown_title' => 'Ikke oppgitt',
+            ),
+        ),
+        'field_log_env_temp_air_0' => array(
+            '#id' => 'field_log_env_temp_air_0',
+            '#field' => 'field_log_env_temp_air',
+            '#title' => 'Temperatur i luft og vann',
+            '#legend_title' => 'vann',
+            '#type' => 'boxes',
+            '#width' => 800,
+            '#height' => 150,
+            'mods' => array(
+                'box_label_range' => '35',
+                'box_label_y' => 'Dives',
+                //'col_space' => '15',
+                //'col_width' => '15',
+                'y_label' => 'Dykk',
+                'x_label' => 'Depths',
+                'ignore_empty_values' => TRUE,
+                'more_cols' => array(
+                    0 => array(
+                        '#field' => 'field_log_env_temp_water',
+                        '#legend_title' => 'vann',
+                    ),
+                ),
+            ),
+        ),
+        'field_glob_date_0' => array(
+            '#id' => 'field_glob_date_0',
+            '#field' => 'field_glob_date',
+            '#title' => 'Dykk per måned',
+            '#width' => 350,
+            '#height' => 180,
+            '#legend_title' => 'Antall',
+            '#type' => 'boxes',
+            'func' => array(0 => 'logstats_modify_date_to_month'),
+            'mods' => array(
+                'box_label_y' => 'Dives',
+                'col_space' => '15',                    // Space between cols on the graph
+                'col_width' => '12',                    // Width between cols on the graph
+                'y_label' => 'Dykk',
+                'ignore_empty_values' => TRUE,
+                'forced_titles' => array(               // Overrides horizontal titles
+                    'Jan', 'Feb', 'Mar', 'Apr',
+                    'May', 'Jun', 'Jul', 'Aug',
+                    'Sep', 'Oct', 'Nov', 'Dec' // Should be done in one function call
+                ),
+            ),
+        ),
+        'field_glob_date_1' => array(
+            '#id' => 'field_glob_date_1',
+            '#field' => 'field_glob_date',
+            '#title' => 'Dykk per år',
+            '#legend_title' => 'Antall',
+            '#type' => 'boxes',
+            '#width' => 700,
+            '#height' => 180,
+            'func' => array(0 => 'logstats_modify_date_to_year'),
+            'mods' => array(
+                'box_label_y' => 'Dives',
+                'col_space' => '25',
+                'col_width' => '25',
+                'y_label' => 'Dykk',
+                'ignore_empty_values' => TRUE,
+                'forced_titles' => range(date("Y") - 10, date("Y")),
+            ),
+        ),
+        'field_glob_date_2' => array(
+            '#id' => 'field_glob_date_2',
+            '#field' => 'field_glob_date',
+            '#title' => 'Dykk per tid på døgnet',
+            '#legend_title' => 'Antall',
+            '#type' => 'boxes',
+            '#width' => 700,
+            '#height' => 180,
+            'func' => array(0 => 'logstats_modify_date_to_time_of_day'),
+            'mods' => array(
+                'box_label_y' => 'Dives',
+                'col_space' => '10',
+                'col_width' => '10',
+                'y_label' => 'Dykk',
+                'ignore_empty_values' => TRUE,
+                'forced_titles' => range(0, 23),
+            ),
+        ),
+    );
+    return $settings;
+}
+
+/**
+ * Modifies the value of the data items in a delta item.
+ * Takes a term ID and replaces it with the corresponding term name.
+ * 
+ * @param <type> $data_item 
+ */
+
+function logstats_modify_termname(&$data_item) {
+    foreach ($data_item['data'] AS $rid => $rval) {
+        $term = taxonomy_term_load($rval);
+        $name = $term->name;
+        $data_item['data'][$rid] = $name;
+    }
+}
+
+/**
+ * A helper function to convert datetime to timestamp.
+ * 
+ * @param $str
+ * The datetime.
+ *
+ * @return <type> 
+ * The timestamp. This is common in Drupal.
+ */
+
+function convert_datetime($str) {
+    list($date, $time) = explode(' ', $str);
+    list($year, $month, $day) = explode('-', $date);
+    list($hour, $minute, $second) = explode(':', $time);
+    $timestamp = mktime($hour, $minute, $second, $month, $day, $year);
+    return $timestamp;
+}
+
+/**
+ * Replaces date item to month.
+ * 
+ * NOTICE:
+ * Uses the built-ind Date system in drupal. Here we have created a date type 'month' (1-12).
+ * This must exist in the system, or this won't function properly.
+ * 
+ * @param $data_item 
+ * The delta item being edited.
+ */
+
+function logstats_modify_date_to_month(&$data_item) {
+    foreach ($data_item['data'] AS $rid => $rval) {
+        $data_item['data'][$rid] = format_date(convert_datetime($rval), $type = 'month');
+    }
+}
+
+/**
+ * Replaces date item to year
+ * 
+ * NOTICE:
+ * Uses the built-ind Date system in drupal. Here we have created a date type 'year'.
+ * This must exist in the system, or this won't function properly.
+ * 
+ * @param $data_item 
+ * The delta item being edited.
+ */
+
+function logstats_modify_date_to_year(&$data_item) {
+    foreach ($data_item['data'] AS $rid => $rval) {
+        $data_item['data'][$rid] = format_date(convert_datetime($rval), $type = 'year');
+    }
+}
+
+/**
+ * Replaces date item to time of day.
+ *
+ * NOTICE:
+ * Uses the built-ind Date system in drupal. Here we have created a date type 'year'.
+ * This must exist in the system, or this won't function properly.
+ *
+ * @param $data_item
+ * The delta item being edited.
+ */
+
+function logstats_modify_date_to_time_of_day(&$data_item) {
+    foreach ($data_item['data'] AS $rid => $rval) {
+        $data_item['data'][$rid] = format_date(convert_datetime($rval), $type = 'hour');
+    }
+}
+
+/**
+ *
+ * Implements hook_block_info().
+ * We programmatically add all blocks in the logstats $settings.
+ *  
+ * @return string
+ */
+
+function logstats_block_info() {
+    include_once drupal_get_path('module', 'logstats') . '/logstats_crawler.php';
+    $settings = logstats_field_settings();
+    foreach ($settings AS $gid => $gdata) {
+        $blocks[$gid . "_block"] = array(
+            'info' => t("Graf: ") . $gdata['#title'],
+            'cache' => DRUPAL_NO_CACHE,
+        );
+    }
+    return $blocks;
+}

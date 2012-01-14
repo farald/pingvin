@@ -1,0 +1,7 @@
+name = Location modifications
+description = Contains modifications of the location picker form
+package = Pingvindatabasen
+version = VERSION
+core = 7.x
+
+files[] = location_mod.module

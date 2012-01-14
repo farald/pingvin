@@ -1,0 +1,707 @@
+/* 
+    Document   : mod.css
+    Created on : 25.mar.2011, 09:48:49
+    Author     : Faraldur
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+/* test */
+
+/*
+    The country map at /country. Simple decoration.
+*/
+.view-term-all-regions {
+    /*background:#ffffff url('verdenskart.gif') no-repeat right top;*/
+}
+
+.view-taxonomy-term .views-exposed-widgets {
+    background:#ffffff url('verdenskart-mini.gif') no-repeat left top;
+    background-position:0px 80px;
+}
+
+/*
+    Formatting of field-name-field-log-comments.
+    For viewing dives, own or others.
+*/
+
+.node-full .field-name-field-log-comments {
+    /*background-color:#F4F5EB;*/
+    padding:5px;
+    margin-bottom:3px;
+    margin-top:10px;
+    border:1px solid #EDEDDD;
+}
+
+/*
+    Displaying inline field labels a little bit more tidy
+*/
+
+.field-label-inline .field-label {
+    min-width:120px;
+}
+
+/*
+    View the taxonomy terms similar to other fields.
+*/
+
+.field-type-taxonomy-term-reference {
+    font-size: 1em !important;
+    margin: 0 !important;
+}
+.field-type-taxonomy-term-reference .field-label {
+    font-family: Georgia,"Times New Roman",Times,serif;
+    font-weight:bold !important;
+    font-size: 1em !important;
+}
+
+.field-type-taxonomy-term-reference ul.links {
+    font-size:1em !important;
+}
+
+/*
+    The map in country hierarchy needs to be right-centered.
+*/
+
+
+/*.content .view-dom-id-1{
+    position:relative;
+}
+
+.view-display-id-gmap_overview_display {
+     position:absolute;
+     top:0px;
+     right:400px;
+     width:200px;
+}
+
+.view-taxonomy-term3 .views-exposed-widgets {
+    min-height:300px;
+}*/
+
+/*
+    Testing out a concept of faded descriptive images i header.
+*/
+
+/*#header .section {
+    background:url('faded-boatpeople.png') no-repeat right top;
+    background-position:700px 0px;
+}*/
+
+
+/*
+    Icons for the main menu. Makes the page look little bit neater.
+*/
+#main-menu-links a
+{
+    padding-left:40px !important;
+    background-repeat:no-repeat !important;
+    background-position:3px 3px !important;
+}
+
+#main-menu-links .menu-473 a{
+background-image:url('menu-icon-user.png') !important;
+}
+
+#main-menu-links .menu-473 a.active,
+#main-menu-links .menu-473 a:hover{
+background-image:url('menu-icon-user-select.png') !important;
+}
+
+#main-menu-links .menu-317 a{
+background-image:url('menu-icon-add.png') !important;
+}
+
+#main-menu-links .menu-317 a.active,
+#main-menu-links .menu-317 a:hover{
+background-image:url('menu-icon-add-select.png') !important;
+}
+
+#main-menu-links .menu-468 a{
+background-image:url('menu-icon-world.png') !important;
+}
+
+#main-menu-links .menu-468 a.active,
+#main-menu-links .menu-468 a:hover{
+background-image:url('menu-icon-world-select.png') !important;
+}
+
+#main-menu-links .menu-665 a{
+background-image:url('menu-icon-club.png') ;
+}
+
+#main-menu-links .menu-665 a.active,
+#main-menu-links .menu-665 a:hover{
+background-image:url('menu-icon-club-select.png') !important;
+}
+
+#main-menu-links .menu-961 a{
+background-image:url('menu-icon-trip.png') ;
+}
+
+#main-menu-links .menu-961 a.active,
+#main-menu-links .menu-961 a:hover{
+background-image:url('menu-icon-trip-select.png') !important;
+}
+
+#main-menu-links .menu-910 a{
+background-image:url('menu-icon-target.png') ;
+}
+
+#main-menu-links .menu-910 a.active,
+#main-menu-links .menu-910 a:hover{
+background-image:url('menu-icon-target-select.png') !important;
+}
+
+#main-menu-links .menu-492 a{
+background-image:url('menu-icon-onoff.png') ;
+}
+
+#main-menu-links .menu-492 a.active,
+#main-menu-links .menu-492 a:hover{
+background-image:url('menu-icon-onoff-select.png') !important;
+}
+
+
+
+/*
+    Repair a fix in comment forms that makes the form too wide
+    Reduce width by 200px.
+*/
+
+.no-sidebars .comment-form .form-text {
+    width:600px !important;
+}
+
+/*
+    We want to add a neat line between the instances of data in the dashboard
+*/
+
+.view-dashboard-upcoming-trips-list .views-row,
+.view-dashboard-my-dives .views-row,
+.view-dashboard-active-divesites .views-row
+{
+    padding:3px 0;
+}
+
+.view-dashboard-my-dives .views-row,
+.view-dashboard-active-divesites .views-row {
+    /*color: grey;*/
+    font-size:90%;
+}
+
+.view-dashboard-my-dives .views-field-title,
+.view-dashboard-active-divesites .views-field-title {
+    font-size:120% !important;
+    /*font-weight: bold;*/
+}
+
+/*
+    We want the map on log node page to have some padding to the left.
+*/
+
+.view-display-id-log_map .view-content {
+    margin:10px 5px 0 5px;
+    border:1px solid lightgrey;
+}
+
+/*
+    Groups on node-log pages. This to keep layout constant.
+*/
+
+.node-log .group-first,
+.node-log .group-second
+{
+    width:50%;
+}
+.node-log .group-third,
+.node-log .group-fourth {
+    width:100%;
+}
+
+/*
+    Groups on node-trip pages.
+*/
+.node-divetrip .group-first
+
+{
+    width:50%;
+}
+.node-divetrip .group-second,
+.node-divetrip .group-third
+{
+    width:25%;
+}
+.node-divetrip .group-fourth {
+    width:100%;
+} 
+/*
+    Group on user pages.
+*/
+.page-user .group-first,
+.page-user .group-second{
+    width:35%;
+}
+.page-user .group-third {
+    width:30%;
+}
+
+.page-user .group-fourth {
+    width:100%;
+}
+
+/*
+    We want to remove the formatting guidelines on post comments.
+    FAIL: I removed this, as it has implications for the map.
+    TODO: Find another way.
+*/
+
+.filter-wrapper
+{
+  display: none;
+}
+
+/*
+    a FIX FOR the log page, to minimize the padding against the top of tab content
+*/
+
+/*.horizontal-tabs-panes .fieldset-wrapper {
+    margin-top:2px;
+}*/
+
+/*
+    On log view, we want the footer text to reside beneath the go button.
+*/
+
+.view-display-id-log_shortcuts {
+    position:relative;
+}
+.view-display-id-log_shortcuts .view-header {
+    position:absolute;
+    right:70px;
+    top:6px;
+}
+
+/* We want the logs to have colors. That way we may distinguish them.*/
+.node-log fieldset legend {
+    background: none repeat scroll 0 0 #eeeeee;
+}
+
+.node-type-log {
+    background:url('logbook.png') no-repeat right top !important;
+    background-position:1px 30px;
+}
+
+/*.node-type-divetrip {
+    background:url('greyboat.jpg') no-repeat right top !important;
+    background-position:900px 81px !important;
+}*/
+
+/*.node-type-divesite{
+    background:url('target.png') no-repeat right top !important;
+    background-position:600px 300px;
+}*/
+
+/*
+    The calendar page. Clean up some CSS
+*/
+
+.calendar-calendar td.empty {
+    background:none repeat scroll 0 0 #eeeeee !important;
+}
+
+.calendar-calendar td .inner div.calendar div, .calendar-calendar td .inner div.calendar div a {
+    background: none repeat scroll 0 0 #c3ccdf !important;
+}
+
+
+.view-club-list-overview .panels-flexible-region-club-top_left-inside {
+    padding-left:5px;
+}
+
+/*
+    Ok, so here is some modification of the node titles.
+    We want grey text to identify the content being viewed
+*/
+
+.mod-title-hover-info {
+    font-size:12px;
+    color:#46956d;
+    background-color:white;
+    margin-right:20px;
+}
+
+.mod-title-hover-info a {
+    color:#46956d !important;
+}
+
+a.grey-link, a.greylink:hover, a.greylink:visited {
+    color:#46956d;
+}
+
+
+/*
+    A modification of the breadcrumb, it vandalized the menu items.
+*/
+.breadcrumb {
+    max-height: 10px;
+}
+
+.marker-explain-log{
+    width:200px;
+    height:200px;
+    background:url('marker-explain.png') no-repeat right top !important;
+}
+
+/*
+    iN /%COUNTRY/%REGION/activity, we want some space between date and text
+*/
+
+.view-activity-functions .views-field-created {
+    padding-right:10px;
+}
+
+/*
+    We add some icons to the homebox, to prevent all the info to blend in with each other.
+*/
+
+.block-logstats .portlet-title {
+    padding-left:18px;
+    background:url('icon-logstats.png') no-repeat left 3px !important;
+}
+
+.portlet-title {
+    padding-left:18px;
+    background:url('icon-info-general.png') no-repeat left 3px;
+}
+
+#homebox-block-views_9bc4289854b7baec81c4db6636c59cee .portlet-title,
+#homebox-block-views_user_trip_attending-block .portlet-title {
+    background:url('icon-trip.png') no-repeat left 3px !important;
+}
+
+
+#homebox-block-views_dashboard_my_regions-block_1 .portlet-title {
+    background:url('icon-regional.png') no-repeat left 3px !important;
+}
+
+/*
+    This is the login image for the /login page.
+*/
+/*#user-login {
+    background:url('facebook-twitter-youtube.jpg') no-repeat right top !important;
+}*/
+
+/*
+    We do not want the descriptions under the map fields in forms,
+    as it is of no use for us.
+*/
+
+#edit-field-map-point-und-0 .description {
+    display:none;
+}
+
+/* If IE fails to view the charts at user/%uid/dashboard*/
+.quicktabs_tabpage{
+    /*min-height:200px;*/
+}
+
+/*
+    CSS for the logpage, to make the list look good.
+*/
+.view-log-details .field-content {
+    display:inline;
+}
+
+.view-log-details .views-field-field-log-depth,
+.view-log-details .views-field-name-1,
+.view-log-details .views-field-field-log-comments,
+.view-log-details .views-field-field-log-press-gastype,
+.view-proximity-functions  .views-row-last,
+.view-og-nodes .views-row-last
+{
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid lightgrey;
+
+}
+
+
+.views-field div {
+    padding-right:10px;
+    /*color:#46956D !important;*/
+}
+
+
+
+
+.node-log .fieldset {
+    margin-right:10px;
+}
+
+.node-log .gmap-control {
+    border:1px solid lightgrey;
+}
+
+/*
+    The logpage images
+*/
+
+.view-log-details .views-field-field-log-images {
+    background-color:white !important;
+    width:0px;
+    
+}
+
+.view-log-details .views-view-grid {
+    background-color:white !important;
+    /*width:0px;*/
+}
+
+.view-log-details td {
+    background-color:white !important;
+    border:1px solid #eeeeee;
+    text-align: center;
+}
+/*
+    Request pages. Add some border and padding to the report.
+*/
+.node-request .content {
+    padding:10px;
+    border:1px solid #eeeeee;
+}
+
+/*
+
+*/
+.view-og-nodes .views-row,
+.pane-taxonomy-term3 .view-display-id-attachment_2 .views-row
+{
+    margin-bottom:10px;
+    display: inline;
+}
+.view-display-id-image_block_small_thumb .field-content,
+.view-id-user_divelog .field-content
+
+{
+    display:inline;
+    padding-right:0px !important;
+}
+
+.view-dashboard-node-block .views-field,
+.view-display-id-image_block_small_thumb .views-field,
+.view-dashboard-node-block .views-row,
+.view-display-id-image_block_small_thumb .views-row,
+.view-dashboard-node-block .field-content,
+.view-display-id-image_block_small_thumb .field.content
+{
+    display:inline;
+    padding-right:0px !important;
+}
+
+
+/*
+    Big headers for the error reports
+*/
+
+.view-request-details .views-field-title a{
+    font-size:120%;
+}
+
+/*
+    Image tables. Create a view grid with equal size items
+*/
+
+.view-display-id-prox_images td {
+    width:12.5%;
+    background-color:#ffffff;
+}
+
+.view-display-id-prox_images img {
+    padding:2px;
+    border:1px solid #eeeeee;
+}
+
+/*
+    Site images. pull them together horizontally.
+*/
+
+.field-name-field-place-images .field-item,
+.pull-together-images
+
+{
+    display:inline;
+    padding-left:2px;
+}
+
+/*
+    GENERIC: Padding (primarily for views rows)
+*/
+.padding-bottom-10 {
+    padding-bottom:10px;
+}
+
+/*
+    Node gallery: Inline images
+*/
+.node-gallery .field-item {
+    display:inline;
+    padding-right:10px;
+}
+
+/*
+    Node teaser: remove the bottom line, and add some other styles
+*/
+
+.node-teaser {
+    border-bottom:0px solid black !important;
+
+
+}
+.node-teaser h2{
+    line-height: 1em;
+}
+.pane-og-nodes-panel-pane-2 .node-teaser .field-name-body {
+    padding-top:30px;
+}
+
+.help-area {
+    color:grey !important;
+    font-size:90%;
+    margin-top:10px;
+}
+
+.soft-border .views-field-field-glob-images,
+.soft-border .views-field-field-log-images
+{
+
+    padding-top:10px;
+} 
+
+.soft-border-left {
+    border-left: 1px solid #EEEEEE;
+    padding-left:20px;
+}
+
+.minor-info {
+    color:#cccccc;
+    font-size:85%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* We start a new CSS run. */
+
+/* /club */
+.infoblock-hover-eff {
+    border:1px solid #D5D9D4;
+    background-color:#F7F7F7;
+    margin-bottom:10px;
+}
+
+
+/* Latest news bulletin */
+.jcar-latest-news{
+    background-color:ededed;
+    max-width:440px;
+    padding:5px;
+    border:1px solid #dddddd;
+}
+
+.jcar-latest-news .static,
+.jcar-latest-news a,
+.jcar-latest-news a:hover
+{
+    
+    color: #549274;
+}
+
+.jcar-latest-news .view-content {
+    padding-left:20px;
+}
+
+.jcar-latest-news .marker {
+    color:blue;
+    background-color:white;
+    padding:3px;
+}
+
+
+
+/* Nivo image galleries */
+.nivo-full {
+    padding:10px;
+    border:5px solid #eeeeee;
+    margin:20px 0;
+}
+
+a.nivo-controlNav {
+    width:10px; height:10px;
+}
+
+.map-standard {
+    border:1px solid #dddddd;
+}
+
+/*  */
+.portlet-content{
+    padding-left:10px;
+}
+
+.dashboard-dive {
+    padding-left:10px;
+}
+.dashboard-dive img {
+    border:2px solid lightgrey;
+}
+
+
+.dashboard-regions {
+    padding-left:10px;
+    padding-bottom:10px;
+}
+
+.dashboard-my-dives {
+    padding-left:10px;
+}
+
+
+/*Divesite list at /sted */
+.site-list-view .form-item,
+.site-list-view .form-submit{
+    float:left;
+    min-height:40px;
+    padding-right:20px;
+}
+
+.site-list-view .views-view-grid{
+    border:2px solid #dddddd;
+}
+
+.site-list-view .edit-fields{
+    border:1px solid white;
+}

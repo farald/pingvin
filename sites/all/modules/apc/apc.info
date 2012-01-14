@@ -1,0 +1,15 @@
+; $Id: apc.info,v 1.1.2.1 2010/01/11 23:34:41 rmuilwijk Exp $
+name = Alternative PHP Cache
+description = Enables the Alternative PHP Cache.
+package = Caching
+version = VERSION
+core = 7.x
+files[] = apc.module
+files[] = drupal_apc_cache.inc
+
+; Information added by drupal.org packaging script on 2010-11-02
+version = "7.x-1.0-beta2"
+core = "7.x"
+project = "apc"
+datestamp = "1288741836"
+

@@ -1,0 +1,11 @@
+
+.cmap-me {
+    height:600px;
+    width:400px;
+    border:1px solid #efefef;
+}
+
+.jvectormap-zoomin, .jvectormap-zoomout{
+    background-color:#efefef;
+    
+}

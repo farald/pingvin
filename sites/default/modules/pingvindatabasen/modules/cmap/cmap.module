@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * Implements HOOK_block_info
+ */
+function cmap_block_info() {
+    $blocks['cmap'] = array(
+        'info' => t('Jvector map block'),
+        'cache' => DRUPAL_NO_CACHE,
+    );
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view
+ */
+
+function cmap_block_view($delta = '') {
+  // This example is adapted from node.module.
+  $block = array();
+
+  switch ($delta) {
+    case 'cmap':
+      $block['subject'] = t('JvectorMap');
+      $block['content'] = cmap_field_formatter_view();
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function cmap_field_formatter_view() {
+    $element = array();
+    drupal_add_js(cmap_color_data($entity_type, $entity, $field), 'inline');
+    drupal_add_css(drupal_get_path('module', 'cmap') . '/jquery.vector-map/jquery.vector-map.css');
+    drupal_add_js(drupal_get_path('module', 'cmap') . '/jquery.vector-map/jquery.vector-map.js');
+    drupal_add_js(drupal_get_path('module', 'cmap') . '/jquery.vector-map/norway-en.js'); 
+    drupal_add_js(drupal_get_path('module', 'cmap') . '/jquery.vector-map/world-en.js'); 
+    drupal_add_js(drupal_get_path('module', 'cmap') . '/cmap-field.js');
+    drupal_add_css(drupal_get_path('module', 'cmap') . '/cmap-field.css');
+
+    $element[0]['#markup'] = "<div id='cmap' class='cmap-me'></div>";
+    return $element;
+}
+
+/**
+ * Create an JSON array of the colors.
+ * @param type $node 
+ */
+function cmap_color_data($entity_type, $entity, $field) {
+    $items = array();
+    $result = views_get_view_result('countrymap_helper');
+
+    //$result = db_query('SELECT DISTINCT field_country_value AS cc FROM `field_data_field_country`;');
+    foreach ($result AS $record) {
+        $term = taxonomy_term_load($record->tid);
+        $items[($term->field_term_countrycode[und][0][value])] = '#60a71f';
+    };
+    return "var cmapColordata = " . drupal_json_encode($items) . ";" .
+        "var cmapCountryData";
+}

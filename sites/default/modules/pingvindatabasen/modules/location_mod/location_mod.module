@@ -1,0 +1,232 @@
+<?php
+
+/*
+ * Implementation of hook_form_FORM_ID_alter
+ *
+ * Insert validate function for location logs.
+ * If location is set, do nothing.
+ * If location is not set and gather field is not set, return error.
+ * If gather field contains node, do nothing.
+ *
+ */
+
+function location_mod_form_log_node_form_alter(&$form, &$form_state, &$form_id) {
+    $form['#validate'][] = 'location_mod_form_log_location_checker';
+}
+
+function location_mod_form_log_location_checker(&$form, &$form_state) {
+    $lat = $form_state['values']['field_map_point'][LANGUAGE_NONE]['0']['locpick']['user_latitude'];
+    $lon = $form_state['values']['field_map_point'][LANGUAGE_NONE]['0']['locpick']['user_longitude'];
+    $gather = $form_state['values']['field_map_inherit_data'][LANGUAGE_NONE]['0']['nid'];
+    //drupal_set_message($lat . $lon . $gather . "test");
+    if ((!is_numeric($lat) || !is_numeric($lon)) && !is_numeric($gather)) {
+        form_set_error('titlle', 'Du må ENTEN oppgi koordinater eller et sted vi kan hente inn koordinater fra.');
+    }
+}
+
+/**
+ * Implementation of hook_node_presave
+ *
+ * Hooks into the node save process and uses field field_map_inherit_data.
+ * If field is set, load the node's location and spill it onto the node being saved.
+ *
+ * TODO Function written, but not yet implemented.
+ *
+ * @param <type> $node
+ */
+function location_mod_node_presave($node) {
+    $gather = $node->field_map_inherit_data[LANGUAGE_NONE]['0']['nid'];
+    //drupal_set_message("Debug:Presave outside");
+    print var_export($node->field_map_inherit_data);
+    if (is_numeric($gather)) {
+        $gather_node = node_load($gather);
+        $node->field_map_point[LANGUAGE_NONE]['0']['locpick']['user_latitude'] = $gather_node->field_map_point[LANGUAGE_NONE]['0']['locpick']['user_latitude'];
+        $node->field_map_point[LANGUAGE_NONE]['0']['locpick']['user_longitude'] = $gather_node->field_map_point[LANGUAGE_NONE]['0']['locpick']['user_longitude'];
+        unset($node->field_map_inherit_data); // We don't need to save this field.
+        drupal_set_message("Geodata er arvet av " . $gather_node->title);
+    }
+}
+
+/**
+ * We want to be able to post latitudes and longitudes to comments, for use in overview maps.
+ *
+ * @global <type> $user
+ * @param <type> $comment
+ */
+function location_mod_comment_presave($comment) {
+    global $user;
+    if (in_array('administrator', array_values($user->roles))) {
+        $location_item = field_get_items('comment', $comment, 'field_map_point', $comment->language);
+        if ($location_item[0][locpick][user_latitude] > 0 && $location_item[0][locpick][user_longitude] > 0) {
+            $comment->field_user_latitude[$comment->language][0][value] = $location_item[0][locpick][user_latitude];
+            $comment->field_user_longitude[$comment->language][0][value] = $location_item[0][locpick][user_longitude];
+        } else {
+            unset($comment->field_user_latitude[$comment->language]);
+            unset($comment->field_user_longitude[$comment->language]);
+        }
+        dpm($comment);
+        //AIRIN99376338
+        //drupal_set_message("Debug: is_admin");
+    }
+}
+
+function location_mod_form_comment_form_alter(&$form, &$form_state, $form_id) {
+    if ($form['field_user_latitude']['und']['0']['value']['#default_value'] > 0) {
+        $default_value = array(// #default_value
+            'lid' => '',
+            'name' => '',
+            'street' => '',
+            'additional' => '',
+            'city' => '',
+            'province' => '',
+            'postal_code' => '',
+            'country' => 'no',
+            'latitude' => $form['field_user_latitude']['und']['0']['value'],
+            'longitude' => $form['field_user_longitude']['und']['0']['value'],
+            'source' => '1',
+            'is_primary' => '0',
+            'locpick' =>
+            array(
+                'user_latitude' => (float) $form['field_user_latitude']['und']['0']['value']['#default_value'],
+                'user_longitude' => (float) $form['field_user_longitude']['und']['0']['value']['#default_value'],
+            ),
+            'province_name' => '',
+            'country_name' => 'Norway',
+        );
+
+        $form['field_map_point']['und']['0']['#default_value'] = $default_value;
+
+        drupal_set_message("Debug: Form_comment_alter");
+        //dpm($form);
+        $node2 = node_load(149);
+        //dpm($node2);
+        dpm(comment_node_page_additions($node2));
+    }
+}
+
+function location_mod_block_info() {
+    $blocks['trip_custom_map'] = array(
+        'info' => t('Pingvindatabasen: Trip custom map'),
+        'cache' => DRUPAL_NO_CACHE,
+    );
+    return $blocks;
+}
+
+function location_mod_block_view($delta = '') {
+    $block = array();
+    switch ($delta) {
+        case 'trip_custom_map':
+            $block['title'] = 'Trip custom map';
+            $block['content'] = location_mod_load_trip_map(arg(1));
+            break;
+    }
+    return $block;
+}
+
+/**
+ *
+ * @param <type> $nid
+ * @return string
+ */
+function location_mod_load_trip_map($nid = 0) {
+    if (!$nid > 0) {
+        return;
+    };
+
+    // The host node of the information
+    $host_node = node_load($nid);
+    $host_date = field_get_items('node', $host_node, 'field_trip_date_range');
+
+    //dpm($host_node);
+    // The array to put clean lats and lons into. 'text' 'markername' 'latitude' 'longitude'
+    $pointers = array();
+
+    // Entity list to drag lats and lons from
+    $entities = array();
+
+    // We load a list of nids to get locations from
+    $field = $host_node->field_trip_target[LANGUAGE_NONE];
+    IF (is_array($field)) {
+        foreach ($field AS $fid => $fval) {
+            $entities[] = node_load($fval['nid']);
+        }
+    }
+
+    // Include the current node
+    $entities[] = $host_node;
+
+    // We need the comments from a node
+    $comments_all = comment_node_page_additions($host_node);
+    if (is_array($comments_all[comments])) {
+        foreach ($comments_all[comments] AS $comment) {
+            if ($comment['field_user_latitude']['#items']['0'][value] > 0) {
+                $entities[] = $comment;
+            }
+        }
+    }
+
+    // Now, let's recurse into the array and create a map.
+
+    foreach ($entities AS $entity) {
+        if (is_array($entity)) { // Is comment, this post contains lat & lon
+            switch ($entity['comment_body']['#object']->created > convert_datetime($host_date[0][value2])) {
+                case false:
+                    $pointers[] = array(
+                        'text' => '<a href="#comment-' . $entity['comment_body']['#object']->cid . '">Kommentar #' . ($entity['#weight'] + 1) . ':</a><br>' . $entity['comment_body']['#items']['0']['value'],
+                        'latitude' => $entity['field_user_latitude']['#items']['0'][value],
+                        'longitude' => $entity['field_user_longitude']['#items']['0'][value],
+                        'markername' => 'small white',
+                    );
+                    break;
+                case true:
+                    $pointers[] = array(
+                        'text' => '<a href="#comment-' . $entity['comment_body']['#object']->cid . '">Kommentar #' . ($entity['#weight'] + 1) . ' </a>(Postet etterpå):<br>' . $entity['comment_body']['#items']['0']['value'],
+                        'latitude' => $entity['field_user_latitude']['#items']['0'][value],
+                        'longitude' => $entity['field_user_longitude']['#items']['0'][value],
+                        'markername' => 'small gray',
+                    );
+                    break;
+            }
+
+
+
+            // Change marker if comment is after date of trip.
+        } elseif (is_object($entity)) { //Is node
+            $geo_field = field_get_items('node', $entity, 'field_map_point');
+            //dpm($geo_field);
+            switch ($entity->nid == $nid) {
+
+
+                case true:
+                    $pointers[] = array(
+                        'text' => t('Denne dykkeurens startpunkt.'),
+                        'latitude' => $geo_field['0']['locpick']['user_latitude'],
+                        'longitude' => $geo_field['0']['locpick']['user_longitude'],
+                        'markername' => 'small blue',
+                    );
+                    break;
+                case false:
+                    $pointers[] = array(
+                        'text' => t('Turmål foreslått av tursjef.<br>') . $entity->title,
+                        'latitude' => $geo_field['0']['locpick']['user_latitude'],
+                        'longitude' => $geo_field['0']['locpick']['user_longitude'],
+                        'markername' => 'small green',
+                    );
+                    break;
+            }
+        }
+    }
+
+    // Generate the GMAP
+    $macro_text = "[gmap overlay=tile/1.0:http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=sjo_hovedkart2&zoom={Z}&x={X}&y={Y} | zoom=10 |center=63.5,10.40546875 |width=450px |height=400px |control=Small |type=Map]";
+    $club_map = gmap_parse_macro($macro_text);
+    $club_map['markers'] = $pointers;
+    $element2 = array(
+        '#type' => 'gmap',
+        '#gmap_settings' => $club_map,
+    );
+    $output2 = drupal_render($element2) . t("<ul><li>Blått: Startpunktet for turen.</li><li>Grønt: Dykkested foreslått av tursjef</li><li>Hvitt: Forslag fra kommentarfeltet</li><li>Grått: Kartpunkt som er nevnt i kommentarer datert etterpå.</li></ul>");
+
+    return $output2;
+}
+

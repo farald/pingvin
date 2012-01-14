@@ -1,0 +1,14 @@
+name = "Jump"
+description = "Turns a menu or taxonomy into a pick list"
+core = 7.x
+files[] = jump.module
+files[] = jump.install
+files[] = jump.test
+configure = admin/config/system/jump
+
+; Information added by drupal.org packaging script on 2011-02-25
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "jump"
+datestamp = "1298619514"
+

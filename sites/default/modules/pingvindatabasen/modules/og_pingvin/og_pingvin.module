@@ -1,0 +1,425 @@
+<?php
+
+/**
+ * Implementation of hook_og_permission_alter
+ *
+ * We want to add a permission to view personal information, so that clubs may choose
+ * show / hide it themselves.
+ *
+ * @param <type> $perms
+ */
+function og_pingvin_og_permission_alter(&$perms) {
+    $perms['view member info'] = array(
+        'title' => 'View member info',
+        'description' => 'Permission to view club member list.',
+        'default role' =>
+        array(
+            0 => 'administrator member',
+            1 => 'member',
+        ),
+        'roles' =>
+        array(
+            0 => 'non-member',
+            1 => 'member',
+        ),
+        'module' => 'og_pingvin',
+    );
+    $perms['add self to club trip'] = array(
+        'title' => 'Self-registration to club trips',
+        'description' => 'Permission to att themselves to a club trip.',
+        'default role' =>
+        array(
+            0 => 'administrator member',
+            1 => 'member',
+        ),
+        'roles' =>
+        array(
+            0 => 'non-member',
+            1 => 'member',
+        ),
+        'module' => 'og_pingvin',
+    );
+    //drupal_set_message("Serialized");
+    //variable_set('dev',serialize($perms));
+}
+
+/**
+ * Implementation of hook_block_info
+ *
+ * Information about the join dive trip button, for system use.
+ *
+ * @return <type>
+ */
+function og_pingvin_block_info() {
+    $blocks['add_user_to_event'] = array(
+        'info' => t('Block to attend or unattend to a trip.'),
+        'cache' => DRUPAL_NO_CACHE, // default
+    );
+    return $blocks;
+}
+
+/**
+ * Implementation of hook_block_view
+ *
+ * This hook is called when block is viewed.
+ * So this returns our block when delta is current.
+ *
+ * @global  $user
+ * The current user object
+ *
+ * @param string $delta
+ * The name of the block
+ *
+ * @return array
+ * An array of items needed by Drupal
+ */
+function og_pingvin_block_view($delta = '') {
+    switch ($delta) {
+        case 'add_user_to_event':
+            // We need the node to check for trip settings.
+            global $user;
+            $node_trip = node_load(arg(1));
+            // Find out if it is a club trip
+            if ($node_trip->type !== 'divetrip') {
+                return $block; // Nothing.
+            }
+            $block['subject'] = t('Title');
+
+            $field = field_get_items('node', $node_trip, 'field_trip_people');
+            $match = false;
+            if ($field) {
+                foreach ($field AS $field_item) {
+                    if ($field_item['uid'] == $user->uid) {
+                        $match = true;
+                    }
+                }
+            }
+
+            switch ($match) {
+                case true:
+                    $block['content'] = drupal_get_form('og_pingvin_unsubscribe_form');
+                    break;
+                case false:
+                    $block['content'] = drupal_get_form('og_pingvin_subscribe_form');
+            }
+            return $block;
+    }
+}
+
+/**
+ * The unsubscribe form for the block.
+ *
+ * @return array
+ * The form being returned.
+ */
+function og_pingvin_unsubscribe_form() {
+    $form = array();
+    $form['description'] = array(
+        '#type' => 'markup',
+        '#markup' => t("Du er allerede påmeldt. Trykk på knappen for å melde deg av."),
+    );
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Meld meg av!',
+        '#disabled' => false,
+    );
+    $form['nid'] = array(
+        '#type' => 'hidden',
+        '#value' => arg(1),
+    );
+    return $form;
+}
+
+/**
+ * Submit function for the unsubscribe form.
+ * Removes user from the array on the node.
+ *
+ * @global object $user
+ * Current user object
+ *
+ * @param <type> $form
+ * The form
+ *
+ * @param <type> $form_state
+ * The current state of the form
+ */
+function og_pingvin_unsubscribe_form_submit($form, &$form_state) {
+    global $user;
+    $node = node_load($form['nid']['#value']);
+    if ($node->field_trip_people['und']) {
+        foreach ($node->field_trip_people['und'] AS $fid => $fval) {
+            if ($fval['uid'] == $user->uid) {
+                $reset = $fid;
+                print var_Export($fid);
+            }
+        }
+    }
+    unset($node->field_trip_people['und'][$reset]);
+    node_save($node);
+}
+
+/**
+ *
+ * Returns a too late form if time has passed.
+ *
+ * @return string
+ */
+function og_pingvin_too_late_form() {
+    $form = array();
+    $form['description'] = array(
+        '#type' => 'markup',
+        '#markup' => "Turen er overstått.",
+    );
+    return $form;
+}
+
+/**
+ * The main form functions. Determines what form to display based on the node content
+ * (permissions) and date.
+ *
+ * TODO: This should be broken into several functions for reusability.
+ * 
+ * Here we break the permissions given in field_trip_allow_other and field_trip_allow_anon
+ * down and compares it to the permissions of the current user.
+ * 
+ *  We need to determine:
+ * 1 - Is user anonymous?
+ * 2 - Is user logged in, but not a member?
+ * 3 - Is user a member of a club?
+ * 4 - Is user a member of current club?
+ *
+ * Status uses these numbers to determine further progress.
+ *
+ * @global  $user
+ * @return string
+ */
+function og_pingvin_subscribe_form() {
+    // Load user and node..
+    global $user;
+    $node_trip = node_load(arg(1));
+    // Check if node is too old
+    if (strtotime($node_trip->field_trip_date_range['und'][0]['value']) < time()) {
+        return og_pingvin_too_late_form();
+    } else {
+
+    }
+
+    $form = array();
+    $form['description'] = array(
+        '#type' => 'markup',
+        '#markup' => "Logg inn for å melde deg på dykketurer!",
+    );
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Jeg vil delta!',
+        '#disabled' => true,
+    );
+    $form['gid'] = array(
+        '#type' => 'hidden',
+        '#value' => arg(0),
+    );
+    $form['uid'] = array(
+        '#type' => 'hidden',
+        '#value' => $user->uid,
+    );
+    $form['nid'] = array(
+        '#type' => 'hidden',
+        '#value' => arg(1),
+    );
+
+    if (user_is_anonymous ()) {
+        $form['description']['#markup'] = "Logg inn for å melde deg på dykketurer!<br>";
+        return $form;
+    }
+
+    $u_status = 0;
+    /*
+     *  We need to determine:
+     * 1 - Is user anonymous?
+     * 2 - Is user logged in, but not a member?
+     * 3 - Is user a member of a club?
+     * 4 - Is user a member of current club?
+     *
+     * Status uses these numbers to determine further progress.
+     */
+
+    // 0: We need some values
+    $node_owner = user_load($node_trip->uid);
+    $node_owner_groups = og_get_entity_groups('user', $node_owner);
+    $user_current_groups = og_get_entity_groups();
+
+    //2 - Is user anonymous?
+    $u_status = (user_is_logged_in()) ? 2 : 1;
+
+    //3 - Is user member of current group?
+    $u_status = (count($user_current_groups) > 0) ? 3 : $u_status;
+
+    //4 - Is the user member of same group?
+    foreach ($node_owner_groups AS $node_owner_group) {
+        if (in_array($node_owner_group, $user_current_groups)) {
+            $u_status = 4;
+        }
+    }
+    //drupal_set_message("User:" . $u_status);
+
+    $g_status = 0;
+    /*
+     * We need to determine:
+     * 2 - Is trip open to all?
+     * 3 - Is trip open to all club
+     * 4 - Is trip a club-only?
+     */
+
+    // 0: We need some values
+    $allow_anon = field_get_items('node', $node_trip, 'field_trip_allow_anon');
+    $allow_other = field_get_items('node', $node_trip, 'field_trip_allow_other');
+
+    //2- Is trip open to all?
+    $g_status = ($allow_anon[0][value] == 1 && $allow_other[0][value] == 1) ? 2 : 0;
+    // 0 because we dont want an anonymous match
+    //3- Is trip open to all clubs ?
+    $g_status = ($allow_anon[0][value] != 1 && $allow_other[0][value] == 1) ? 3 : $g_status;
+
+    //4- Is this club only trip?
+    $g_status = ($allow_anon[0][value] == 0 && $allow_other[0][value] == 0) ? 4 : $g_status;
+
+    // Now, let's compare levels. If user's level is equal or above, allow access.
+    if ($u_status >= $g_status) {
+        $form['submit']['#disabled'] = FALSE;
+        $form['description']['#markup'] = t("Du kan melde deg på denne turen.
+                Vær oppmerksom på at en påmelding i utgangspunktet er bindende!<br>");
+    } else {
+        $form['description']['#markup'] = t("Du kan ikke melde deg på denne turen,
+                se premissene for påmelding på sida.<br>");
+        $form['submit']['#disabled'] = TRUE;
+    };
+
+    return $form;
+}
+
+/*
+ * Implementation of hook_FORM_ID_submit
+ *
+ * Does the actual work of adding a user to the trip.
+ * Opens up the node and edits the field_trip_people directly.
+ */
+
+function og_pingvin_subscribe_form_submit($form, &$form_state) {
+    $node = node_load($form['nid']['#value']);
+    cache_set('test_delete', ($form));
+    $nid = $form['nid']['#value'];
+    $uid = $form['uid']['#value'];
+    $gid = $form['gid']['#value'];
+    // Load field with uids
+    $users_sub = field_get_items('node', $node, 'field_trip_people');
+    print var_Export($users_sub);
+    // Check if there are results.
+    if ($node->field_trip_people['und']['0']['uid']) {
+        $node->field_trip_people['und'][] = array(
+            'uid' => $uid,
+        );
+    }
+    // If no results, we input entire array.
+    else {
+        $node->field_trip_people = array(
+            'und' => array(
+                '0' => array(
+                    'uid' => $uid,
+                )
+            )
+        );
+        drupal_set_message(t('Du har blitt lagt til listen over deltakere på denne turen.' . $nid));
+    }
+    node_save($node);
+}
+
+/*
+ * Views filter helper
+ *
+ * Filter by group ID.
+ * Get group ID from either user on new or node on edit.
+ * Then compare it to a row from views, and then filter if they are not equal.
+ * 
+ * This way, we filter equipment selection based on current club (group).
+ *
+ */
+
+function og_pingvin_gid_compare($row) {
+    global $user;
+    static $etids;
+
+    // Wrapper to check for static info(we run this many many times)
+    if (!is_array($etids)) {
+        // If node edit form
+        if (is_numeric(arg(1))) {
+            $items = node_load(arg(1));
+            $etids = $items->group_audience[LANGUAGE_NONE];
+            // If node add form
+        } else {
+            $items = user_load($user->uid); // Load entire object
+            $etids = $items->group_audience[LANGUAGE_NONE];
+        }
+    }
+
+    if (is_array($etids)) {
+        foreach ($etids AS $item_id => $item) {
+            if ($item['state'] == 1 && ($item['gid'] == $row->group_audience_gid)) {
+                return false;
+            } else {
+                return true;
+            };
+        }
+    }
+    return true;
+}
+
+/**
+ * Views filter helper.
+ *
+ * Get list of all users in club from current nid.
+ *
+ *
+ */
+function og_pingvin_get_members() {
+    $node = node_load(89);
+    $group = field_get_items('node', $node, 'group_group');
+    $gid = $group[0]['gid'];
+
+    $uids = array();
+    $view = views_get_view('cron_club_members');
+    $view->execute_display('default', array($gid)); // <----- Check this!!
+    $view->render();
+    foreach ($view->result as $account) {
+        $params['account'] = $account;
+        $params['node'] = $node;
+        dpm($account);
+        //drupal_mail('cron_jobs', 't07', $account->mail, user_preferred_language($account), $params);
+    }
+}
+
+/**
+ * Get current user's club ID.
+ * TODO replace code where we want the user's club ID, NID & Name
+ *
+ * @param <type> $uid
+ */
+function og_pingvin_my_club_id($uid) {
+    // If user is current
+    switch ($uid) {
+        case null:
+            global $user;
+            break;
+        case ($uid > 0):
+            $user = user_load($uid);
+            break;
+    };
+    $etids = field_get_items('user', $user, 'group_audience');
+    foreach ($etids AS $item_id => $item) {
+        if (is_array($etids)) {
+            if ($item['state'] == 1) {
+                $group = og_get_group('group', $item['gid']);
+                return $group;
+            }
+        }
+    }
+}
