@@ -260,7 +260,7 @@ function _quicktabs_admin_main_form($form_state, &$quicktab) {
       FALSE => t('No') . ': ' . t('Load all tabs on page view.'),
     ),
     '#default_value' => isset($quicktab->ajax) ? $quicktab->ajax : 0,
-    '#description' => t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p>'),
+    '#description' => t('Choose how the content of tabs should be loaded.<p>By choosing "Yes", only the first tab will be loaded when the page first viewed. Content for other tabs will be loaded only when the user clicks the other tab. This will provide faster initial page loading, but subsequent tab clicks will be slower. This can place less load on a server.</p><p>By choosing "No", all tabs will be loaded when the page is first viewed. This will provide slower initial page loading, and more server load, but subsequent tab clicks will be faster for the user. Use with care if you have heavy views.</p><p>Warning: if you enable Ajax, any block you add to this quicktabs block will be accessible to anonymous users, even if you place role restrictions on the quicktabs block. Do not enable Ajax if the quicktabs block includes any blocks with potentially sensitive information.</p>'),
     '#weight' => -6,
   );
 
@@ -358,7 +358,10 @@ function _quicktabs_form(array $tab) {
       '#default_value' => $selected_view,
       '#title' => t('Select a view'),
       '#ajax' => array(
-        'callback' => '_quicktabs_replace_view_displays_callback',
+        'callback' => 'quicktabs_ajax_callback',
+        'wrapper' => 'quicktab-tabs',
+        'method' => 'replace',
+        'effect' => 'fade',
       ),
     );
     $form['view']['display'] = array(
@@ -492,26 +495,11 @@ function theme_quicktabs_admin_form_tabs($variables) {
 }
 
 /**
- * Ajax callback for add more and remove buttons.
+ * Ajax callback for add more and remove buttons and for the view dropdown.
  */
 function quicktabs_ajax_callback($form, $form_state) {
   $form_tabs = $form['qt_wrapper']['tabs'];
   return $form_tabs;
-}
-
-/**
- * Ajax callback, triggered when view is changed.
- */
-function _quicktabs_replace_view_displays_callback($form, $form_state) {
-  $view_name = $form_state['triggering_element']['#value'];
-  $delta = $form_state['triggering_element']['#parents'][1];
-  $display_options = _quicktabs_get_views_displays($view_name);
-  $form['qt_wrapper']['tabs'][$delta]['view']['display']['#options'] = $display_options;
-
-  $commands = array();
-  // Replace the view display dropdown.
-  $commands[] = ajax_command_replace("#view-display-dropdown-$delta", drupal_render($form['qt_wrapper']['tabs'][$delta]['view']['display']));
-  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 

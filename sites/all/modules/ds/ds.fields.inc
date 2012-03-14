@@ -67,6 +67,10 @@ function ds_field_human_name($type) {
       return t('Code field');
     case DS_FIELD_TYPE_BLOCK:
       return t('Block field');
+    case DS_FIELD_TYPE_CTOOLS:
+      return t('Dynamic field');
+    case DS_FIELD_TYPE_PREPROCESS:
+      return t('Preprocess field');
   }
 
   // Fallback
@@ -89,6 +93,14 @@ function ds_custom_manage($field_key = '') {
 
       case DS_FIELD_TYPE_BLOCK:
         $redirect = 'admin/structure/ds/fields/manage_block/' . $field_key;
+        break;
+
+      case DS_FIELD_TYPE_CTOOLS:
+        $redirect = 'admin/structure/ds/fields/manage_ctools/' . $field_key;
+        break;
+
+      case DS_FIELD_TYPE_PREPROCESS:
+        $redirect = 'admin/structure/ds/fields/manage_preprocess/' . $field_key;
         break;
 
       default:
@@ -122,7 +134,8 @@ function ds_shared_form(&$form, $field) {
     '#title' => t('Label'),
     '#type' => 'textfield',
     '#default_value' => $field->label,
-    '#description' => t('The human-readable label of the field. This name must be unique.'),
+    '#description' => t('The human-readable label of the field.'),
+    '#maxlength' => 32,
     '#required' => TRUE,
     '#size' => 30,
   );
@@ -141,7 +154,7 @@ function ds_shared_form(&$form, $field) {
   $entity_options = array();
   $entities = entity_get_info();
   foreach ($entities as $entity_type => $entity_info) {
-    if ($entity_info['fieldable']) {
+    if ((isset($entity_info['fieldable']) && $entity_info['fieldable']) || $entity_type == 'ds_views') {
       $entity_options[$entity_type] = drupal_ucfirst(str_replace('_', ' ', $entity_type));
     }
   }
@@ -182,7 +195,7 @@ function ds_field_unique($name) {
  */
 function ds_shared_form_validate($form, &$form_state) {
   $field = new stdClass;
-  $field->properties = new stdClass;
+  $field->properties = array();
   $field->field = $form_state['values']['field'];
   $field->label = $form_state['values']['name'];
 
@@ -267,9 +280,50 @@ function ds_edit_custom_field_form($form, &$form_state, $custom_field = '') {
  */
 function ds_custom_field_form_validate($form, &$form_state) {
   $form_state['field']->field_type = DS_FIELD_TYPE_CODE;
-  $form_state['field']->properties = array();
   $form_state['field']->properties['code'] = $form_state['values']['code'];
   $form_state['field']->properties['use_token'] = $form_state['values']['use_token'];
+}
+
+/**
+ * Manage a CTools field.
+ */
+function ds_edit_ctools_field_form($form, &$form_state, $ctools_field = '') {
+  $custom_field = ds_shared_form($form, $ctools_field);
+  $form['info'] = array(
+    '#markup' => t('The content of this field is configurable on the "Manage display" screens.'),
+    '#weight' => -10,
+  );
+  $form['#validate'][] = 'ds_ctools_field_form_validate';
+  return $form;
+}
+
+/**
+ * CTools field form validation.
+ */
+function ds_ctools_field_form_validate($form, &$form_state) {
+  $form_state['field']->field_type = DS_FIELD_TYPE_CTOOLS;
+  $form_state['field']->properties['default'] = array();
+  $form_state['field']->properties['settings'] = array('show_title' => array('type' => 'checkbox'), 'title_wrapper' => array('type' => 'textfield', 'description' => t('Eg: h1, h2, p')), 'ctools' => array('type' => 'ctools'));
+}
+
+/**
+ * Manage a Preprocess field.
+ */
+function ds_edit_preprocess_field_form($form, &$form_state, $ctools_field = '') {
+  $custom_field = ds_shared_form($form, $ctools_field);
+  $form['info'] = array(
+    '#markup' => t('The machine name of this field must reflect the key in the variables, e.g. "submitted". So in most cases, it is very likely you will have to manually edit the machine name as well, which can not be changed anymore after saving.'),
+    '#weight' => -10,
+  );
+  $form['#validate'][] = 'ds_preprocess_field_form_validate';
+  return $form;
+}
+
+/**
+ * CTools field form validation.
+ */
+function ds_preprocess_field_form_validate($form, &$form_state) {
+  $form_state['field']->field_type = DS_FIELD_TYPE_PREPROCESS;
 }
 
 /**
@@ -299,11 +353,11 @@ function ds_edit_block_field_form($form, &$form_state, $custom_block = '') {
   $form['block_identity']['block_render'] = array(
     '#type' => 'select',
     '#options' => array(
-      DS_BLOCK_TEMPLATE => t('Render through block template'),
+      DS_BLOCK_TEMPLATE => t('Default'),
       DS_BLOCK_TITLE_CONTENT => t('Show block title + content'),
       DS_BLOCK_CONTENT => t('Show only block content'),
     ),
-    '#title' => t('Block render'),
+    '#title' => t('Layout'),
     '#required' => TRUE,
     '#default_value' => isset($custom_block->properties['block_render']) ? $custom_block->properties['block_render'] : '',
   );
@@ -345,7 +399,7 @@ function ds_remove_fields_form($form, &$form_state, $field = '', $action = 'dele
   $custom_fields = ctools_export_crud_load_all('ds_fields');
   if (isset($custom_fields[$field])) {
     $field = $custom_fields[$field];
-    $form['#field'] = $field;
+    $form['#ds_field'] = $field;
     return confirm_form($form,
       t('Are you sure you want to ' . $action . ' %field?', array('%field' => $field->label)),
       'admin/structure/ds/fields',
@@ -379,7 +433,7 @@ function ds_revert_field_confirm_submit($form, &$form_state) {
  */
 function ds_remove_field_confirm_submit($form, &$form_state, $action = 'deleted') {
 
-  $field = $form['#field'];
+  $field = $form['#ds_field'];
 
   // Remove field.
   db_delete('ds_fields')

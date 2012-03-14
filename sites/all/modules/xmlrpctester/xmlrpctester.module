@@ -378,7 +378,8 @@ function xmlrpctester_get_remote_method($name) {
   $server = _xmlrpctester_server();
   $method = new StdClass;
   $method->method = $name;
-  $method->parameters = xmlrpc($server, array('system.methodSignature' => array($name)));
+  $multiple_signatures = xmlrpc($server, array('system.methodSignature' => array($name)));
+  $method->parameters = $multiple_signatures[0];
   $method->description = xmlrpc($server, array('system.methodHelp' => array($name)));
   return $method;
 }
@@ -392,7 +393,7 @@ function xmlrpctester_get_remote_methods($reset = FALSE) {
   if (!isset($methods) || $reset) { // Not empty, because a server might not have any.
     $result = xmlrpc($server, array('system.listMethods' => array()));
     if ($error = xmlrpc_error()) {
-      watchdog('xmlrpctester', 'Error when calling system.listMethods at server %server. 
+      watchdog('xmlrpctester', 'Error when calling system.listMethods at server %server.
         Error code: %code, message: %message.',
         array('%server' => $server, '%code' => $error->code, '%message' => $error->message), WATCHDOG_ERROR);
       // TODO some more error handling if error code is -32700 perhaps?

@@ -92,7 +92,7 @@ function _services_build_resources($endpoint_name = '') {
  * @return void
  */
 function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
-  if(is_array($endpoint) && isset($endpoint['build_info'])) {
+  if (is_array($endpoint) && isset($endpoint['build_info'])) {
     $endpoint = $endpoint['build_info']['args'][0];
   }
   foreach ($resources as $name => &$resource) {
@@ -114,7 +114,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
         }
       }
 
-      $classes = array('targeted actions', 'actions', 'relationships');
+      $classes = array('targeted_actions', 'actions', 'relationships');
       foreach ($classes as $class) {
         if (!empty($resource[$class])) {
           foreach ($resource[$class] as $op => $def) {

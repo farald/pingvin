@@ -36,7 +36,7 @@ class views_php_plugin_wrapper {
   }
 
   public function __unset($name) {
-    unset($this->wrapped[$name]);
+    unset($this->wrapped->$name);
   }
 
   public function __call($name, $arguments) {

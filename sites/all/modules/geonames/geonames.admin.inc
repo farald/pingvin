@@ -9,6 +9,39 @@
  * Admin Settings Page
  */
 function geonames_admin_settings() {
+  $form['geonames_server'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL to Geonames server to use.'),
+    '#description' => t('Example: http://ws.geonames.net (paid service) or http://api.geonames.org (free service) - without the trailing slash. You should always support developers of quality services. Increased performance is cheap, and you should afford it. Visit the !link page for more information', array('!link' => l(t('GeoNames Premium Webservices'), 'http://www.geonames.org/professional-webservices.html'))),
+    '#default_value' => variable_get('geonames_server', GEONAMES_FREE_SERVER_URL),
+  );
+  $form['geonames_username'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username'),
+    '#description' => t('This is *required* for commercial and free services. You can !register.', array('!register' => l('register a GeoNames account', 'http://www.geonames.org/login'))),
+    '#default_value' => variable_get('geonames_username', ''),
+  );
+  $form['geonames_count_credits'] = array(
+    '#type' => 'radios',
+    '#title' => t('Count credits used when calling the service'),
+    '#default_value' => variable_get('geonames_count_credits', 0),
+    '#options' => array(1 => 'Enabled', 0 => 'Disabled'),
+  );
+  if (variable_get('geonames_count_credits', 0)) {
+    // Show the Status and Credits Counter (ick)
+    $since = variable_get('geonames_commercial_credits_since');
+    $tvalues = array(
+      '@credits' => variable_get('geonames_commercial_credits', 0),
+      '@date' => $since ? format_date($since) : 'unknown',
+      '!link' => l(t('Reset'), 'admin/settings/geonames/reset_credits'),
+    );
+    $form['counter'] = array(
+      '#type' => 'item',
+      '#title' => 'Credits',
+      '#markup' => t('You have used @credits credits since @date. [!link]', $tvalues),
+    );
+  }
+
   $form['geonames_docs_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Path to GeoNames Documentation'),
@@ -47,52 +80,6 @@ function geonames_admin_settings() {
     '#description' => t('If an item is retrieved from the cache, the request[cached] property will be available in the result object if this switch is set to Yes.'),
     '#default_value' => variable_get('geonames_reveal_cache', TRUE),
     '#options' => array(1 => 'Yes', 0 => 'No'),
-  );
-
-  $commercial_collapsed = (variable_get('geonames_commercial_active', FALSE) == TRUE) ? FALSE : TRUE;
-
-  $form['commercial'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('GeoNames Commercial Webservices'),
-    '#collapsible' => TRUE,
-    '#collapsed' => $commercial_collapsed
-  );
-  $form['commercial']['leadingtext'] = array(
-    '#type' => 'markup',
-    '#prefix' => '<div>',
-    '#markup' => t('You should always support developers of quality services. Increased performance is cheap, and you should afford it. Visit the !link page for more information', array('!link' => l(t('GeoNames Commercial Webservices'), 'http://www.geonames.org/professional-webservices.html'))),
-    '#suffix' => '</div>'
-  );
-  if (variable_get('geonames_commercial_active', FALSE) == TRUE) {
-    // Show the Status and Credits Counter (ick)
-    $since = variable_get('geonames_commercial_credits_since', 0);
-    $form['commercial']['counter'] = array(
-      '#type' => 'markup',
-      '#prefix' => '<div><p>',
-      '#markup' => '<b>' . t('Status') . ':</b><br />' . t('You have used @credits credits since %date. [!link]', array(
-        '@credits' => variable_get('geonames_commercial_credits', 0),
-        '%date' => $since ? format_date($since) : t('Unknown date'),
-        '!link' => l(t('Reset'), 'admin/config/geonames/reset_credits'),
-      )),
-      '#suffix' => '</p></div>'
-    );
-  }
-  $form['commercial']['geonames_commercial_active'] = array(
-    '#type' => 'radios',
-    '#title' => t('GeoNames Commercial Webservices'),
-    '#default_value' => variable_get('geonames_commercial_active', 0),
-    '#options' => array(1 => 'Enabled', 0 => 'Disabled'),
-  );
-  $form['commercial']['geonames_commercial_server'] = array(
-    '#type' => 'textfield',
-    '#title' => t('URL to Commercial Service Server'),
-    '#description' => 'Example: http://ws.geonames.net - without the trailing slash',
-    '#default_value' => variable_get('geonames_commercial_server', 'http://ws.geonames.net'),
-  );
-  $form['commercial']['geonames_commercial_username'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Username'),
-    '#default_value' => variable_get('geonames_commercial_username', ''),
   );
 
   $updated = variable_get('geonames_metadata_updated', 0);
@@ -151,45 +138,24 @@ function geonames_admin_settings() {
  * Admin Settings Page : Validation
  */
 function geonames_admin_settings_validate($form, &$form_state) {
-  $geonames_commercial_active = $form_state['values']['geonames_commercial_active'];
-  $geonames_commercial_server = $form_state['values']['geonames_commercial_server'];
-  $geonames_commercial_username = $form_state['values']['geonames_commercial_username'];
-
-  // have Commercial Services Changed?
-  $c = $form['commercial'];
-  $com_changed = $geonames_commercial_active != $c['geonames_commercial_active']['#default_value'];
-  $com_changed = $com_changed || ($geonames_commercial_server != $c['geonames_commercial_server']['#default_value']);
-  $com_changed = $com_changed || ($geonames_commercial_username != $c['geonames_commercial_username']['#default_value']);
-
-  // if active and changed, validate
-  if ($geonames_commercial_active && $com_changed) {
-
-    // verify that a username is set
-    if ($geonames_commercial_username == '') {
-      form_set_error('geonames_commercial_username', t('Commercial Webservices: You must provide a username.'));
+  // validate that the given settings work
+  $url = $form_state['values']['geonames_server'] .'/search?username='. $form_state['values']['geonames_username'] .'&name=nydalen';
+  $data = drupal_http_request($url);
+  if ($data->code != '200') {
+    form_set_error('', t('There is a problem with the response from the URL you have specified.') .'<br />'. t('The server returned errorcode %code: %error', array('%code' => $data->code, '%error' => $data->error)));
+  }
+  else {
+    $xml = new SimpleXMLElement($data->data);
+    if ($xml->status['message']) {
+      form_set_error('', t('GeoNames Service Response: %message (code: %code)', array('%message' => $xml->status['message'], '%code' => $xml->status['value'])));
     }
     else {
-      // verify if the service works
-      // Test using the search service
-      $url = $geonames_commercial_server . '/search?username=' . $geonames_commercial_username . '&name=nydalen';
-      $data = drupal_http_request($url);
-      if ($data->code != '200') {
-        form_set_error('geonames_commercial_server', t('There is a problem with the response from the URL you have specified.') . '<br />' . t('The server returned errorcode %code: %error', array('%code' => $data->code, '%error' => $data->error)));
+      geonames_credits_pay(1); // use one credit! ;)
+        if ($xml->geoname[0]->name == 'Nydalen') {
+        drupal_set_message(t('Your account has been successfully tested and is properly configured!'));
       }
       else {
-        $xml = new SimpleXMLElement($data->data);
-        if ($xml->status['message']) {
-          form_set_error('geonames_commercial_server', t('GeoNames Service Response: %message (code: %code)', array('%message' => $xml->status['message'], '%code' => $xml->status['value'])));
-        }
-        else {
-          geonames_credits_pay(1); // use one credit! ;)
-          if ($xml->geoname[0]->name == 'Nydalen') {
-            drupal_set_message(t('Your account has been successfully tested and is properly configured!'));
-          }
-          else {
-            form_set_error('', t('Unknown Error'));
-          }
-        }
+        form_set_error('', t('Unknown Error'));
       }
     }
   }
@@ -217,4 +183,3 @@ function geonames_credits_reset($adminpage = TRUE) {
     drupal_goto('admin/config/geonames');
   }
 }
-

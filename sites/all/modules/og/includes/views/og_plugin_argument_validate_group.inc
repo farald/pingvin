@@ -10,13 +10,16 @@
 class og_plugin_argument_validate_group extends views_plugin_argument_validate {
 
   function validate_argument($argument) {
-    $group = og_load($argument);
-    if (!$group) {
+    if (!empty($argument)) {
+      $group = og_load($argument);
+    }
+
+    if (empty($group)) {
       return FALSE;
     }
 
     $this->argument->argument = $argument;
-    $this->argument->validated_title = check_plain($group->label);
+    $this->argument->validated_title = og_label($group->gid);
     return TRUE;
   }
 }

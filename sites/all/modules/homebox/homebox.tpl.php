@@ -1,5 +1,4 @@
 <?php
-// $Id: homebox.tpl.php,v 1.1.4.25.2.1 2011/02/02 19:01:05 brianV Exp $
 
 /**
  * @file

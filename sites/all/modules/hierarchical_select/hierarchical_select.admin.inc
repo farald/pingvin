@@ -1,5 +1,4 @@
 <?php
-// $Id: hierarchical_select.admin.inc,v 1.24.4.4 2011/02/14 22:35:02 wimleers Exp $
 
 
 /**
@@ -101,11 +100,11 @@ function hierarchical_select_admin_configs() {
           ),
           array(
             'title' => t('Export'),
-            'href' => "admin/config/hierarchical_select/export/$config_id",
+            'href' => "admin/config/content/hierarchical_select/export/$config_id",
           ),
           array(
             'title' => t('Import'),
-            'href' => "admin/config/hierarchical_select/import/$config_id",
+            'href' => "admin/config/content/hierarchical_select/import/$config_id",
           ),
         ))),
     );

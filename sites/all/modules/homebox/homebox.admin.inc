@@ -1,5 +1,4 @@
 <?php
-// $Id: homebox.admin.inc,v 1.2.2.36.2.1 2011/02/02 19:01:05 brianV Exp $
 
 /**
  * @file
@@ -186,9 +185,13 @@ function homebox_admin_page_validate($form, &$form_state) {
 
   // If no imported settings...
   if (!isset($form_state['values']['import']) ||
-      $form_state['values']['import'] == NULL) {
-    // Filter title
-    $form_state['values']['title'] = filter_xss($form_state['values']['title']);
+    $form_state['values']['import'] == NULL) {
+
+    // Validate title.
+    $test = strip_tags($form_state['values']['title']);
+    if ($test != $form_state['values']['title']) {
+      form_set_error('title', t('Limit the title to non HTML characters.'));
+    }
 
     // Make sure a title is present
     if (empty($form_state['values']['title'])) {
@@ -344,7 +347,7 @@ function homebox_admin_form_to_page(&$page, $form_state) {
  * Form builder function for module settings.
  */
 function homebox_layout($page) {
-  drupal_set_title(t('!page_name layout', array('!page_name' => $page->settings['title'])));
+  drupal_set_title(t('@page_name layout', array('@page_name' => $page->settings['title'])));
 
   // Gets admin build block helper for usort function
   module_load_include('inc', 'block', 'block.admin');
@@ -549,7 +552,7 @@ function homebox_admin_display_form_submit($form, &$form_state) {
    */
 
   menu_rebuild();
-  drupal_set_message(t('Layout settings have been updated for !page_title.', array('!page_title' => $page->settings['title'])));
+  drupal_set_message(t('Layout settings have been updated for @page_title.', array('@page_title' => $page->settings['title'])));
   $form_state['redirect'] = 'admin/structure/homebox';
 }
 
@@ -559,7 +562,7 @@ function homebox_admin_display_form_submit($form, &$form_state) {
 function homebox_admin_flush_form($form, &$form_state, $page) {
   $form['name'] = array(
     '#type' => 'value',
-    '#value' => $page->name,
+    '#value' => check_plain($page->name),
   );
 
   $form = confirm_form(
@@ -664,7 +667,7 @@ function template_preprocess_homebox_admin_display_form(&$variables) {
  *  $form
  */
 function homebox_configure_form($form, &$form_state, $page) {
-  drupal_set_title(t('!page_name settings', array('!page_name' => $page->settings['title'])));
+  drupal_set_title(t('@page_name settings', array('@page_name' => $page->settings['title'])));
 
   $form['columns'] = array(
     '#type' => 'select',
@@ -698,12 +701,11 @@ function homebox_configure_form($form, &$form_state, $page) {
   $form['widths'] = array(
     '#type' => 'fieldset',
     '#title' => t('Custom column widths'),
-    '#description' => t('
-      Optionally set custom widths for each available region.
-      If these values are omitted, the regions will all be the same width, set horizontally.<br/>
-      <img src="' . base_path() . drupal_get_path('module', 'homebox') . '/images/layout-example.png" alt="Layout" style="float:right;"/>
-      To achieve a layout like the image to the right, you would set the column count to 4, with widths of 100, 50, 50, and 100.
-    '),
+    '#description' => t('Optionally set custom widths for each available region.
+      If these values are omitted, the regions will all be the same width, set horizontally. !example
+      To achieve a layout like the image to the right, you would set the column count to 4, with widths of 100, 50, 50, and 100.',
+      array('!example' => '<br/><img src="' . base_path() . drupal_get_path('module', 'homebox') . '/images/layout-example.png" alt="Layout" style="float:right;"/>')
+    ),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );

@@ -10,7 +10,7 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
   /**
    * Implementation of getInfo().
    */
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('GeoNames All'),
       'description' => t('Exercise every query supported by the GeoNames module - requires internet access.'),
@@ -25,6 +25,7 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
     parent::setUp('geonames');
     variable_set('geonames_commercial_active', FALSE);
     variable_set('geonames_cache', FALSE);
+    variable_set('geonames_username', 'demo');
   }
 
   /**
@@ -34,7 +35,19 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
    */
   function geonames_query($service, $query = array(), $options = NULL) {
     unset($this->services[$service]);
-    return geonames_query($service, $query, $options);
+    $result = geonames_query($service, $query, $options);
+    if ($result == FALSE) {
+      $message = 'FALSE';
+    }
+    elseif (isset($result->status)) {
+      $message = t('Status: @message (@value)', array('@message' => $result->status['message'], '@value' => $result->status['value']));
+    }
+    else {
+      $message = 'OK';
+    }
+
+    $this->assertTrue($message == 'OK', t('Geonames query to service %service completed: !message', array('%service' => $service, '!message' => $message)));
+    return $result;
   }
 
 
@@ -54,7 +67,7 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
     $this->assertEqual($result['astergdem'], "192", t('Found expected result for fixed coordinates for astergdem service'));
 
     // Test the "children" service
-    $query = array('geonameid' => 3175395);
+    $query = array('geonameid' => 3175395, 'maxrows' => 10);
     $results = $this->geonames_query('children', $query);
     $this->assertTrue($results->total_results_count > 5, t('At least 5 regions found for Italy'));
     $all_ok = TRUE;
@@ -103,7 +116,7 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
     $this->assertEqual($results->total_results_count, 1, 'Found 1 result from "extendedFindNearby" A');
     $result = $results->results[0];
     $this->assertEqual($result['street'], 'Roble Ave', t('Found "Roble Ave" from "extendedFindNearby" A'));
-    $this->assertEqual($result['streetnumber'], '671', t('Found "61" from "extendedFindNearby" A'));
+    $this->assertEqual($result['streetnumber'], '671', t('Found "671" from "extendedFindNearby" A'));
 
     // Test the "extendedFindNearby" service : other countries
     $query = array('lat' => 47.3, 'lng' => 9);
@@ -142,7 +155,7 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
     $this->assertEqual($results->total_results_count, 1, 'Found 1 result from "findNearestAddress"');
     $result = $results->results[0];
     $this->assertEqual($result['street'], 'Roble Ave', t('Found "Roble Ave" from "findNearestAddress"'));
-    $this->assertEqual($result['streetnumber'], '671', t('Found "61" from "findNearestAddress"'));
+    $this->assertEqual($result['streetnumber'], '671', t('Found "671" from "findNearestAddress"'));
 
     // Test the "findNearestIntersection" service
     $query = array('lat' => 37.451, 'lng' => -122.18);

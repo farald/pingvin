@@ -259,3 +259,28 @@ function geonames_update_7000() {
   }
   variable_del('geonames_cache_table');
 }
+
+/**
+ * Simplify configuration relating to commercial web-services.
+ */
+function geonames_update_7001() {
+  // Now there are just explicit settings for the URL to use, whether
+  // to count credits, and which username to use. For the new servers
+  // at api.geonames.org username is *required*.
+
+  $commercial_active = variable_get('geonames_commercial_active', FALSE);
+  $server = $commercial_active ? variable_get('geonames_commercial_server', '') : GEONAMES_FREE_SERVER_URL;
+  $username = variable_get('geonames_commercial_username', '');
+  if ($username === '') {
+    $link = l('GeoNames settings', 'admin/config/geonames');
+    drupal_set_message('Geonames server username is not set. Please configure this at '. $link, 'warning');
+  }
+
+  variable_set('geonames_server', $server);
+  variable_set('geonames_count_credits', $commercial_active);
+  variable_set('geonames_username', $username);
+
+  variable_del('geonames_commercial_active');
+  variable_del('geonames_commercial_server');
+  variable_del('geonames_commercial_username');
+}

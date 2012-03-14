@@ -93,10 +93,6 @@ table.location-search-form-table tbody tr td table tbody tr td table tbody tr td
 .location .container-inline label { display: block; float: left; width: 120px; }
 */
 
-#edit-field-map-point .fieldset-wrapper {
-    min-height:430px;
-}
-
 .location-current-coordinates-fieldset {
   width: 35em;
 }

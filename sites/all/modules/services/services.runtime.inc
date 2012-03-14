@@ -144,26 +144,12 @@ function services_controller_execute($controller, $args = array(), $options = ar
 
   // Call default or custom access callback.
   if (call_user_func_array($controller['access callback'], $access_arguments) != TRUE) {
-    global $user;
     return services_error(t('Access denied for user @user', array(
       '@user' => isset($user->name) ? $user->name : 'anonymous',
     )), 401);
   }
 
-  // Change working directory to drupal root to call drupal function,
-  // then change it back to server module root to handle return.
-  $server_root = getcwd();
-  $drupal_path = services_get_server_info('drupal_path');
-  if (isset($drupal_path) && $drupal_path) {
-    chdir($drupal_path);
-  }
-
-  // Check if the arguments should be preprocessed.
-  if (!empty($controller['endpoint']['preprocess'])) {
-    foreach ($controller['endpoint']['preprocess'] as $callable) {
-      call_user_func_array($callable, array(&$args, $controller));
-    }
-  }
+  drupal_alter('services_request_preprocess', $controller, $args);
 
   // Log the arguments.
   if ($server_info->debug) {
@@ -173,12 +159,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   // Execute the controller callback.
   $result = call_user_func_array($controller['callback'], $args);
   
-  // Check if the result should be post-processed.
-  if (!empty($controller['endpoint']['postprocess'])) {
-    foreach ($controller['endpoint']['postprocess'] as $callable) {
-      $result = call_user_func_array($callable, array($args, $controller, $result));
-    }
-  }
+  drupal_alter('services_request_postprocess', $controller, $args, $result);
   
   if (drupal_save_session($user) === FALSE) {
     $user = $original_user;
@@ -260,10 +241,8 @@ function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$
 function services_resource_uri($path) {
   $endpoint_name = services_get_server_info('endpoint');
   $endpoint = services_endpoint_load($endpoint_name);
-  if (isset($endpoint) && !empty($endpoint)) {
-    if (is_array($endpoint->resources) && is_array($path) && isset($path[0]) && isset($endpoint->resources[$path[0]]['alias'])) {
-        $path[0] = $endpoint->resources[$path[0]]['alias'];
-    }
+  if (!empty($path[0]) && !empty($endpoint->resources[$path[0]]['alias'])) {
+    $path[0] = $endpoint->resources[$path[0]]['alias'];
   }
   $formatter = services_get_server_info('resource_uri_formatter');
   if ($formatter) {
@@ -370,4 +349,50 @@ function services_node_load($node, $fields = array()) {
   }
 
   return $val;
+}
+
+
+
+/**
+ * Extract arguments for a services method callback, preserving backwards compatibility with #1083242.
+ *
+ * @param array $data
+ *  original argument passed to a resource method callback
+ * @param string $field
+ *  name of the field where arguments should be checked for
+ * @return array
+ */
+
+// Adds backwards compatability with regression fixed in #1083242
+function _services_arg_value($data, $field) {
+  if (isset($data[$field]) && count($data) == 1 && is_array($data[$field])) {
+    return $data[$field];
+  }
+  return $data;
+}
+
+
+/**
+ * Extract arguments for a services method access callback, preserving backwards compatibility with #1083242.
+ *
+ * @param string $data
+ *  original argument passed to a resource method callback
+ * @param mixed $fields
+ *  name of the field(s) where arguments should be checked for, either as a string or as an array of strings
+ * @return array
+ */
+
+// Adds backwards compatability with regression fixed in #1083242
+function _services_access_value($data, $fields) {
+
+  if (!is_array($fields)) {
+    $fields = array($fields);
+  }
+
+  foreach ($fields as $field) {
+    if (is_array($data) && isset($data[$field]) && count($data) == 1) {
+      return $data[$field];
+    }
+  }
+  return $data;
 }

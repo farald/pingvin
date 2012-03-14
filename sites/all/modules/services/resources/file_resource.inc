@@ -50,8 +50,14 @@ function _file_resource_definition() {
             'type'         => 'int',
             'description'  => t('To return file contents or not.'),
             'source'       => array('param' => 'file_contents'),
-            'optional'     => FALSE,
             'default value' => TRUE,
+          ),
+          array(
+            'name'         => 'image_styles',
+            'type'         => 'int',
+            'description'  => t('To return image styles or not.'),
+            'source'       => array('param' => 'image_styles'),
+            'default value' => FALSE,
           ),
         ),
       ),
@@ -101,6 +107,14 @@ function _file_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_file_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access callback' => '_file_resource_access',
         'access arguments' => array('index'),
@@ -132,9 +146,7 @@ function _file_resource_create($file) {
   // Adds backwards compatability with regression fixed in #1083242
   // $file['file'] can be base64 encoded file so we check whether it is
   // file array or file data.
-  if (isset($file['file']) && is_array($file['file'])) {
-    $file = $file['file'];
-  }
+  $file = _services_arg_value($file, 'file');
 
   global $user;
   $file = (object) $file;
@@ -218,14 +230,32 @@ function _file_resource_create_raw() {
  *   Number. File ID
  * @param $include_file_contents
  *   Bool Whether or not to include the base64_encoded version of the file.
+ * @param $get_image_style
+ *   Bool Whether or not to provide image style paths.
  * @return
  *   The file
  */
-function _file_resource_retrieve($fid, $include_file_contents = TRUE) {
+function _file_resource_retrieve($fid, $include_file_contents, $get_image_style) {
   if ($file = file_load($fid)) {
     $filepath = $file->uri;
+
+    // Convert the uri to the external url path provided by the stream wrapper.
+    $file->uri_full = file_create_url($file->uri);
+
+    // Provide a path in the form sample/test.txt.
+    $file->target_uri = file_uri_target($file->uri);
+
     if ($include_file_contents) {
-      $file->file = base64_encode(file_get_contents($filepath));
+      $file->file = base64_encode(file_get_contents(drupal_realpath($filepath)));
+    }
+
+    $file->image_styles = array();
+    // Add image style information if available.
+    if ($get_image_style) {
+      foreach (image_styles() as $style) {
+        $style_name = $style['name'];
+        $file->image_styles[$style_name] = image_style_url($style_name, $file->uri);
+      }
     }
     return $file;
   }
@@ -262,18 +292,20 @@ function _file_resource_delete($fid) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be deleted.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of file objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _file_resource_index($page, $fields, $parameters) {
+function _file_resource_index($page, $fields, $parameters, $page_size) {
   $file_select = db_select('file_managed', 't')
     ->orderBy('timestamp', 'DESC');
 
-  services_resource_build_index_query($file_select, $page, $fields, $parameters);
+  services_resource_build_index_query($file_select, $page, $fields, $parameters, $page_size, 'file');
 
   $results = services_resource_execute_index_query($file_select);
 
@@ -286,10 +318,8 @@ function _file_resource_index($page, $fields, $parameters) {
  */
 function _file_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($args[0]) && is_array($args[0])) {
-    if (key_exists('file', $args[0]) && count($args[0]) == 1) {
-      $args[0] = $args[0]['file'];
-    }
+  if (isset($args[0])) {
+    $args[0] = _services_access_value($args[0], 'file'); 
   }
 
   global $user;

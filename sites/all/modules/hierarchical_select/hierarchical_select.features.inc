@@ -1,5 +1,4 @@
 <?php
-// $Id: hierarchical_select.features.inc,v 1.1.4.1 2011/02/06 18:37:17 wimleers Exp $
 
 /**
  * @file
@@ -48,7 +47,7 @@ function hierarchical_select_features_export_options() {
   $options = array();
   foreach ($info_items as $id => $item) {
     $config_id = $item['config_id'];
-    $options[$config_id] = $item['hierarchy type'] . ': ' . check_plain($item['hierarchy']) . ' - ' . $item['context type'] . (!empty($item['context']) ? ': ' . $item['context'] : '');
+    $options[$config_id] = $item['hierarchy type'] . ': ' . $item['hierarchy'] . ' - ' . $item['context type'] . (!empty($item['context']) ? ': ' . $item['context'] : '');
   }
 
   return $options;

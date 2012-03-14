@@ -10,7 +10,7 @@ class GeoNamesTestCase extends DrupalWebTestCase {
   /**
    * Implementation of getInfo().
    */
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('GeoNames'),
       'description' => t('Test basic functionality of GeoNames module - requires internet access.'),
@@ -21,16 +21,17 @@ class GeoNamesTestCase extends DrupalWebTestCase {
   /**
    * Implementation of setUp().
    */
-  function setUp() {
+  protected function setUp() {
     parent::setUp('geonames');
     variable_set('geonames_commercial_active', FALSE);
     variable_set('geonames_cache', FALSE);
+    variable_set('geonames_username', 'demo');
   }
 
   /**
    * Check geonames_query() with a simple search.
    */
-  function testGeoNamesQuery() {
+  protected function testGeoNamesQuery() {
     // Setup configuration for the tests.
     variable_set('geonames_cache', TRUE);
     variable_set('geonames_reveal_cache', TRUE);
@@ -81,7 +82,7 @@ class GeoNamesTestCase extends DrupalWebTestCase {
     // error_log(print_r($result3, TRUE));
   }
 
-  function testCacheSorting() {
+  protected function testCacheSorting() {
     variable_set('geonames_cache', TRUE);
     variable_set('geonames_reveal_cache', TRUE);
 
@@ -117,7 +118,7 @@ class GeoNamesTestCase extends DrupalWebTestCase {
    * Check that GeoNames loads country-info and feature-codes metadata from
    * Geonames, and returns it to local queries.
    */
-  function testMetaData() {
+  protected function testMetaData() {
     // Update the MetaData, and check it updated the last-updated value
     variable_set('geonames_metadata_updated', 0);
     geonames_metadata_update();
@@ -148,7 +149,7 @@ class GeoNamesTestCase extends DrupalWebTestCase {
     $this->assertEqual($info['name'], 'administrative division', 'Found ADMD:administrative division (featurecode)');
   }
 
-  function testHelperFunctions() {
+  protected function testHelperFunctions() {
     // Check Continent Codes
     $codes = geonames_continent_codes();
     $this->assertEqual(count($codes), 7, t('Seven continents found'));

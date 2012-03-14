@@ -128,13 +128,15 @@ function xmlrpctester_remote_call_form_submit($form, $form_values) {
   }
   else {
     $error = xmlrpc_error();
-    if ($error->is_error) {
-      drupal_set_message(t('Error: @error', array('@error' => $error->message)), 'error');
-      if (-32700 == $error->code) { // Parse error.
-        // Lets try to find out whats wrong.
-        $remote = drupal_http_request($server);
-        $remote_output = filter_xss($remote->data);
-        drupal_set_message($remote_output, 'error');
+    if (!is_null($error)) {
+      if (isset($error->is_error)) {
+        drupal_set_message(t('Error: @error', array('@error' => $error->message)), 'error');
+        if (-32700 == $error->code) { // Parse error.
+          // Lets try to find out whats wrong.
+          $remote = drupal_http_request($server);
+          $remote_output = filter_xss($remote->data);
+          drupal_set_message($remote_output, 'error');
+        }
       }
     }
     else {

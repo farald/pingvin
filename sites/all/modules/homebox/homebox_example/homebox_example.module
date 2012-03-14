@@ -1,5 +1,4 @@
 <?php
-// $Id: homebox_example.module,v 1.1.2.13.2.3 2011/02/15 14:26:31 brianV Exp $
 
 /**
  * Implements hook_homebox().

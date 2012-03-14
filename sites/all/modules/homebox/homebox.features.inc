@@ -1,5 +1,4 @@
 <?php
-// $Id: homebox.features.inc,v 1.1.2.7.2.1 2011/02/02 19:01:05 brianV Exp $
 
 /**
  * @file
@@ -42,7 +41,6 @@ function homebox_features_export_options() {
 function homebox_features_export($data, &$export, $module_name = '') {
   $pipe = array();
   $export['dependencies']['homebox'] = 'homebox';
-  $export['dependencies']['homebox'] = 'jquery_ui';
   foreach ($data as $name) {
     $export['features']['homebox'][$name] = $name;
   }

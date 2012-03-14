@@ -31,12 +31,11 @@ function services_views_services_resources() {
     'access arguments' => array('view'),
     'access arguments append' => TRUE,
     'args' => array(
-        array(
       'view_name' => array(
         'name' => 'view_name',
         'type' => 'string',
         'description' => 'The name of the view to get.',
-        'source' => array('path' => '0'),  
+        'source' => array('path' => '0'),
         'optional' => FALSE,
       ),
       'display_id' => array(
@@ -78,13 +77,13 @@ function services_views_services_resources() {
         'source' => array('param' => 'theme_output'),
         'optional' => TRUE,
         'default value' => FALSE,
-          ),
       ),
     ),
   );
 
   return $resources;
 }
+
 
 /**
  * Check the access permission to a given views.
@@ -97,7 +96,6 @@ function services_views_services_resources() {
  *  Boolean. TRUE if the user is allowed to load the given view.
  */
 function services_views_access($op = 'view', $args = array()) {
-    return true;
   switch ($op) {
     case 'view':
       $view = views_get_view($args['view_name']);

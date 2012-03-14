@@ -12,6 +12,7 @@
  * Compatible with the 2008 revision (imagecache 2)
  *
  * @author dan http://coders.co.nz
+ * @author sydneyshan http://enigmadigital.net.au
  */
 
 // During devel, caching is pointless. Flush it
@@ -29,7 +30,7 @@ module_load_include('inc', 'imagecache_coloractions', 'transparency');
 
 /**
  * hook_image_effect_info()
- * 
+ *
  * Return the descriptions for the supported actions.
  */
 function imagecache_coloractions_image_effect_info() {
@@ -41,6 +42,14 @@ function imagecache_coloractions_image_effect_info() {
     'effect callback' => 'coloractions_colorshift_image',
     'form callback' => 'coloractions_colorshift_form',
     'summary theme' => 'coloractions_colorshift_summary',
+  );
+
+  $effects['imagecache_coloroverlay'] = array(
+    'label' => t('Color Overlay'),
+    'help' => t('Apply a color tint to an image (retaining blacks and whites).'),
+    'effect callback' => 'coloractions_coloroverlay_image',
+    'form callback' => 'coloractions_coloroverlay_form',
+    'summary theme' => 'coloractions_coloroverlay_summary',
   );
 
   $effects['coloractions_brightness'] = array(
@@ -83,6 +92,9 @@ function imagecache_coloractions_image_effect_info() {
 function imagecache_coloractions_theme() {
   return array(
     'coloractions_colorshift_summary' => array(
+      'variables' => array('data' => NULL),
+    ),
+    'coloractions_coloroverlay_summary' => array(
       'variables' => array('data' => NULL),
     ),
     'coloractions_alpha_summary' => array(
@@ -167,9 +179,111 @@ function image_gd_colorshift($image, $data = array()) {
  */
 function image_imagemagick_colorshift($image, $data = array()) {
   $RGB = $data['RGB'];
-  $image->ops[] = "-fill rgb\\({$RGB['red']},{$RGB['green']},{$RGB['blue']}\\) -colorize 50\\%";
+  $image->ops[] = "-fill rgb" . escapeshellcmd('(') . "{$RGB['red']},{$RGB['green']},{$RGB['blue']}" . escapeshellcmd(')') . " -colorize 50" . escapeshellcmd('%');
   return TRUE;
 }
+
+
+/**
+ * Implementation of imagecache_hook_form()
+ *
+ * Settings for coloroverlay actions.
+ *
+ * @param $action array of settings for this action
+ * @return a form definition
+ */
+function coloractions_coloroverlay_form($action) {
+  $defaults = array(
+    'RGB' => array(
+      'HEX' => '#E2DB6A',
+    ),
+  );
+  $action = array_merge($defaults, (array) $action);
+  $form = array('#theme' => 'imagecache_rgb_form');
+  $form['RGB'] = imagecache_rgb_form($action['RGB']);
+  $form['note'] = array('#value' => t("<p>
+    Note that color overlay is a mathematical filter that doesn't always
+    have the expected result.
+    To shift an image precisely TO a target color,
+    desaturate (greyscale) it before colorizing.
+    The hue (color wheel) is the <em>direction</em> the
+    existing colors are shifted. The tone (inner box) is the amount.
+    Keep the tone half-way up the left site of the color box
+    for best results.
+    </p>"));
+  return $form;
+}
+
+
+/**
+ * Implementation of theme_hook() for imagecache_ui.module
+ */
+function theme_coloractions_coloroverlay_summary($variables) {
+  return theme_imagecacheactions_rgb($variables['data']);
+}
+
+
+/**
+ * Implementation of hook_image()
+ *
+ * Process the imagecache action on the passed image
+ *
+ * Just converts and passes the vals to the all-purpose 'filter' action
+ */
+function coloractions_coloroverlay_image($image, $data = array()) {
+  // convert color from hex (as it is stored in the UI)
+  if ($data['RGB']['HEX'] && $deduced = imagecache_actions_hex2rgba($data['RGB']['HEX'])) {
+    $data['RGB'] = array_merge($data['RGB'], $deduced);
+  }
+  return image_toolkit_invoke('coloroverlay', $image, array($data));
+}
+
+/**
+ * Implementation of hook_{toolkit}_{effect}()
+ */
+function image_gd_coloroverlay($image, $data = array()) {
+  $RGB = $data['RGB'];
+
+  $w = $image->info['width'];
+  $h = $image->info['height'];
+
+  for($y=0;$y<$h;$y++) {
+    for($x=0;$x<$w;$x++) {
+      $rgb = imagecolorat($image->resource, $x, $y);
+      $source = imagecolorsforindex($image->resource, $rgb);
+
+      if($source['red'] <= 128){
+        $final_r = (2 * $source['red'] * $RGB['red'])/256;
+      }else{
+        $final_r = 255 - (((255 - (2 * ($source['red'] - 128))) * (255 - $RGB['red']))/256);
+      }
+      if($source['green'] <= 128){
+        $final_g = (2 * $source['green'] * $RGB['green'])/256;
+      }else{
+        $final_g = 255 - (((255 - (2 * ($source['green'] - 128))) * (255 - $RGB['green']))/256);
+      }
+      if($source['blue'] <= 128){
+        $final_b = (2 * $source['blue'] * $RGB['blue'])/256;
+      }else{
+        $final_b = 255 - (((255 - (2 * ($source['blue'] - 128))) * (255 - $RGB['blue']))/256);
+      }
+      $final_colour = imagecolorallocatealpha($image->resource, $final_r, $final_g, $final_b, $source['alpha']);
+      imagesetpixel($image->resource, $x, $y, $final_colour);
+    }
+  }
+
+  return TRUE;
+}
+
+/**
+ * Implementation of hook_{toolkit}_{effect}()
+ */
+function image_imagemagick_coloroverlay($image, $data = array()) {
+  $RGB = $data['RGB'];
+  $image->ops[] = escapeshellcmd('(') . " +clone +matte -fill rgb" . escapeshellcmd('(') . "{$RGB['red']},{$RGB['green']},{$RGB['blue']}" . escapeshellcmd(')') . " -colorize 100" . escapeshellcmd('%') . " +clone +swap -compose overlay -composite " . escapeshellcmd(')') . " -compose SrcIn -composite";
+  return TRUE;
+}
+
 
 /**
  * Implementation of imagecache_hook_form()
@@ -316,9 +430,9 @@ function theme_coloractions_convert_summary($variables) {
     '@format' => $formats[$data['format']],
     '@quality' => $data['quality']
     ));
-  } 
-  else { 
-    return t("Convert to") .": ". $formats[$data['format']]; 
+  }
+  else {
+    return t("Convert to") .": ". $formats[$data['format']];
   }
 }
 
@@ -347,12 +461,29 @@ function image_gd_convert_image($image, $data = array()) {
 }
 
 /**
- * Implementation of hook_{toolkit}_{effect}()
+ * Implements hook_{toolkit}_{effect}().
  *
+ * Converting the image format with imagemagick is done by prepending the output
+ * format to the target file separated by a colon (:).
+ * Hook_imagemagick_arguments_alter, see below, allows to move this operation to
+ * destination part of the imagemagick command that will be constructed.
  */
 function image_imagemagick_convert_image($image, $data = array()) {
-  $image->ops[] = "{$image->info['extension']}:";
+  $image->ops['output_format'] = $image->info['extension'];
   return TRUE;
+}
+
+/**
+ * Implements hook_imagemagick_arguments_alter.
+ *
+ * This hook moves a change in output format from the args (action list) to the
+ * destination format setting within the context.
+ */
+function imagecache_coloractions_imagemagick_arguments_alter(&$args, &$context) {
+  if (array_key_exists('output_format', $args)) {
+    $context['destination_format'] = $args['output_format'];
+    unset($args['output_format']);
+  }
 }
 
 /**

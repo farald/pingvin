@@ -50,7 +50,7 @@ function drupalforfirebug_preprocess_node_process($node, $op) {
   if (isset($node->nid)) {
     $nid = $node->nid;
   } else { 
-    $nid = '*NEW*';
+    $nid = '*'.t('NEW').'*';
   }
   if ($node->created) { // only save information about real nodes
     $node_clone = clone($node);

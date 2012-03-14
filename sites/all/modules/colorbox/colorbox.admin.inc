@@ -1,5 +1,4 @@
 <?php
-// $Id: colorbox.admin.inc,v 1.17.2.5 2011/01/14 15:14:37 frjo Exp $
 
 /**
  * @file
@@ -12,21 +11,30 @@
 function colorbox_admin_settings() {
   drupal_add_js(drupal_get_path('module', 'colorbox') . '/js/colorbox_admin_settings.js', array('preprocess' => FALSE));
 
-  $colorbox_path = variable_get('colorbox_path', COLORBOX_PATH);
+  $colorbox_path = colorbox_get_path();
 
-  if (module_exists('image')) {
-    $form['colorbox_imagefield'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Image field options (CCK)')
-    );
-    $form['colorbox_imagefield']['colorbox_imagefield_gallery'] = array(
-      '#type' => 'radios',
-      '#title' => t('Image field gallery'),
-      '#default_value' => variable_get('colorbox_imagefield_gallery', 1),
-      '#options' => array(0 => t('Per page gallery'), 1 => t('Per post gallery'), 2 => t('Per field gallery'), 3 => t('No gallery')),
-      '#description' => t('Should the gallery be images within a single field, a single post (default) or all images on the page. The last option disables galleries.'),
-    );
-  }
+  $form['colorbox_plugin_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Colorbox plugin settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE
+  );
+  $form['colorbox_plugin_settings']['colorbox_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path'),
+    '#default_value' => $colorbox_path,
+    '#description' => t('The location where Colorbox plugin is installed. Relative paths are from the Drupal root directory.'),
+    '#after_build' => array('_colorbox_admin_settings_check_plugin_path'),
+  );
+  $form['colorbox_plugin_settings']['colorbox_compression_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Choose Colorbox compression level'),
+    '#options' => array(
+      'min' => t('Production (Minified)'),
+      'none' => t('Development (Uncompressed Code)'),
+    ),
+    '#default_value' => variable_get('colorbox_compression_type', 'min'),
+  );
 
   if (module_exists('image_old')) {
     $form['colorbox_image_module'] = array(
@@ -87,12 +95,13 @@ function colorbox_admin_settings() {
     '#default_value' => variable_get('colorbox_login', 0),
     '#description' => t('Automatically activate Colorbox for links to user/login.'),
   );
-  $form['colorbox_login_settings']['colorbox_login_form'] = array(
-    '#type' => 'select',
-    '#title' => t('Login form to use'),
-    '#options' => array('user_login' => t('User login'), 'user_login_block' => t('User login block')),
-    '#default_value' => variable_get('colorbox_login_form', 'user_login'),
-    '#description' => t('Select which form to use for login.'),
+  $form['colorbox_login_settings']['colorbox_login_links'] = array(
+    '#type' => 'radios',
+    '#title' => t('Display links'),
+    '#options' => array(0 => t('No links'), 1 => t('Show links'), 2 => t('Show links and open them in a Colorbox')),
+    '#default_value' => variable_get('colorbox_login_links', 0),
+    '#description' => t('Display the "Create new account" (if allowed) and "Request new password" links below the login form.'),
+    '#after_build' => array('_colorbox_admin_settings_login_links_load'),
     '#states' => array(
       'visible' => array(
         ':input[name="colorbox_login"]' => array('checked' => TRUE),
@@ -108,7 +117,7 @@ function colorbox_admin_settings() {
     '#type' => 'checkbox',
     '#title' => t('Enable Colorbox load'),
     '#default_value' => variable_get('colorbox_load', 0),
-    '#description' => t('This enables custom links that can open forms and paths in a Colorbox. Add the class "colorbox-load" to the link and build the url like this for forms "/colorbox/form/[form_id]?width=500&height=500" and like this for paths "[path]?width=500&height=500&iframe=true". If you do not want the box to persist set iframe to false. Other modules may activate this for easy Colorbox integration.'),
+    '#description' => t('This enables custom links that can open forms and paths in a Colorbox. Add the class "colorbox-load" to the link and build the url like this for forms "/colorbox/form/[form_id]?destination=some_path&width=500&height=500" and like this for paths "[path]?width=500&height=500&iframe=true" or "[path]?width=500&height=500" if you don\'t want an iframe. Other modules may activate this for easy Colorbox integration.'),
   );
   $form['colorbox_extra_settings']['colorbox_inline'] = array(
     '#type' => 'checkbox',
@@ -171,7 +180,7 @@ function colorbox_admin_settings() {
     '#type' => 'select',
     '#title' => t('Opacity'),
     '#options' => drupal_map_assoc(array('0', '0.10', '0.15', '0.20', '0.25', '0.30', '0.35', '0.40', '0.45', '0.50', '0.55', '0.60', '0.65', '0.70', '0.75', '0.80', '0.85', '0.90', '0.95', '1')),
-    '#default_value' => variable_get('colorbox_opacity', '0.90'),
+    '#default_value' => variable_get('colorbox_opacity', '0.85'),
     '#description' => t('The overlay opacity level. Range: 0 to 1.'),
   );
   $form['colorbox_custom_settings']['colorbox_text_current'] = array(
@@ -221,6 +230,26 @@ function colorbox_admin_settings() {
     '#default_value' => variable_get('colorbox_maxheight', '100%'),
     '#size' => 30,
     '#description' => t('Set a maximum height for loaded content. Example: "100%", 500, "500px".'),
+  );
+  $form['colorbox_custom_settings']['colorbox_initialwidth'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Initial width'),
+    '#default_value' => variable_get('colorbox_initialwidth', '300'),
+    '#size' => 30,
+    '#description' => t('Set the initial width, prior to any content being loaded. Example: "100%", 500, "500px".'),
+  );
+  $form['colorbox_custom_settings']['colorbox_initialheight'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Initial height'),
+    '#default_value' => variable_get('colorbox_initialheight', '100'),
+    '#size' => 30,
+    '#description' => t('Set the initial height, prior to any content being loaded. Example: "100%", 500, "500px".'),
+  );
+  $form['colorbox_custom_settings']['colorbox_fixed'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Fixed'),
+    '#default_value' => variable_get('colorbox_fixed', 1),
+    '#description' => t('If the ColorBox should be displayed in a fixed position within the visitor\'s viewport or relative to the document.'),
   );
 
   $form['colorbox_custom_settings']['colorbox_slideshow_settings'] = array(
@@ -286,38 +315,23 @@ function colorbox_admin_settings() {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE
   );
-  $form['colorbox_advanced_settings']['colorbox_title_trim'] = array(
+  $form['colorbox_advanced_settings']['colorbox_caption_trim'] = array(
     '#type' => 'radios',
-    '#title' => t('Title shortening'),
+    '#title' => t('Caption shortening'),
     '#options' => array(0 => t('Default'), 1 => t('Yes')),
-    '#default_value' => variable_get('colorbox_title_trim', 0),
-    '#description' => t('If the title should be made shorter in the Colorbox to avoid layout problems. The default is to shorten for the example styles, they need it, but not for other styles.'),
-    '#prefix' => '<div class="colorbox-title-trim-settings-activate">',
-    '#suffix' => '</div>',
+    '#default_value' => variable_get('colorbox_caption_trim', 0),
+    '#description' => t('If the caption should be made shorter in the Colorbox to avoid layout problems. The default is to shorten for the example styles, they need it, but not for other styles.'),
   );
-  $js_hide = variable_get('colorbox_title_trim', 0) ? '' : ' js-hide';
-  $form['colorbox_advanced_settings']['colorbox_title_trim_length'] = array(
+  $form['colorbox_advanced_settings']['colorbox_caption_trim_length'] = array(
     '#type' => 'select',
-    '#title' => t('Title max length'),
+    '#title' => t('Caption max length'),
     '#options' => drupal_map_assoc(array(40, 45, 50, 55, 60, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120)),
-    '#default_value' => variable_get('colorbox_title_trim_length', 75),
-    '#prefix' => '<div class="colorbox-title-trim-settings' . $js_hide . '">',
-    '#suffix' => '</div>',
-  );
-  $form['colorbox_advanced_settings']['colorbox_path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Path to Colorbox'),
-    '#default_value' => $colorbox_path,
-    '#description' => t('Enter the path relative to Drupal root where the Colorbox plugin directory is located. NO trailing slash!'),
-  );
-  $form['colorbox_advanced_settings']['colorbox_compression_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Choose Colorbox compression level'),
-    '#options' => array(
-      'min' => t('Production (Minified)'),
-      'none' => t('Development (Uncompressed Code)'),
+    '#default_value' => variable_get('colorbox_caption_trim_length', 75),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="colorbox_caption_trim"]' => array('value' => '1'),
+      ),
     ),
-    '#default_value' => variable_get('colorbox_compression_type', 'min'),
   );
   $form['colorbox_advanced_settings']['colorbox_pages'] = array(
     '#type' => 'textarea',
@@ -329,3 +343,31 @@ function colorbox_admin_settings() {
   return system_settings_form($form);
 }
 
+/**
+ * Checks if the directory in $form_element exists and contains a file named
+ * 'jquery.colorbox.js'. If validation fails, the form element is flagged
+ * with an error from within the file_check_directory function.
+ *
+ * @param $form_element
+ *   The form element containing the name of the directory to check.
+ */
+function _colorbox_admin_settings_check_plugin_path($form_element) {
+  $library_path = $form_element['#value'];
+  if (!is_dir($library_path) || !(file_exists($library_path . '/colorbox/jquery.colorbox.js') && file_exists($library_path . '/colorbox/jquery.colorbox-min.js'))) {
+    form_set_error($form_element['#parents'][0], t('You need to download the !colorbox and extract the entire contents of the archive into the %path folder of your server.', array('!colorbox' => l(t('Colorbox plugin'), 'http://colorpowered.com/colorbox/'), '%path' => $library_path)));
+  }
+
+  return $form_element;
+}
+
+/**
+ * Enable the Colorbox load feature of the login links are set to open in a Colorbox.
+ */
+function _colorbox_admin_settings_login_links_load($form_element) {
+  $login_links = $form_element['#value'];
+  if ($login_links == 2) {
+    variable_set('colorbox_load', 1);
+  }
+
+  return $form_element;
+}

@@ -10,10 +10,12 @@ Drupal.behaviors.views_nivo_sliderBehavior = {
       // Fix sizes
       vns.data('hmax', 0).data('wmax', 0);
       $('img', vns).each(function () {
-        hmax =  (vns.data('hmax') > $(this).height()) ? vns.data('hmax') : $(this).height();
-        wmax =  (vns.data('wmax') > $(this).width()) ? vns.data('wmax') : $(this).width();
+        $(this).load(function() {
+          hmax =  (vns.data('hmax') > $(this).height()) ? vns.data('hmax') : $(this).height();
+          wmax =  (vns.data('wmax') > $(this).width()) ? vns.data('wmax') : $(this).width();
 
-        vns.width(wmax).height(hmax).data('hmax', hmax).data('wmax', wmax);
+          vns.width(wmax).height(hmax).data('hmax', hmax).data('wmax', wmax);
+        });
       });
 
       vns.nivoSlider(cfg);

@@ -1,13 +1,31 @@
-// $Id: CHANGELOG.txt,v 1.2.2.6.2.19 2011/02/17 13:47:45 brianV Exp $
 
 CHANGELOG for Homebox for Drupal
 
 7.x-2.x-dev xxxx/xx/xx
 
+
+7.x-2.x-beta6 2011/10/05
+  - Fix another bad syntax error.
+
+7.x-2.x-beta5 2011/10/05
+  - #1296902 by EvanDonovan: Fixed Homebox user profile path should be admin/people/homebox, not admin/user/homebox.
+  - #1295292 by theullrich: Fixed Getting  BLOCK_CACHE_PER_PAGE error.
+  - #1294790 by mongolito404: Added Homebox should uses hook_block_view_alter() and hook_block_view_MODULE_DELTA_alter() implementations.
+  - Fix syntax error.
+
+7.x-2.x-beta4 2011/10/04
+  - #946206 by rv0 | flecus: Fixed Changed the color of the block is not saved.
+  - #1107020 by heyrocker, alakon: Fixed 'User profile Homebox' link does not belong in floating primary admin menu.
+  - #1152692 by heyrocker: Fixed Custom edit forms do not work.
+  - #1202592 by setvik, slashrsm: Fixed Features export: jquery_ui() is not depencency anymore in D7.
+  - Fix XSS vulnerability in homebox_og.
+  - #1289338 filter on output, validate on input.
+
 7.x-2.x-beta3 2011/02/17
   - by brianV: Remove unneeded hook_update_n() implementations for D5-D6 update.
   - by brianV: Fix autosave.
-  - by drumm: Fix equalizeColumnHeight() JS function, which fixes the block landing zones.
+  - #1063928 by drumm: Fix equalizeColumnHeight() JS function, which fixes the block landing zones.
+  - by brianV: revert #1063928 to remove 100% width columns from the maximum-height check.
 
 7.x-2.0-beta2 2011/02/15
   - by brianV: update arguments to og_is_group_type() in homebox_og.module.

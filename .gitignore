@@ -4,4 +4,6 @@ sites/*/settings*.php
 # Ignore paths that contain user-generated content.
 sites/*/files
 sites/*/private
-sites/*/private-files
+
+# Ignore backups dir on server
+sites/default/private-files/backup_migrate/scheduled

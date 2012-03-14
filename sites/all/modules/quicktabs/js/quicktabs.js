@@ -68,7 +68,7 @@ Drupal.quicktabs.clickHandler = function(event) {
           qtAjaxPath +=  tab.tabObj.nid + '/' + tab.tabObj.teaser + '/' + tab.tabObj.hide_title;
           break;
         case 'block':
-          qtAjaxPath +=  tab.tabObj.bid + '/' + tab.tabObj.hide_title;
+          qtAjaxPath +=  tab.name + '/' + tab.tabObj.bid + '/' + tab.tabObj.hide_title;
           break;
         case 'qtabs':
           qtAjaxPath +=  tab.tabObj.machine_name;

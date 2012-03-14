@@ -9,9 +9,9 @@ files[] = views_nivo_slider_plugin_row_nivo_sliderfields.inc
 files[] = views_nivo_slider_style_plugin.inc
 
 
-; Information added by drupal.org packaging script on 2011-08-04
+; Information added by drupal.org packaging script on 2011-11-12
 version = "7.x-2.x-dev"
 core = "7.x"
 project = "views_nivo_slider"
-datestamp = "1312461334"
+datestamp = "1321102057"
 

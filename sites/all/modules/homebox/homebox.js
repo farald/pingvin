@@ -1,4 +1,3 @@
-// $Id: homebox.js,v 1.1.4.49.2.3 2011/02/17 13:41:45 brianV Exp $
 (function ($) {
   Drupal.homebox = {
     config: {}
@@ -84,9 +83,15 @@
   Drupal.homebox.equalizeColumnsHeights = function () {
     var maxHeight = 0;
     Drupal.homebox.$columns.each(function () {
-      $(this).height('auto');
-      maxHeight = Math.max($(this).height(), maxHeight);
-    }).height(maxHeight);
+      if ($(this).parent('.homebox-column-wrapper').attr('style').match(/width: 100%/i) == null) {
+        $(this).height('auto');
+        maxHeight = Math.max($(this).height(), maxHeight);
+      }
+    }).each(function () {
+      if ($(this).parent('.homebox-column-wrapper').attr('style').match(/width: 100%/i) == null) {
+        $(this).height(maxHeight);
+      }
+    });
   };
 
   Drupal.homebox.maximizeBox = function (icon) {
@@ -153,6 +158,20 @@
     else {
       $('#homebox-changes-made').show();
     }
+  };
+
+  Drupal.homebox.hexColor = function (rgb) {
+    // Handle hex strings like: #CCCCCC, #CCC, CCCCCC, CCC
+    hexval = rgb.match(/^(#)?(\w{3})(\w{2})?$/);
+    if (hexval) {
+      return (!hexval[1] ? "#" + hexval[0] : hexval[0]);
+    }
+
+    rgb = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+))?\)$/);
+    function hex(x) {
+        return ("0" + parseInt(x).toString(16)).slice(-2);
+    }
+    return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
   };
 
   Drupal.behaviors.homeboxPortlet = {
@@ -238,6 +257,7 @@
         // Add click behaviour to color buttons
         $portlet.find('.homebox-color-selector').click(function () {
           var color = $(this).css('background-color');
+          color = Drupal.homebox.hexColor(color);
 
           $.each($portlet.attr('class').split(' '), function (key, value) {
             if (value.indexOf('homebox-color-') === 0) {

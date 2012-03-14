@@ -39,6 +39,7 @@ function quicktabs_schema() {
       'hide_empty_tabs' => array(
         'description' => 'Whether this tabset hides empty tabs.',
         'type' => 'int',
+        'size' => 'tiny',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
@@ -47,7 +48,6 @@ function quicktabs_schema() {
         'description' => 'Default tab.',
         'type' => 'int',
         'unsigned' => TRUE,
-        'size' => 'tiny',
         'not null' => TRUE,
         'default' => 0,
       ),
@@ -127,4 +127,30 @@ function quicktabs_update_7200() {
   }
 
   return implode('<br />', $output);
+}
+
+/**
+ * Remove size 'tiny' from "default_tab" field as this results in ctools exportables
+ * designating it as a boolean value. Add size 'tiny' to "hide_empty_tabs" field as
+ * this ought to be designated as a boolean value.
+ */
+function quicktabs_update_7201() {
+  $default_tab_field = array(
+    'description' => 'Default tab.',
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_change_field('quicktabs', 'default_tab', 'default_tab', $default_tab_field);
+  
+  $hide_empty_tabs_field = array(
+    'description' => 'Whether this tabset hides empty tabs.',
+    'type' => 'int',
+    'size' => 'tiny',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_change_field('quicktabs', 'hide_empty_tabs', 'hide_empty_tabs', $hide_empty_tabs_field);
 }

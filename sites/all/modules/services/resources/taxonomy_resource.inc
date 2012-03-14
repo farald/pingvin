@@ -104,6 +104,14 @@ function _taxonomy_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_taxonomy_term_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access arguments' => array('access content'),
       ),
@@ -241,6 +249,14 @@ function _taxonomy_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_taxonomy_vocabulary_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access arguments' => array('access content'),
       ),
@@ -307,9 +323,7 @@ function _taxonomy_term_resource_retrieve($tid) {
  */
 function _taxonomy_term_resource_create($term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   $term = (object)$term;
   return taxonomy_term_save($term);
@@ -329,9 +343,7 @@ function _taxonomy_term_resource_create($term) {
  */
 function _taxonomy_term_resource_update($tid, $term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   $term = (object) $term;
   $term->tid = $tid;
@@ -398,9 +410,7 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($vocabulary['vocabulary'])) {
-    $vocabulary = $vocabulary['vocabulary'];
-  }
+  $vocabulary = _services_arg_value($vocabulary, 'vocabulary');
 
   $vocabulary = (object) $vocabulary;
   return taxonomy_vocabulary_save($vocabulary);
@@ -420,9 +430,7 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($vocabulary['vocabulary'])) {
-    $vocabulary = $vocabulary['vocabulary'];
-  }
+  $vocabulary = _services_arg_value($vocabulary, 'vocabulary');
 
   $vocabulary = (object) $vocabulary;
   $vocabulary->vid = $vid;
@@ -493,13 +501,11 @@ function taxonomy_service_select_nodes($tid = '', $pager, $limit,  $order) {
  */
 function _taxonomy_resource_update_access($tid, $term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
   
   $term = (object) $term;
   if (!isset($term->vid)) {
-    throw new ServicesArgumentException(t('Term object needs vid property.'), 'term', 0);
+    return services_error(t('Term object needs vid property.'), 406);
   }
   return user_access('edit terms in ' . $term->vid) || user_access('administer taxonomy');
 }
@@ -514,9 +520,7 @@ function _taxonomy_resource_update_access($tid, $term) {
  */
 function _taxonomy_resource_create_access($term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   $term = (object) $term;
   return user_access('edit terms in ' . $term->vid) || user_access('administer taxonomy');
@@ -533,7 +537,7 @@ function _taxonomy_resource_create_access($term) {
 function _taxonomy_resource_delete_access($tid) {
   $term = taxonomy_term_load($tid);
   if (!$term) {
-    throw new ServicesArgumentException(t('There is no term with id %tid', array('%tid' => $tid)), 'tid', 0);
+    return services_error(t('There is no term with id @tid.', array('@tid' => $tid)), 406);
   }
   return user_access('delete terms in ' . $term->vid) || user_access('administer taxonomy');
 }
@@ -553,20 +557,22 @@ function _taxonomy_resource_delete_access($tid) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be returned.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of term objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_term_resource_index($page, $fields, $parameters) {
+function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size) {
   $taxonomy_select = db_select('taxonomy_term_data', 't')
     ->orderBy('vid', 'DESC')
     ->orderBy('weight', 'DESC')
     ->orderBy('name', 'DESC');
 
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters);
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_term');
 
   $results = services_resource_execute_index_query($taxonomy_select);
 
@@ -588,8 +594,10 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be returned.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of vocabulary objects.
  *
@@ -598,12 +606,12 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_vocabulary_resource_index($page, $fields, $parameters) {
+function _taxonomy_vocabulary_resource_index($page, $fields, $parameters, $page_size) {
   $taxonomy_select = db_select('taxonomy_vocabulary', 't')
     ->orderBy('weight', 'DESC')
     ->orderBy('name', 'DESC');
 
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters);
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_vocabulary');
 
   $results = $taxonomy_select->execute();
 

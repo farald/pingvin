@@ -265,8 +265,8 @@ function location_latlon_rough($location = array()) {
   location_load_country($location['country']);
 
   $latlon_function = 'location_latlon_rough_'. $location['country'];
-  if (function_exists($latlon_function)) {
-    return $latlon_function($location);
+  if (function_exists($latlon_function) && $result = $latlon_function($location)) {
+    return $result;
   }
   else {
     return location_latlon_rough_default($location);
@@ -659,12 +659,21 @@ function location_get_general_geocoder_list() {
  * ISO 3166-1 alpha-2
  */
 function location_get_iso3166_list($upper = FALSE) {
-  include_once DRUPAL_ROOT .'/includes/locale.inc';
+  include_once DRUPAL_ROOT . '/includes/locale.inc';
 
-  $countries = country_get_list();
+  // Statically cache a version of the core Drupal list of countries
+  // with lower case country codes for use by this module.
+  $countries = &drupal_static(__FUNCTION__);
 
-  if (empty($upper)) {
-    return array_change_key_case($countries, CASE_LOWER);
+  if ($upper) {
+    // Drupal core stores ISO 3166-1 alpha2 codes in upper case, as
+    // per the ISO standard.
+    return country_get_list();
+  }
+  elseif (!isset($countries)) {
+    // Location module uses lower-case ISO 3166-1 alpha2 codes, so we need
+    // to convert.
+    $countries = array_change_key_case(country_get_list(), CASE_LOWER);
   }
   return $countries;
 }

@@ -49,7 +49,7 @@ function entity_token_token_info_alter(&$info) {
     foreach (entity_get_all_property_info($type) as $name => $property) {
       $name = str_replace('_', '-', $name);
 
-      if (!isset($info['tokens'][$token_type][$name]) && (!isset($property['type']) || in_array($property['type'], $valid_types))) {
+      if (!isset($info['tokens'][$token_type][$name]) && (!isset($property['type']) || in_array($property['type'], $valid_types)) && (!isset($property['entity token']) || $property['entity token'])) {
         $info['tokens'][$token_type][$name] = array(
           'name' => $property['label'],
           'type' => isset($property['type']) ? array_search($property['type'], $valid_types) : 'text',
@@ -133,20 +133,15 @@ function _entity_token_get_token($wrapper, $options) {
   }
   $langcode = isset($options['language']) ? $options['language']->language : NULL;
 
-  // If there are options use them to format the token.
-  if ($options_list = $wrapper->optionsList()) {
-    // Flatten the options array.
-    foreach ($options_list as $entry) {
-      if (is_array($entry)) {
-        $options_list += $entry;
-      }
-    }
-    return empty($options['sanitize']) ? $options_list[$wrapper->value()] : filter_xss($options_list[$wrapper->value()]);
+  // If there is a label for a property, e.g. defined by an options list or an
+  // entity label, make use of it.
+  if ($label = $wrapper->label()) {
+    return empty($options['sanitize']) ? $label : check_plain($label);
   }
 
   switch ($wrapper->type()) {
     case 'integer':
-      return number_format($wrapper->value());
+      return $wrapper->value();
     case 'decimal':
       return number_format($wrapper->value(), 2);
     case 'date':

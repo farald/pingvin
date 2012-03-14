@@ -1,5 +1,4 @@
 <?php
-// $Id: homebox.api.php,v 1.1.2.1.2.1 2011/02/02 19:01:05 brianV Exp $
 
 /**
  * @file

@@ -13,16 +13,18 @@ function drupalforfirebug_init() {
 function drupalforfirebug_exit() {
   $dff = TRUE;
 
-  // Try not to break non html pages. [from devel.module]
-  if (function_exists('drupal_get_headers')) {
-    $headers = drupal_get_headers();
-    $formats = array('xml', 'javascript', 'json', 'plain', 'image', 'application', 'csv', 'x-comma-separated-values');
-    foreach ($formats as $format) {
-      if (strstr($headers, $format)) {
-        $dff = FALSE;
+  // Try not to break non html pages. [from new devel.module]                     
+  if (function_exists('drupal_get_http_header')) {
+      $header = drupal_get_http_header('content-type');
+      if ($header) {
+        $formats = array('xml', 'javascript', 'json', 'plain', 'image', 'application', 'csv', 'x-comma-separated-values');
+        foreach ($formats as $format) {
+          if (strstr($header, $format)) {
+            $dff = FALSE;
+          }
+        }
       }
-    }
-                      }
+    }                    
 
   // Check with Devel if Installed
   if (module_exists('devel')) {
@@ -36,6 +38,10 @@ function drupalforfirebug_exit() {
     // Load Relevant Files and Register Shutdown
     drupal_load('module', 'user');
     register_shutdown_function('drupalforfirebug_shutdown');
+
+    // Load the SQL Query Information
+    global $queries;
+    $queries = Database::getLog('devel', 'default');
   }
 }
 
@@ -210,15 +216,17 @@ function drupalforfirebug_get_sql_log() {
   if (!module_exists('devel')) {
     $output .= '<legend>' . t('Devel Module is Not Installed') . '</legend>';
     $output .= t('Please install and enable the Devel Module to display the SQL queries.');
-  } elseif (!variable_get('dev_query', 0)) {
+  } elseif (!variable_get('devel_query_display', 0)) {
     $output .= '<legend>' . t('Query Logging is Not Enabled') . '</legend>';
-    $output .= t('Please enable "Collect query info" in the Devel Module Settings (admin/settings/devel) to use this feature.');
+    $output .= t('Please enable "Display query info" in the Devel Module Settings (devel/settings) to use this feature.');
   } else {
-    global $queries;
-    list($counts, $query_summary) = devel_query_summary();
-    $output .= '<legend>' . t('SQL Query Log') . '</legend>';
-    $output .= $query_summary;
-    $output .= drupalforfirebug_devel_query_table($queries, $counts);
+    if (function_exists('theme_get_registry') && theme_get_registry()) {
+      global $queries;
+      list($counts, $query_summary) = devel_query_summary($queries);
+      $output .= '<legend>' . t('SQL Query Log') . '</legend>';
+      $output .= $query_summary;
+      $output .= drupalforfirebug_devel_query_table($queries, $counts);
+    }
   }
   $output .= '</fieldset>'; 
   return $output;
@@ -505,10 +513,10 @@ function drupalforfirebug_array_compare_code($a, $b, $c = array(), $history = ar
       }
 
       // Set the Proper Element
-      if (isset($b[$bkeys[$x]]) && is_array($b[$bkeys[$x]])) { // is b a valid array
-        $aval = &$a[$bkeys[$x]];
-        $bval = &$b[$bkeys[$x]];
-        $cval = &$c[$bkeys[$x]];
+      $aval = &$a[$bkeys[$x]];
+      $bval = &$b[$bkeys[$x]];
+      $cval = &$c[$bkeys[$x]];
+      if (isset($bval) && is_array($bval) && isset($aval) && isset($cval)) { // is b a valid array
         $c[$bkeys[$x]] = drupalforfirebug_array_compare_code($aval, $bval, $cval);
       }
     }
@@ -585,35 +593,38 @@ function drupalforfirebug_field_object($marker, $id, $op = NULL, $data) {
 * This is done to work with the Firefox extension which has a harder time loading CSS
 */
 function drupalforfirebug_devel_query_table($queries, $counts) {
+  $version = devel_get_core_version(VERSION);
   $header = array ('ms', '#', 'where', 'query');
   $i = 0;
+  $api = variable_get('devel_api_url', 'api.drupal.org');
   foreach ($queries as $query) {
-    $ar = explode("\n", $query[0]);
-    $function=array_shift($ar);
-    $count = isset($counts[$query[0]]) ? $counts[$query[0]] : 0;
-    $query[0]=join(' ',$ar);
+    $function = !empty($query['caller']['class']) ? $query['caller']['class'] . '::' : '';
+    $function .= $query['caller']['function'];
+    $count = isset($counts[$query['query']]) ? $counts[$query['query']] : 0;
 
-    $diff = round($query[1] * 1000, 2);
+    $diff = round($query['time'] * 1000, 2);
     if ($diff > variable_get('devel_execution', 5)) {
       $cell[$i][] = array ('data' => $diff, 'class' => 'marker');
     }
     else {
       $cell[$i][] = $diff;
     }
-    if ($count > 1) {
-      $cell[$i][] = array ('data' => $count, 'class' => 'marker');
-    }
-    else {
-      $cell[$i][] = $count;
-    }
-    $cell[$i][] = $function;
-    $pos = strpos($query[0], '*/') + 3;
-    $cell[$i][] = check_plain(substr($query[0], $pos));
+    $cell[$i][] = $count;
+    $cell[$i][] = l($function, "http://$api/api/function/$function/$version");
+    // EXPLAIN only valid for select queries.
+    // 3 divs for each variation of the query. Last 2 are hidden by default.
+    $placeholders = '<div class="dev-placeholders">' . check_plain($query['query']) . "</div>\n";
+    $args = '<div class="dev-arguments" style="display: none;"></div>' . "\n";
+    $explain = '<div class="dev-explain" style="display: none;"></div>' . "\n";
+    $cell[$i][] = array(
+      'id' => "devel-query-$i",
+      'data' => $placeholders . $args . $explain,
+    );
     $i++;
-    unset($diff, $count);
+    unset($diff, $count, $ops);
   }
   if (variable_get('devel_query_sort', DEVEL_QUERY_SORT_BY_SOURCE)) {
     usort($cell, '_devel_table_sort');
   }
-  return theme('table', $header, $cell);
+  return theme('table', array('header' => $header, 'rows' => $cell));
 } 

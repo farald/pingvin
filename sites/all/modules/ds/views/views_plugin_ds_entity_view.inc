@@ -25,33 +25,82 @@ class views_plugin_ds_entity_view extends views_plugin_row {
   function ds_views_3_support() {
     $base_table_fields = array(
       'node' => 'nid',
+      'comment' => 'cid',
       'users' => 'uid',
       'apachesolr' => 'nid',
       'taxonomy_term_data' => 'tid',
+      'file_managed' => 'fid',
+      'micro' => 'mid',
     );
-    return $base_table_fields[$this->base_table];
+    return isset($base_table_fields[$this->base_table]) ? $base_table_fields[$this->base_table] : 'nid';
   }
 
   function option_definition() {
     $options = parent::option_definition();
     $options['view_mode'] = array('default' => 'teaser');
+    $options['load_comments'] = array('default' => FALSE);
     $options['alternating'] = array('default' => FALSE);
     $options['changing'] = array('default' => FALSE);
+    $options['grouping'] = array('default' => FALSE);
     $options['advanced'] = array('default' => FALSE);
+    $options['grouping_fieldset'] = array(
+      'contains' => array(
+        'grouping' => array('default' => FALSE, 'bool' => TRUE),
+        'group_field' => array('default' => ''),
+        'group_field_function' => array('default' => ''),
+      ),
+    );
+    $options['default_fieldset'] = array(
+      'contains' => array(
+        'view_mode' => array('default' => ''),
+      ),
+    );
+    $options['alternating_fieldset'] = array(
+      'contains' => array(
+        'alternating' => array('default' => FALSE, 'bool' => TRUE),
+        'allpages' => array('default' => FALSE, 'bool' => TRUE),
+        'item' => array(
+          'default' => array(),
+          'export' => 'ds_item_export_option',
+        ),
+      ),
+    );
+    $options['advanced_fieldset'] = array(
+      'contains' => array(
+        'advanced' => array('default' => FALSE, 'bool' => TRUE),
+      ),
+    );
     return $options;
   }
 
+  /**
+   * Custom export function for alternating_fieldset items.
+   */
+  function ds_item_export_option($indent, $prefix, $storage, $option, $definition, $parents) {
+    $output = '';
+    $definition = array('default' => 'teaser');
+    foreach ($storage as $key => $value) {
+      if (strstr($key, 'item_') !== FALSE) {
+        $output .= parent::export_option($indent, $prefix, $storage, $key, $definition, $parents);
+      }
+    }
+    return $output;
+  }
+
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
     $view_mode_options = array();
     $entity_type = $this->view->base_table;
-    // In case we're working with users, change the entity type variable.
+    // In case we're working with users or managed files, change the entity type variable.
     if ($entity_type == 'users') $entity_type = 'user';
+    if ($entity_type == 'file_managed') $entity_type = 'file';
     $entity_view_modes = ds_entity_view_modes($entity_type);
     foreach ($entity_view_modes as $key => $view_mode) {
       $view_mode_options[$key] = $view_mode['label'];
     }
 
-    // Default view mode.
+    // Default view mode & load comments.
     $form['default_fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => t('Default view mode'),
@@ -62,8 +111,17 @@ class views_plugin_ds_entity_view extends views_plugin_row {
       '#type' => 'select',
       '#default_value' => $this->options['view_mode'],
       '#options' => $view_mode_options,
-      '#description' => t('Make sure you select a view mode which is compatible with the base table of this view which is %base_table. <br />Also note that if you excluded build modes, you will still see them listed here as it\'s possible to list different types in a view.', array('%base_table' => $this->view->base_table))
+      '#description' => t('Select the default view mode for this view.')
     );
+    if ($entity_type == 'node') {
+      $form['default_fieldset']['load_comments'] = array(
+        '#title' => t('Comments'),
+        '#type' => 'checkbox',
+        '#description' => t('Load comments for every node to display.'),
+        '#default_value' => isset($this->options['load_comments']) ? $this->options['load_comments'] : FALSE,
+        '#access' => module_exists('comment'),
+      );
+    }
 
     // Changing view modes.
     $form['alternating_fieldset'] = array(
@@ -123,24 +181,25 @@ class views_plugin_ds_entity_view extends views_plugin_row {
       '#title' => t('Group data on a field. The value of this field will be displayed too.'),
       '#default_value' => $groupable,
     );
+
     if (!empty($sorts)) {
       $sort_options = array();
       foreach ($sorts as $key => $sort) {
-        $sort_name = drupal_ucfirst(str_replace('_', ' ', $sort['table']) . ' ' . $sort['field']);
-        $sort_options[$sort['table'] . '_' . $sort['field']] = $sort_name;
+        $sort_name = drupal_ucfirst($sort['field']);
+        $sort_options[$sort['table'] . '|' . $sort['field']] = $sort_name;
       }
 
       $form['grouping_fieldset']['group_field'] = array(
         '#type' => 'select',
         '#options' => $sort_options,
-        '#default_value' => $this->options['grouping_fieldset']['group_field'],
+        '#default_value' => isset($this->options['grouping_fieldset']['group_field']) ? $this->options['grouping_fieldset']['group_field'] : '',
       );
 
       $form['grouping_fieldset']['group_field_function'] = array(
         '#type' => 'textfield',
         '#title' => 'Heading function',
-        '#description' => t('The value of the field can be in a very raw format (eg, date created). Enter a custom function which you can use to format that value. The value and the object will be passed into that function eg. <em>custom_function($raw_value, $object);</em>'),
-        '#default_value' => $this->options['grouping_fieldset']['group_field_function'],
+        '#description' => check_plain(t('The value of the field can be in a very raw format (eg, date created). Enter a custom function which you can use to format that value. The value and the object will be passed into that function eg. <em>custom_function($raw_value, $object);</em>')),
+        '#default_value' => isset($this->options['grouping_fieldset']['group_field_function']) ? $this->options['grouping_fieldset']['group_field_function'] : '',
       );
     }
     else {
@@ -157,8 +216,8 @@ class views_plugin_ds_entity_view extends views_plugin_row {
     );
     $form['advanced_fieldset']['advanced'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use the advanced build mode selector'),
-      '#description' => t('This gives you the opportunity to have full control of a list for really advanced features.<br /> There is no UI for this, you need to create a function named like this: <strong><em>ds_views_row_adv_@VIEWSNAME($entity, $view_mode)</em></strong>.<br />See <a href="http://drupal.org/node/697320#ds_views_row_adv_VIEWSNAME">http://drupal.org/node/697320#ds_views_row_adv_VIEWSNAME</a> for an example.', array('@VIEWSNAME' => $this->view->name)),
+      '#title' => t('Use the advanced view mode selector'),
+      '#description' => t('This gives you the opportunity to have full control of a list for really advanced features.<br /> There is no UI for this, you need to create a function named like this: <strong><em>ds_views_row_adv_@VIEWSNAME($entity, $view_mode, $load_comments)</em></strong>.<br />See <a href="http://drupal.org/node/697320#ds_views_row_adv_VIEWSNAME">http://drupal.org/node/697320#ds_views_row_adv_VIEWSNAME</a> for an example.', array('@VIEWSNAME' => $this->view->name)),
       '#default_value' => $this->options['advanced'],
     );
   }
@@ -166,8 +225,8 @@ class views_plugin_ds_entity_view extends views_plugin_row {
   /**
    * Validate view mode type selector.
    */
-  function options_validate($form, &$form_state) {
-    if (($form_state['values']['row_options']['alternating_fieldset']['alternate'] || $form_state['values']['row_options']['grouping_fieldset']['grouping']) && $form_state['values']['row_options']['advanced_fieldset']['advanced']) {
+  function options_validate(&$form, &$form_state) {
+    if (($form_state['values']['row_options']['alternating_fieldset']['alternating'] || $form_state['values']['row_options']['grouping_fieldset']['grouping']) && $form_state['values']['row_options']['advanced_fieldset']['advanced']) {
       form_set_error('advanced', t('You can not have changing/grouping and advanced enabled at the same time'));
     }
   }
@@ -175,7 +234,8 @@ class views_plugin_ds_entity_view extends views_plugin_row {
   /**
    * Reset all fieldsets except for changing.
    */
-  function options_submit($form, &$form_state) {
+  function options_submit(&$form, &$form_state) {
+    $form_state['values']['row_options']['load_comments'] = $form_state['values']['row_options']['default_fieldset']['load_comments'];
     $form_state['values']['row_options']['view_mode'] = $form_state['values']['row_options']['default_fieldset']['view_mode'];
     $form_state['values']['row_options']['alternating'] = $form_state['values']['row_options']['alternating_fieldset']['alternating'];
     $form_state['values']['row_options']['grouping'] = $form_state['values']['row_options']['grouping_fieldset']['grouping'];
@@ -195,13 +255,19 @@ class views_plugin_ds_entity_view extends views_plugin_row {
       case 'node':
         $this->entities = node_load_multiple($ids);
         break;
+      case 'comment':
+        $this->entities = comment_load_multiple($ids);
+        break;
       case 'users':
         $this->entities = user_load_multiple($ids);
         break;
       case 'taxonomy_term_data':
         $this->entities = taxonomy_term_load_multiple($ids);
         break;
-      default:
+      case 'file_managed':
+        $this->entities = file_load_multiple($ids);
+      case 'micro':
+        $this->entities = entity_load($this->base_table, $ids);
         break;
     }
   }
@@ -211,11 +277,16 @@ class views_plugin_ds_entity_view extends views_plugin_row {
    */
   function render($row) {
 
+    // Set a variable to indicate if comments need to be loaded or not.
+    $load_comments = isset($this->options['load_comments']) ? $this->options['load_comments'] : FALSE;
+
     // The advanced selector searches for a function called
     // ds_views_row_adv_VIEWSNAME. Return the row immediately.
     if ($this->options['advanced']) {
       $row_function = 'ds_views_row_adv_' . $this->view->name;
-      return $row_function($this->entities[$row->{$this->field_alias}], $this->options['view_mode']);
+      if (function_exists($row_function)) {
+        return $row_function($this->entities[$row->{$this->field_alias}], $this->options['view_mode'], $load_comments);
+      }
     }
 
     // Keep a static group array.
@@ -233,17 +304,31 @@ class views_plugin_ds_entity_view extends views_plugin_row {
         $view_mode = $this->options['view_mode'];
       }
       else {
-        $view_mode = $this->options['alternating_fieldset']['item_' . $this->view->row_index];
+        $view_mode = isset($this->options['alternating_fieldset']['item_' . $this->view->row_index]) ? $this->options['alternating_fieldset']['item_' . $this->view->row_index] : $this->options['view_mode'];
       }
     }
 
     // Call the row render function.
-    $row_function = 'ds_views_row_render_' . $this->base_table;
-    $content = $row_function($this->entities[$row->{$this->field_alias}], $view_mode);
+    $content = $this->ds_views_row_render_entity($view_mode, $row, $load_comments);
 
     // Keep a static grouping for this view.
     if ($this->options['grouping']) {
-      $raw_group_value = $row->{$this->options['grouping_fieldset']['group_field']};
+
+      $group_field = $this->options['grouping_fieldset']['group_field'];
+
+      // New way of creating the alias.
+      if (strpos($group_field, '|') !== FALSE) {
+        list($ftable, $ffield) = explode('|', $group_field);
+        $group_field = $this->view->sort[$ffield]->table_alias . '_' . $this->view->sort[$ffield]->real_field;
+      }
+
+      // Note, the keys in the $row object are cut of at 60 chars.
+      // see views_plugin_query_default.inc.
+      if (drupal_strlen($group_field) > 60) {
+        $group_field = drupal_substr($group_field, 0, 60);
+      }
+
+      $raw_group_value = isset($row->{$group_field}) ? $row->{$group_field} : '';
       if (!isset($grouping[$view_name][$raw_group_value])) {
         $group_value = $raw_group_value;
         // Special function to format the heading value.
@@ -269,25 +354,74 @@ class views_plugin_ds_entity_view extends views_plugin_row {
     // Return the content.
     return $content;
   }
+
+  /**
+   * Render a discrete entity based with the selected view mode.
+   *
+   * @param $view_mode
+   *   The view mode which is set in the Views' options.
+   * @param $row
+   *   The current active row object being rendered.
+   *
+   * @return $content
+   *   An entity view rendered as HTML
+   */
+  function ds_views_row_render_entity($view_mode, $row, $load_comments) {
+    $row_function = 'ds_views_row_render_' . $this->base_table;
+    $content = $row_function($this->entities[$row->{$this->field_alias}], $view_mode, $load_comments);
+    return $content;
+  }
 }
 
 /**
  * Render the node through the entity plugin.
  */
-function ds_views_row_render_node($entity, $view_mode) {
-  return drupal_render(node_view($entity, $view_mode));
+function ds_views_row_render_node($entity, $view_mode, $load_comments) {
+  $node_display = node_view($entity, $view_mode);
+  if ($load_comments && module_exists('comment')) {
+    $node_display['comments'] = comment_node_page_additions($entity);
+  }
+  return drupal_render($node_display);
+}
+
+/**
+ * Render the comment through the entity plugin.
+ */
+function ds_views_row_render_comment($entity, $view_mode, $load_comments) {
+  $node = node_load($entity->nid);
+  $element = comment_view($entity, $node, $view_mode);
+  return drupal_render($element);
 }
 
 /**
  * Render the user through the entity plugin.
  */
-function ds_views_row_render_users($entity, $view_mode) {
-  return drupal_render(user_view($entity, $view_mode));
+function ds_views_row_render_users($entity, $view_mode, $load_comments) {
+  $element = user_view($entity, $view_mode);
+  return drupal_render($element);
 }
 
 /**
  * Render the taxonomy term through the entity plugin.
  */
-function ds_views_row_render_taxonomy_term_data($entity, $view_mode) {
-  return drupal_render(taxonomy_term_view($entity, $view_mode));
+function ds_views_row_render_taxonomy_term_data($entity, $view_mode, $load_comments) {
+  $element = taxonomy_term_view($entity, $view_mode);
+  return drupal_render($element);
 }
+
+/**
+ * Render the file through the entity plugin.
+ */
+function ds_views_row_render_file_managed($entity, $view_mode, $load_comments) {
+  $element = file_view($entity, $view_mode);
+  return drupal_render($element);
+}
+
+/**
+ * Render the micro through the entity plugin.
+ */
+function ds_views_row_render_micro($entity, $view_mode, $load_comments) {
+  $element = micro_view($entity, $view_mode);
+  return drupal_render($element);
+}
+

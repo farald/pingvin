@@ -1,5 +1,4 @@
 <?php
-// $Id: homebox_og.module,v 1.1.2.8.2.2 2011/02/15 14:16:27 brianV Exp $
 
 /**
  * @file
@@ -13,7 +12,7 @@ function homebox_og_menu() {
   $items = array();
 
   // Admin OG/Homebox settings
-  $items['admin/og/homebox'] = array(
+  $items['admin/config/group/homebox'] = array(
     'title' => 'Organic groups Homebox',
     'description' => 'Choose a homebox to act as a group home page',
     'page callback' => 'drupal_get_form',
@@ -26,7 +25,7 @@ function homebox_og_menu() {
     $page = homebox_get_page($name);
     if ($page) {
       $items['node/%node/' . $page->settings['path']] = array(
-        'title' => $page->settings['title'],
+        'title' => check_plain($page->settings['title']),
         'page callback' => 'homebox_build',
         'page arguments' => array($page),
         'access callback' => '_homebox_og_user_access_view_homebox',
@@ -66,7 +65,7 @@ function homebox_og_override_group($node) {
         // Make sure the user has permission to view the homebox
         if (_homebox_user_access_view_homebox($page)) {
           // Force group name as title
-          drupal_set_title($node->title);
+          drupal_set_title(check_plain($node->title));
           // Return the designated homebox
           return homebox_build($page);
         }
@@ -130,7 +129,7 @@ function homebox_og_group_settings_page($form, &$form_state) {
   // Build form options
   $options = array();
   foreach ($pages as $page) {
-    $options[$page->name] = $page->settings['title'] . ' (' . $page->name . ')';
+    $options[$page->name] = check_plain($page->settings['title'] . ' (' . $page->name . ')');
   }
 
   $form['help'] = array(

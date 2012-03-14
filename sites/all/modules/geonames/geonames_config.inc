@@ -97,6 +97,7 @@ function geonames_config($a = NULL, $b = NULL) {
       // our style        // geonames style
       'geonameid' => 'geonameId',
       'style'     => 'style',
+      'maxrows'   => 'maxRows',
       'lang'      => 'lang',
     ),
     'required_parameters' => array(
@@ -175,12 +176,10 @@ function geonames_config($a = NULL, $b = NULL) {
       'lat'      => 'lat',
       'lng'      => 'lng',
       'lang'     => 'lang',
-        'radius' => 'radius',
-        'maxrows' => 'maxRows'
     ),
     'required_parameters' => array( // If you have set query_defaults you should not include the parameter here
       'lat',
-      'lng' 
+      'lng'
     ),
     'required_parameters_type' => 'all',
     'columns' => array('countrycode', 'countryname', 'admincode1', 'adminname1'),

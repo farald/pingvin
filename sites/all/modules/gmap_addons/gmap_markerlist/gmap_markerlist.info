@@ -4,9 +4,9 @@ dependencies[] = gmap
 package = Location
 core = 6.x
 
-; Information added by drupal.org packaging script on 2011-02-25
+; Information added by drupal.org packaging script on 2011-03-30
 version = "7.x-1.x-dev"
 core = "7.x"
 project = "gmap_addons"
-datestamp = "1298619344"
+datestamp = "1301443754"
 

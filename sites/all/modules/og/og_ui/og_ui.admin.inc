@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Admin settings for Organic grops module.
+ * Admin settings for Organic groups module.
  */
 
 /**
@@ -17,6 +17,13 @@ function og_ui_user_admin_settings($form_state) {
     '#title' => t('Group manager full permissions'),
     '#description' => t('When enabled the group manager will have all the permissions in the group.'),
     '#default_value' => variable_get('og_group_manager_full_access', TRUE),
+  );
+
+  $form['og_node_access_strict'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Strict node access permissions'),
+    '#description' => t('When enabled Organic groups will take full control of node access permission, and will deny access based on Organic groups access. Example: A content editor with the <em>Edit any page content</em> permission who is not a member of a group would be denied access to modifying page content in that group.'),
+    '#default_value' => variable_get('og_node_access_strict', TRUE),
   );
 
   return system_settings_form($form);
@@ -44,7 +51,10 @@ function og_ui_group_admin_overview($entity_type, $etid) {
     $item['localized_options'] = array();
   }
 
-  $form['admin_block_content'] = array('#markup' => theme('admin_block_content', array('content' => $items)));
+  $form['admin_block_content'] = array(
+    '#theme' => 'admin_block_content',
+    '#content' => $items,
+  );
 
   return $form;
 }
@@ -93,8 +103,8 @@ function og_ui_add_users($form, &$form_state, $entity_type, $etid) {
     );
 
     // Add group membership form.
-    $name = !empty($form_state['values']['og_add_user_membership_type']) ? $form_state['values']['og_add_user_membership_type'] : OG_MEMBERSHIP_TYPE_DEFAULT;
-    $dummy_entity = og_membership_create(0, 'user', 0, array('name' => $name));
+    $type = !empty($form_state['values']['og_add_user_membership_type']) ? $form_state['values']['og_add_user_membership_type'] : OG_MEMBERSHIP_TYPE_DEFAULT;
+    $dummy_entity = og_membership_create(0, 'user', 0, array('type' => $type));
     $form['membership_fields'] = array(
       '#prefix' => '<div id="og-ui-membership-type">',
       '#suffix' => '</div>',
@@ -135,7 +145,7 @@ function og_ui_add_users_validate($form, &$form_state) {
   if (!empty($form_state['values']['membership_fields'])) {
     $dummy_entity = (object) $form_state['values']['membership_fields'];
   }
-  $dummy_entity->name = $form_state['values']['og_add_user_membership_type'];
+  $dummy_entity->type = $form_state['values']['og_add_user_membership_type'];
 
   field_attach_form_validate('og_membership', $dummy_entity, $form['membership_fields'], $form_state);
 }
@@ -210,7 +220,9 @@ function og_ui_user_admin_account($form, $form_state, $entity_type, $etid) {
 
   $query = db_select('users', 'u');
   $query->innerJoin('og_membership', 'ogm', 'u.uid = ogm.etid');
-  $query->condition('ogm.gid', $group->gid, '=');
+  $query
+    ->condition('ogm.gid', $group->gid, '=')
+    ->condition('ogm.entity_type', 'user', '=');
 
   $count_query = clone $query;
   $count_query->addExpression('COUNT(u.uid)');
@@ -529,6 +541,13 @@ function og_ui_user_admin_permissions($form, $form_state, $entity_type = NULL, $
       '#markup' => $perm_item['title'],
       '#description' => $perm_item['description'],
     );
+
+    // TODO: Move this to theme function.
+    // @see theme_user_admin_permissions().
+    if (!empty($perm_item['restrict access'])) {
+      $form['permission'][$perm]['#description'] .= '</br>';
+      $form['permission'][$perm]['#description'] .= '<em class="permission-warning">' . t('Warning: Give to trusted roles only; this permission has security implications.') . '</em>';
+    }
     foreach ($role_names as $rid => $name) {
       // Builds arrays for checked boxes for each role
       if (isset($role_permissions[$rid][$perm])) {
@@ -711,7 +730,7 @@ function og_ui_field_settings($form, &$form_state) {
       '#weight' => 99,
     );
 
-    // Show all teh group fields of each bundle.
+    // Show all the group fields of each bundle.
     foreach ($field_enabled as $entity_type => $bundles) {
       foreach ($bundles as $bundle => $fields) {
         $options = array();
@@ -777,8 +796,14 @@ function og_ui_field_settings_validate($form, &$form_state) {
     form_set_error('bundles', t('Field %field already exists in %bundle.', $params));
   }
 
+  // Check field can be attached to entity type.
   if (!empty($group_field['entity']) && !in_array($entity_type, $group_field['entity'])) {
-    form_set_error('bundles', t('Field %field can only be attached to %entity entity bundles.', $params));
+    $items = array();
+    foreach ($group_field['entity'] as $entity_type) {
+      $info = entity_get_info($entity_type);
+      $items[] = $info['label'];
+    }
+    form_set_error('bundles', t('Field %field can only be attached to %entities entity bundles.', $params + array('%entities' => implode(', ', $items))));
   }
 
 }

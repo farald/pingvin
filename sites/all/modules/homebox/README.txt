@@ -1,4 +1,3 @@
-// $Id: README.txt,v 1.2.2.9.2.1 2011/02/02 19:01:05 brianV Exp $
  _                          _                  ____
 | |__   ___  _ __ ___   ___| |__   ___ __  __ |___ \
 | '_ \ / _ \| '_ ` _ \ / _ \ '_ \ / _ \\ \/ /   __) |
@@ -7,16 +6,6 @@
 
 
 Welcome to Homebox 2.
-
-
-REQUIREMENTS
-------------
-
- * jQuery UI 6.x-1.3 - http://drupal.org/project/jquery_ui
- * jQuery UI 1.6
-   - Grab jQuery UI package from Google Code - http://jquery-ui.googlecode.com/files/jquery.ui-1.6.zip
- * PHP >= 5.2
-   - This is required for JSON support.
 
 
 RECOMMENDED

@@ -10,9 +10,9 @@ files[] = imagecache_coloractions.module
 files[] = transparency.inc
 files[] = tests/green.imagecache_preset.inc
 
-; Information added by drupal.org packaging script on 2011-03-15
+; Information added by drupal.org packaging script on 2012-01-12
 version = "7.x-1.x-dev"
 core = "7.x"
 project = "imagecache_actions"
-datestamp = "1300191198"
+datestamp = "1326370359"
 

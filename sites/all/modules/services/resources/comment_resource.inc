@@ -113,6 +113,14 @@ function _comment_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_comment_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access callback' => '_comment_resource_access',
         'access arguments' => array('view'),
@@ -178,16 +186,14 @@ function _comment_resource_definition() {
 
 function _comment_resource_create($comment) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($comment['comment'])) {
-    $comment = $comment['comment'];
-  }
+  $comment = _services_arg_value($comment, 'comment');
 
   if (empty($comment['nid'])) {
     return services_error(t('A nid must be provided'));
   }
 
   $form_state['values'] = $comment;
-  $form_state['values']['op'] = t('Save');
+  $form_state['values']['op'] = variable_get('services_comment_save_button_resource_create', t('Save'));
 
   $comment_empty = array(
     'nid' => $comment['nid'],
@@ -240,10 +246,7 @@ function _comment_resource_retrieve($cid) {
  */
 function _comment_resource_update($cid, $comment) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($comment['data'])) {
-    $comment = $comment['data'];
-  }
-
+  $comment = _services_arg_value($comment, 'data');
   $comment['cid'] = $cid;
 
   $old_comment = comment_load($cid);
@@ -253,7 +256,7 @@ function _comment_resource_update($cid, $comment) {
   // Setup form_state.
   $form_state = array();
   $form_state['values'] = $comment;
-  $form_state['values']['op'] = t('Save');
+  $form_state['values']['op'] = variable_get('services_comment_save_button_resource_update', t('Save'));
   $form_state['comment'] = $old_comment;
 
   drupal_form_submit('comment_form', $form_state, $old_comment);
@@ -305,18 +308,20 @@ function _comment_resource_delete($cid) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be deleted.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of comment objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _comment_resource_index($page, $fields, $parameters) {
+function _comment_resource_index($page, $fields, $parameters, $page_size) {
   $comment_select = db_select('comment', 't')
     ->orderBy('created', 'DESC');
 
-  services_resource_build_index_query($comment_select, $page, $fields, $parameters);
+  services_resource_build_index_query($comment_select, $page, $fields, $parameters, $page_size, 'comment');
 
   if (!user_access('administer comments')) {
     $comment_select->condition('status', COMMENT_PUBLISHED);
@@ -359,10 +364,8 @@ function _comment_resource_count_new($nid, $since) {
  */
 function _comment_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (is_array($args[0])) {
-    if (key_exists('comment', $args[0]) || key_exists('data', $args[0])) {
-      $args[0] = $args[0]['comment'] ? $args[0]['comment'] : $args[0]['data'];
-    } 
+  if (isset($args[0])) {
+    $args[0] = _services_access_value($args[0], array('comment', 'data'));
   }
 
   if ($op == 'create') {

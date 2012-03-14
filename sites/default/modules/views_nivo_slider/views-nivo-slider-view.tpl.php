@@ -42,11 +42,13 @@
         <?php print $row?>
       <?php endforeach; ?>
     </div>
-    <?php foreach($view->_vns_captions as $vns_id => $vns_caption): ?>
-      <div id="<?php print $vns_id ?>" class="nivo-html-caption">
-        <?php print $vns_caption; ?>
-      </div>
-    <?php endforeach; ?>
+    <?php if (!empty($view->_vns_captions) && is_array($view->_vns_captions)): ?>
+      <?php foreach($view->_vns_captions as $vns_id => $vns_caption): ?>
+        <div id="<?php print $vns_id ?>" class="nivo-html-caption">
+          <?php print $vns_caption; ?>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
 
   <?php elseif($empty): ?>
     <div class="view-empty">

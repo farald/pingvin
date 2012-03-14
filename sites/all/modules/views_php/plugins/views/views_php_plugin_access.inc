@@ -42,6 +42,13 @@ class views_php_plugin_access extends views_plugin_access {
   }
 
   /**
+   * Implements views_plugin#options_submit().
+   */
+  function options_submit(&$form, &$form_state) {
+    $form_state['values']['access_options']['php_access'] = $form_state['values']['options']['php_access'];
+  }
+
+  /**
    * Implements views_plugin_access#access().
    */
   function access($account) {
