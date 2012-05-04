@@ -1,4 +1,5 @@
 <?php
+// $Id: page.tpl.php,v 1.9 2010/11/07 21:48:56 dries Exp $
 
 /**
  * @file
@@ -170,8 +171,10 @@
     </div></div> <!-- /.section, /#featured -->
   <?php endif; ?>
 
-  <div id="main-wrapper" class="clearfix"><div id="main" class="clearfix">
+  <div id="main-wrapper" class="clearfix <?php if(isset($node->type)){ print ' node-type-' . $node->type;};?>"><div id="main" class="clearfix ">
 
+
+<!-- Here comes a modification--->
     <?php if ($breadcrumb): ?>
       <div id="breadcrumb"><?php print $breadcrumb; ?></div>
     <?php endif; ?>
@@ -188,7 +191,15 @@
       <?php print render($title_prefix); ?>
       <?php if ($title): ?>
         <h1 class="title" id="page-title">
+            <!-- Here comes a modification--->
           <?php print $title; ?>
+            <span class ="mod-title-hover-info">
+                <?php print pingvindatabasen_custom_theme_mod(arg(0));?>
+
+
+
+
+            </span>
         </h1>
       <?php endif; ?>
       <?php print render($title_suffix); ?>
