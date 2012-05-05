@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * Implements hook_requirements().
+ */
+function pjax_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break at install time.
+  $t = get_t();
+
+  // Check existance of pjax library.
+  if ($phase == 'runtime') {
+
+    $requirements['pjax'] = array(
+      'title' => $t('pjax library'),
+    );
+    $path = libraries_get_path('jquery-pjax');
+
+    if ($path && file_exists($path . '/jquery.pjax.js')) {
+      $requirements['pjax']['value'] = $t('The pjax library is installed at <code>!path</code>', array('!path' => $path));
+    }
+    else {
+      $requirements['pjax']['description'] = $t('The pjax library could not be found. Please <a href="!url">download it</a>, install it in a <code>libraries</code> directory, and rename the directory to <code>jquery-pjax</code>. The library should be available at a path like <code>sites/all/libraries/jquery-pjax/jquery.pjax.js</code>', array('!url' => 'https://github.com/defunkt/jquery-pjax'));
+      $requirements['pjax']['severity'] = REQUIREMENT_ERROR;
+      $requirements['pjax']['value'] = $t('Not found');
+    }
+
+  }
+
+  return $requirements;
+}

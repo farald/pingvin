@@ -1,0 +1,122 @@
+<?php
+
+/**
+ * @file
+ * Enables client-side partial page loads with jquery.pjax.
+ * See https://github.com/defunkt/jquery-pjax
+ */
+
+/**
+ * Implements hook_init().
+ */
+function pjax_init() {
+  // Add all the necessary prerequisites.
+  if ($path = libraries_get_path('jquery-pjax')) {
+    drupal_add_js($path . '/jquery.pjax.js', array('every_page' => TRUE));
+
+    // Add the JS behavior.
+    drupal_add_js(drupal_get_path('module', 'pjax') . '/pjax.js', array('every_page' => TRUE));
+    $settings = array(
+      'contentSelector' => variable_get('pjax_content_selector', '#content-area'),
+      'linksSelector' => variable_get('pjax_links_selector', NULL),
+      'scrollto' => variable_get('pjax_scrollto', 0),
+      'timeout' => (int) variable_get('pjax_timeout', 650),
+    );
+    drupal_add_js(array('pjax' => $settings), 'setting');
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function pjax_menu() {
+  $items = array();
+
+  $items['admin/config/user-interface/pjax'] = array(
+    'title' => 'pjax',
+    'description' => 'Configuration for setting up pjax page loads.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pjax_settings_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback: pjax settings
+ *
+ * @see pjax_menu()
+ */
+function pjax_settings_form($form, &$form_state) {
+  $form['pjax_content_selector'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Main content selector'),
+    '#default_value' => variable_get('pjax_content_selector', '#content-area'),
+    '#size' => 60,
+    '#description' => t('A jQuery selector that specifies the container element of the main content on your page. You can find this element in your theme\'s page.tpl.php file – it\'s the one that surrounds the statement <code>@template_code</code>.<br />You can leave this empty if you want to disable this module\'s JavaScript behavior and implement your own instead.<br />Example: <code>@example</code>', array('@template_code' => 'print render($page[\'content\'])', '@example' => '#content-area')),
+    '#required' => FALSE,
+  );
+  $form['pjax_links_selector'] = array(
+    '#type' => 'textfield',
+    '#title' => t('pjax links selector'),
+    '#default_value' => variable_get('pjax_links_selector', NULL),
+    '#size' => 60,
+    '#description' => t('A jQuery selector that specifies all of the links that you want to enable pjax for. These are usually links that are used to navigate between pages, like a navigation menu. Note that you can provide multiple selectors separated by a comma, just like in CSS or jQuery.<br />Example: <code>#primary a, .my-special-link</code>'),
+    '#required' => FALSE,
+  );
+  $form['pjax_scrollto'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Scroll to'),
+    '#default_value' => variable_get('pjax_scrollto', 0),
+    '#size' => 10,
+    '#description' => t('The pixel offset to scroll the page to after it has loaded. The default is 0, which scrolls the page to the top, mimicing ordinary page loads. You can turn this behavior off completely by emptying the field.'),
+    '#required' => FALSE,
+  );
+  $form['pjax_timeout'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Timeout'),
+    '#default_value' => variable_get('pjax_timeout', 650),
+    '#size' => 10,
+    '#description' => t('Set the time in ms that pjax should wait for a page response before aborting and falling back to standard page loads. The pjax default is 650 which is probably good for production, but may be too short for a development environment.'),
+    '#required' => FALSE,
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_page_delivery_callback_alter().
+ */
+function pjax_page_delivery_callback_alter(&$callback) {
+  // pjax requests can be detected by the X-PJAX http header.
+  // When serving pjax requests, deliver just the main page content.
+  if (isset($_SERVER['HTTP_X_PJAX']) && $_SERVER['HTTP_X_PJAX'] && $callback == 'drupal_deliver_html_page') {
+    $callback = 'pjax_deliver_page_content';
+  }
+}
+
+/**
+ * Delivers only the main content of the requested page, for pjax requests.
+ */
+function pjax_deliver_page_content($page_callback_result) {
+  if (is_int($page_callback_result)) {
+    // Pass over to drupal_deliver_html_page() to deal with errors.
+    drupal_deliver_html_page($page_callback_result);
+  }
+  else {
+    if (is_null(drupal_get_http_header('Content-Type'))) {
+      drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+    }
+
+    // $page_callback_result contains the rendered main contents of the page.
+    // Add a page title, which will be picked up and used by pjax.
+    $output = '<title>' . drupal_get_title() . '</title>' . $page_callback_result;
+    print($output);
+
+    // Make sure the requests are cached. pajax requests will be cached separately 
+    // from standard page requests thanks to the "_pjax" query string.
+    drupal_page_footer();
+  }
+}
