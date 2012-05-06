@@ -1,47 +1,75 @@
 /* 
- * ##### Sasson - advanced drupal theming. #####
- *   
- * SITENAME theme main stylesheet.
- * 
- *  Index
- *  -----------
- *  1. General Sitewide Styles
- *    -- Layout
- *    -- General Styles
- *    -- Typography
- *    -- Links 
- *    -- Header
- *    -- Sidebars
- *    -- Footer
- *  2. Front Page
- *  3. Inner Pages
- *  4. Forms
- * 
- */
+* ##### Sasson - advanced drupal theming. #####
+*   
+* SITENAME theme main stylesheet.
+* 
+*  Index
+*  -----------
+*  1. General Sitewide Styles
+*    -- Layout
+*    -- General Styles
+*    -- Typography
+*    -- Links 
+*    -- Header
+*    -- Sidebars
+*    -- Footer
+*  2. Front Page
+*  3. Inner Pages
+*  4. Forms
+* 
+*/
 
 /*         General Sitewide Styles
- *************************************************/
-  /* Layout */
+*************************************************/
+/* Layout */
 
-  /* General Styles (Colors, Backgrounds etc.)*/
+/* General Styles (Colors, Backgrounds etc.)*/
 
-  /* Typography */
+/* Typography */
 
-  /* Links */
+/* Links */
 
-  /* header */
+/* header */
 
-  /* Sidebars */
+/* Sidebars */
 
-  /* Footer */
+/* Footer */
 
 
 /*         Front Page
- *************************************************/
+*************************************************/
 
 /*         Inner Pages
- *************************************************/
+*************************************************/
 
 /*         Forms
- *************************************************/
+*************************************************/
+$border-color: #dddddd;
 
+html {
+  background: url("../images/background.png") repeat scroll 0 0;
+  }
+
+body {
+  font: 12px helvetica,arial,"nimbus sans l",sans-serif;
+  color: #555555;
+  #header {
+    #site-name {
+      display:none; 
+    }
+  }
+  .h2 .a {
+      color: #2BAF8A;
+      text-decoration: none;
+      }
+  .field-type-image {
+      clear:none;
+      .field-item {
+            float:left;
+            margin:4px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: $border-color;
+            }
+      }
+} 
