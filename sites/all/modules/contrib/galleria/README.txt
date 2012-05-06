@@ -93,11 +93,14 @@ The main concept of configuring how your Gallerias look like are so called "opti
 For each gallery, you can assign one of these option sets which determine the size, theme, image styles and
 overall Galleria options.
 For a documentation of available options, see http://galleria.aino.se/docs/1.2/options/.
+All officially documented options are available from the select list, but you can also type in custom options (for
+example for theme specific options) using the input field next to the drop-down list.
+If you need these special values to be of type Boolean, use the special strings 'TRUE' and 'FALSE'.
 You have to at least specify a height and width if you do not plan to set these values in one of your CSS files.
 
 
 4. Customizing and adding themes
----...--------------------------
+--------------------------------
 
 Galleria supports several additional themes which can be bought and downloaded at http://galleria.aino.se/themes/.
 It's also possible to alter existing themes or completely create new ones. The documentation to do so can be found
@@ -123,6 +126,10 @@ A: If you want to limit the possible image formats you can do so by entering the
 Q: I found a bug / have a feature request / need support! What do I do?
 A: That's what the issue tracker is for! Just create a new issue at http://drupal.org/project/issues/galleria?version=7.x
    and tell us what you need.
+
+Q: How can I upload multiple images at once?
+A: There's a module for that!
+   The Multiupload Imagefield Widget can be found at http://drupal.org/project/multiupload_imagefield_widget.
 
 
 6. Missing Features from Drupal 6

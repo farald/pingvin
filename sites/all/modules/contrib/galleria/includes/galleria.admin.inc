@@ -118,6 +118,22 @@ function theme_galleria_form_table($variables) {
  * This function returns an array defining the form elements used to edit the different options.
  */
 function galleria_option_elements() {
+  $cropOptions = array(
+    'true'      => t('Crop the image.'),
+    'false'     => t('Scale down so the entire image fits.'),
+    'height'    => t('Scale the image to fill the height of the stage.'),
+    'width'     => t('Scale the image to fill the width of the stage.'),
+    'landscape' => t('Fill up images with landscape proportions; scale portrait images to fit.'),
+    'portrait'  => t('Fill up images with portrait proportions; scale landscape images to fit.'),
+  );
+  $transitionOptions = array(
+    'fade'      => t('fade: crossfade betweens images'),
+    'flash'     => t('flash: fades into background color between images'),
+    'pulse'     => t('pulse: quickly removes the image into background color, then fades the next image'),
+    'slide'     => t('slide: slides the images depending on image position'),
+    'fadeslide' => t('fadeslide: fade between images and slide slightly at the same time'),
+  );
+
   return array(
     'autoplay' => array(
       '#type' => 'textfield',
@@ -128,14 +144,14 @@ function galleria_option_elements() {
     ),
     'carousel' => array(
       '#type' => 'checkbox',
-      '#title' => t('Thumbnail Carousel'),
-      '#description' => t('Galleria comes with a built-in horizontal carousel. Activating this, the carousel will be automatically applied if the total sum of thumbnails width exceeds the thumbnail container. This will be re-calculaed on resize.'),
+      '#title' => t('Thumbnail carousel'),
+      '#description' => t('Galleria comes with a built-in horizontal carousel. Activating this, the carousel will be automatically applied if the total sum of thumbnails width exceeds the thumbnail container. This will be re-calculated on resize.'),
       '#default_value' => TRUE,
     ),
     'carouselFollow' => array(
       '#type' => 'checkbox',
       '#title' => t('Carousel follows active image'),
-      '#description' => t('This option defines if the the carousel should follow the active image.<br />Please note that animating heavy thumbnails can affect your main image animation, so if you are seeing big lags in the main animation you can try to disable this option.'),
+      '#description' => t('This option defines if the the carousel should follow the active image. You can control the speed of the animation with the carouselSpeed option. Please note that animating heavy thumbnails can affect your main image animation, so if you are seeing big lags in the main animation you can try to disable this option.'),
       '#default_value' => TRUE,
     ),
     'carouselSpeed' => array(
@@ -158,23 +174,49 @@ function galleria_option_elements() {
       '#description' => t('This options adds a click event over the stage that navigates to the next image in the gallery. Useful for mobile browsers and other simpler applications.'),
       '#default_value' => FALSE,
     ),
+    // 'dailymotion' => array(),
     // 'dataConfig' => array(),
     // 'dataSelector' => array(),
     // 'dataSource' => array(),
-    // 'debug' => array(),
+    'debug' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Debug'),
+      '#description' => t('This option is for turning debug on/off. By default, Galleria displays errors by printing them out in the gallery container and sometimes throw exceptions. For deployment you can turn debug off to generate a more generic error message if a fatal error is raised.'),
+      '#default_value' => TRUE,
+    ),
+    'dummy' => array(
+      '#type' => 'textfield',
+      '#title' => t('Dummy image'),
+      '#description' => t('This option allows you to define an image that should be shown if Galleria can\'t find the original image. Think of it as a 404 for Galleria.'),
+      '#default_value' => '',
+    ),
     // 'easing' => array(),
     // 'extend' => array(),
+    'fullscreenCrop' => array(
+      '#type' => 'select',
+      '#title' => t('Fullscreen cropping'),
+      '#description' => t('Sets how Galleria should crop when in fullscreen mode.'),
+      '#options' => $cropOptions,
+      '#default_value' => 'false',
+    ),
     'fullscreenDoubleTap' => array(
       '#type' => 'checkbox',
       '#title' => t('Fullscreen on double-tap'),
       '#description' => t('This options listens for the double-tap event on touch devices and toggles fullscreen mode if it happens.'),
       '#default_value' => TRUE,
     ),
+    'fullscreenTransition' => array(
+      '#type' => 'select',
+      '#title' => t('Fullscreen transition'),
+      '#description' => t('Defines a different transition for fullscreen mode. Some transitions are less smooth in fullscreen mode, this option allows you to set a different transition when in fullscreen mode. See the transition option for info about the different transitions.'),
+      '#options' => $transitionOptions,
+      '#default_value' => 'fade',
+    ),
     'height' => array(
       '#type' => 'textfield',
       '#title' => t('Height'),
       '#description' => t('Galleria needs a height to work properly. You should set the height using this option. By default, Galleria will try to find the height of the parent container which requires Drupal theme support.'),
-      '#element_validate' => array('_galleria_validate_integer_auto'),
+      '#element_validate' => array('_galleria_validate_number_auto'),
       '#default_value' => 'auto',
     ),
     'idleMode' => array(
@@ -201,12 +243,7 @@ function galleria_option_elements() {
       '#type' => 'select',
       '#title' => t('Image cropping'),
       '#description' => t('Defines how the main image will be cropped inside it’s container.'),
-      '#options' => array(
-        'true'   => t('Crop the image.'),
-        'false'  => t('Scale down so the entire image fits.'),
-        'height' => t('Scale the image to fill the height of the stage.'),
-        'width'  => t('Scale the image to fill the width of the stage.'),
-      ),
+      '#options' => $cropOptions,
       '#default_value' => 'false',
     ),
     'imageMargin' => array(
@@ -236,20 +273,27 @@ function galleria_option_elements() {
       '#description' => t('Positions the main image inside the stage container. Works like the CSS background-position property, for example ‘top right’ or ‘20% 100%’. You can use keywords, percents or pixels. The first value is the horizontal position and the second is the vertical.<br />Read more about positioning at <a href="http://www.w3.org/TR/REC-CSS1/#background-position">http://www.w3.org/TR/REC-CSS1/#background-position'),
       '#default_value' => 'center',
     ),
+    'imageTimeout' => array(
+      '#type' => 'textfield',
+      '#title' => t('Image timeout'),
+      '#description' => t('This option defines how long Galleria will try to fetch the images (unless it returns 404) before an exception is thrown. It uses milliseconds, so 30000 is 30 sec.'),
+      '#element_validate' => array('_galleria_validate_integer'),
+      '#default_value' => 30000,
+    ),
     'initialTransition' => array(
       '#type' => 'select',
-      '#title' => t('Initial Transition'),
+      '#title' => t('Initial transition'),
       '#description' => t('Defines a different transition to show on the first image. For example, if you are using a slide transition, you might want the first image to fade. You can then set this option to ‘fade’.'),
-      '#options' => array(
-        'fade'      => t('fade: crossfade betweens images'),
-        'flash'     => t('flash: fades into background color between images'),
-        'pulse'     => t('pulse: quickly removes the image into background color, then fades the next image'),
-        'slide'     => t('slide: slides the images depending on image position'),
-        'fadeslide' => t('fadeslide: fade between images and slide slightly at the same time'),
-      ),
+      '#options' => $transitionOptions,
       '#default_value' => 'fade',
     ),
     // 'keepSource' => array(),
+    'layerFollow' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Layer follow'),
+      '#description' => t('By default, the layer follows the image size on the stage, even if crop is set. This means that the HTML layer will stretch according to the active image. If you want the layer to fill the stage regardless of cropping settings, set this to false.'),
+      '#default_value' => TRUE,
+    ),
     'lightbox' => array(
       '#type' => 'checkbox',
       '#title' => t('Lightbox'),
@@ -272,17 +316,23 @@ function galleria_option_elements() {
     ),
     'maxScaleRatio' => array(
       '#type' => 'textfield',
-      '#title' => t('Max Scale Ratio'),
+      '#title' => t('Maximum scale ratio'),
       '#description' => t('Sets the maximum scale ratio for images. For example, if you don’t want Galleria to upscale any images, set this to 1. Removing this option will allow any scaling of the images.'),
       '#element_validate' => array('_galleria_validate_number'),
       '#default_value' => 1,
     ),
     'minScaleRatio' => array(
       '#type' => 'textfield',
-      '#title' => t('Min Scale Ratio'),
+      '#title' => t('Minimum scale ratio'),
       '#description' => t('Sets the minimum scale ratio for images. For example, if you don’t want Galleria to downscale any images, set this to 1. Removing this option will allow any scaling of the images.'),
       '#element_validate' => array('_galleria_validate_number'),
       '#default_value' => 1,
+    ),
+    'overlayBackground' => array(
+      '#type' => 'textfield',
+      '#title' => t('Lightbox overlay background'),
+      '#description' => t('This defines the overlay background color when the lightbox opens.'),
+      '#default_value' => '#0b0b0b',
     ),
     'overlayOpacity' => array(
       '#type' => 'textfield',
@@ -291,7 +341,6 @@ function galleria_option_elements() {
       '#element_validate' => array('_galleria_validate_opacity'),
       '#default_value' => 0.85,
     ),
-    // 'overlayBackground' => array(),
     'pauseOnInteraction' => array(
       '#type' => 'checkbox',
       '#title' => t('Pause playback on interaction'),
@@ -313,6 +362,12 @@ function galleria_option_elements() {
       '#description' => t('Galleria queues all activation clicks (next/prev & thumbnails). You can see this effect when f.ex clicking “next” fast many times. If you don’t want Galleria to queue, disable this. This will make Galleria stall during animations.'),
       '#default_value' => TRUE,
     ),
+    'responsive' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Responsive layout'),
+      '#description' => t('This option sets the gallery in responsive mode. That means that it will resize the entire container if your CSS is dynamic. In other words, you can add media queries or dynamic proportions in your CSS and the gallery will follow these proportions as the window resizes.'),
+      '#default_value' => FALSE,
+    ),
     'show' => array(
       '#type' => 'textfield',
       '#title' => t('Show image'),
@@ -320,21 +375,21 @@ function galleria_option_elements() {
       '#element_validate' => array('_galleria_validate_integer'),
       '#default_value' => 0,
     ),
-    'showInfo' => array(
-      '#type' => 'checkbox',
-      '#title' => t('Show info'),
-      '#description' => t('Disable this if you do not wish to display the image caption and description.'),
-      '#default_value' => TRUE,
-    ),
     'showCounter' => array(
       '#type' => 'checkbox',
       '#title' => t('Show counter'),
       '#description' => t('Disable this if you do not wish to display the counter.'),
       '#default_value' => TRUE,
     ),
+    'showInfo' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Show info'),
+      '#description' => t('Disable this if you do not wish to display the image caption and description.'),
+      '#default_value' => TRUE,
+    ),
     'showImagenav' => array(
       '#type' => 'checkbox',
-      '#title' => t('Show imagenav'),
+      '#title' => t('Show image navigation'),
       '#description' => t('Disable this option if you do not wish to display the image navigation (next/prev arrows).'),
       '#default_value' => TRUE,
     ),
@@ -347,12 +402,7 @@ function galleria_option_elements() {
       '#type' => 'select',
       '#title' => t('Thumbnail cropping'),
       '#description' => t('Defines how the thumbnails will be cropped inside their container.'),
-      '#options' => array(
-        'true'   => t('Crop the thumbnail.'),
-        'false'  => t('Scale down so the entire thumbnail fits.'),
-        'height' => t('Scale the thumbnail to fill the height of the container.'),
-        'width'  => t('Scale the thumbnail to fill the width of the container.'),
-      ),
+      '#options' => $cropOptions,
       '#default_value' => 'true',
     ),
     'thumbFit' => array(
@@ -369,17 +419,6 @@ function galleria_option_elements() {
       '#element_validate' => array('_galleria_validate_integer'),
       '#default_value' => 0,
     ),
-    'thumbQuality' => array(
-      '#type' => 'select',
-      '#title' => t('Thumbnail quality in IE'),
-      '#description' => t('Defines if and how IE should use bicubic image rendering for thumbnails'),
-      '#options' => array(
-        'auto'  => t('Use high quality if image scaling is moderate'),
-        'false' => t('Don´t use high quality (better performance)'),
-        'true'  => t('Force high quality rendering (can slow down performance)'),
-      ),
-      '#default_value' => 'true',
-    ),
     'thumbnails' => array(
       '#type' => 'select',
       '#title' => t('Show Thumbnails'),
@@ -392,17 +431,29 @@ function galleria_option_elements() {
       ),
       '#default_value' => 'true',
     ),
+    'thumbQuality' => array(
+      '#type' => 'select',
+      '#title' => t('Thumbnail quality in IE'),
+      '#description' => t('Defines if and how IE should use bicubic image rendering for thumbnails'),
+      '#options' => array(
+        'auto'  => t('Use high quality if image scaling is moderate'),
+        'false' => t('Don´t use high quality (better performance)'),
+        'true'  => t('Force high quality rendering (can slow down performance)'),
+      ),
+      '#default_value' => 'true',
+    ),
+    'touchTransition' => array(
+      '#type' => 'select',
+      '#title' => t('Touch Transition'),
+      '#description' => t('Defines a different transition when a touch device is detected. See the transition option for info about the different transitions.'),
+      '#options' => $transitionOptions,
+      '#default_value' => 'fade',
+    ),
     'transition' => array(
       '#type' => 'select',
       '#title' => t('Transition'),
       '#description' => t('The transition that is used when displaying the images.'),
-      '#options' => array(
-        'fade'      => t('fade: crossfade betweens images'),
-        'flash'     => t('flash: fades into background color between images'),
-        'pulse'     => t('pulse: quickly removes the image into background color, then fades the next image'),
-        'slide'     => t('slide: slides the images depending on image position'),
-        'fadeslide' => t('fadeslide: fade between images and slide slightly at the same time'),
-      ),
+      '#options' => $transitionOptions,
       '#default_value' => 'fade',
     ),
     'transitionSpeed' => array(
@@ -412,6 +463,19 @@ function galleria_option_elements() {
       '#element_validate' => array('_galleria_validate_integer'),
       '#default_value' => 400,
     ),
+    'trueFullscreen' => array(
+      '#type' => 'checkbox',
+      '#description' => t('Galleria supports true fullscreen mode if it is supported by the browser (currently FF10+, Safari 5.1+ and Chrome 15+). That means that it will enter a native OS fullscreen if the fullscreen method is triggered.'),
+      '#default_value' => TRUE,
+    ),
+    // 'vimeo' => array(),
+    'wait' => array(
+      '#type' => 'textfield',
+      '#title' => t('Measurement timeout'),
+      '#description' => t('Sets how long Galleria should wait when trying to extract measurements, before throwing an error. Set this to \'true\' for infinity. See <a href="http://galleria.io/docs/options/wait/">the documentation</a> for more details.'),
+      '#element_validate' => array('_galleria_validate_integer_boolean'),
+      '#default_value' => 5000,
+    ),
     'width' => array(
       '#type' => 'textfield',
       '#title' => t('Width'),
@@ -419,6 +483,7 @@ function galleria_option_elements() {
       '#element_validate' => array('_galleria_validate_integer_auto'),
       '#default_value' => 'auto',
     ),
+    // 'youtube' => array(),
   );
 }
 
@@ -427,7 +492,16 @@ function galleria_option_elements() {
  */
 function galleria_option_element($option, $value) {
   $elements = galleria_option_elements();
-  $element = isset($elements[$option]) ? $elements[$option] : array('#type' => 'textfield');
+
+  if (isset($elements[$option])) {
+    $element = $elements[$option];
+  }
+  else {
+    $element = array(
+      '#type' => 'textfield',
+      '#description' => t('Automatic type conversion: Use the special strings "TRUE" or "FALSE" to specify boolean values. Numeric values are passed to Galleria as float, everything else as string.'),
+    );
+  }
 
   if ($value !== NULL) {
     if ($element['#type'] == 'select') {
@@ -624,12 +698,32 @@ function _galleria_validate_integer_auto($element, &$form_state) {
 }
 
 /**
+ * Validate a form element that should have an integer or boolean value.
+ */
+function _galleria_validate_integer_boolean($element, &$form_state) {
+  $value = $element['#value'];
+  if ($value !== '' && strtolower($value) !== 'true' && strtolower($value) !== 'false' && (!is_numeric($value) || intval($value) != $value || $value < 0)) {
+    form_error($element, t('%name must be a positive integer or one of the boolean strings \'true\' or \'false\'.', array('%name' => $element['#title'])));
+  }
+}
+
+/**
  * Validate a form element that should have a number as value.
  */
 function _galleria_validate_number($element, &$form_state) {
   $value = $element['#value'];
   if ($value !== '' && !is_numeric($value)) {
     form_error($element, t('%name must be a number.', array('%name' => $element['#option_name'])));
+  }
+}
+
+/**
+ * Validate a form element that should have a number as value or the special value 'auto'.
+ */
+function _galleria_validate_number_auto($element, &$form_state) {
+  $value = $element['#value'];
+  if ($value !== '' && $value !== 'auto' && (!is_numeric($value) || $value < 0)) {
+    form_error($element, t('%name must be a positive number or the special value \'auto\'.', array('%name' => $element['#option_name'])));
   }
 }
 

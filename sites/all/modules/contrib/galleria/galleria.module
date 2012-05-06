@@ -289,10 +289,10 @@ function galleria_field_formatter_info() {
   return array(
     'galleria' => array(
       'label' => t('Galleria'),
-      'field types' => array('image', 'node_reference', 'media'),
+      'field types' => array('image', 'media', 'node_reference'),
       'settings' => array(
-        'galleria_optionset' => 'default',
-        'galleria_reference_img_src' => NULL,
+        'optionset' => 'default',
+        'referenced_fields' => array(),
       ),
     ),
   );
@@ -308,53 +308,53 @@ function galleria_field_formatter_settings_form($field, $instance, $view_mode, $
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
-  $form = array();
+  $form = array(
+    '#tree' => TRUE,
+  );
 
   // Show select box for the option set
   $optionsets = array();
   foreach (galleria_optionsets() as $name => $optionset) {
     $optionsets[$name] = check_plain($optionset['title']);
   }
-  $form['galleria_optionset'] = array(
+  $form['optionset'] = array(
     '#title' => t('Option set'),
     '#type' => 'select',
     '#options' => $optionsets,
-    '#default_value' => $settings['galleria_optionset'],
+    '#default_value' => $settings['optionset'],
   );
 
   // Show select box for image fields if we're formatting a node_reference field
   if ($field['type'] == 'node_reference') {
     // Find all image fields
-    $image_fields = array();
-    $fields = field_info_fields();
-    $ref_node_types = array_filter($field['settings']['referenceable_types']);
-    foreach ($ref_node_types as $ref_node_type) {
-      foreach (field_info_instances('node', $ref_node_type) as $field_name => $field_instance) {
-        if ($fields[$field_name]['type'] == 'image') {
-          $image_fields[$field_name] = $field_name;
+    $referenceable_types = array_filter($field['settings']['referenceable_types']);
+    foreach ($referenceable_types as $referenceable_type) {
+      $image_fields = array();
+      foreach (field_info_instances('node', $referenceable_type) as $field_name => $field_instance) {
+        $field = field_info_field($field_name);
+        if (($field['type'] == 'image') || ($field['type'] == 'media')) {
+          $image_fields[$field_name] = $field_instance['label'];
         }
       }
-    }
-    asort($image_fields);
 
-    if (count($image_fields) == 0) {
-      drupal_set_message(t('The referenced node type does not contain any valid image field(s).'), 'error');
-      return FALSE;
+      if (!empty($image_fields)) {
+        $form['referenced_fields'][$referenceable_type] = array(
+          '#type' => 'checkboxes',
+          '#title' => node_type_get_name($referenceable_type),
+          '#options' => $image_fields,
+          '#default_value' => isset($settings['referenced_fields'][$referenceable_type]) ? $settings['referenced_fields'][$referenceable_type] : array(),
+        );
+      }
     }
-    elseif (count($image_fields) == 1) {
-      $keys = array_keys($image_fields);
-      $key = $keys[0];
-      $form['galleria_reference_img_src'] = array(
-        '#type' => 'hidden',
-        '#value' => $image_fields[$key],
-      );
+
+    if (count($form['referenced_fields']) == 0) {
+      drupal_set_message(t('The referenced node type(s) does not contain any valid image fields.'), 'error');
     }
-    elseif (count($image_fields) > 1) {
-      $form['galleria_reference_img_src'] = array(
-        '#type' => 'select',
-        '#title' => t('Image source field of the referenced content type'),
-        '#options' => $image_fields,
-        '#default_value' => isset($settings['galleria_reference_img_src']) ? $settings['galleria_reference_img_src'] : '', // defaults to classic theme
+    else {
+      $form['referenced_fields'] += array(
+        '#type' => 'fieldset',
+        '#title' => t('Image source fields'),
+        '#description' => t('Select the image fields of the referenced content types to use as the source for Galleria.'),
       );
     }
   }
@@ -373,23 +373,69 @@ function galleria_field_formatter_settings_summary($field, $instance, $view_mode
 
   $summary = array();
 
-  // Load option set
-  if (!empty($settings['galleria_optionset'])) {
-    $o = galleria_optionset_load($settings['galleria_optionset']);
+  // Optionset
+  $optionset = t('Default settings');
+  if (!empty($settings['optionset'])) {
+    $o = galleria_optionset_load($settings['optionset']);
     if ($o !== FALSE) {
-      $optionset = $o;
+      $optionset = $o['title'];
     }
   }
-
-  // Build settings summary
-  $optionset = isset($optionset) ? $optionset['title'] : t('Default settings');
   $summary[] = t('Option set: %optionset', array('%optionset' => $optionset));
 
-  if (isset($settings['galleria_reference_img_src'])) {
-    $summary[] = t('Image field of the referenced node: %field', array('%field' => $settings['galleria_reference_img_src']));
+  // For node_reference fields: Referenced image fields
+  if ($field['type'] == 'node_reference') {
+    $referenced_fields = array();
+    foreach ($settings['referenced_fields'] as $node_type => $fields) {
+      $fields = array_keys(array_filter($fields));
+      if (!empty($fields)) {
+        foreach ($fields as &$field) {
+          $field_info = field_info_instance('node', $field, $node_type);
+          $field = $field_info['label'];
+        }
+        $referenced_fields[] = node_type_get_name($node_type) . ': ' . implode(', ', $fields);
+      }
+    }
+    $referenced_fields = empty($referenced_fields) ? t('All') : implode('; ', $referenced_fields);
+    $summary[] = t('Referenced image fields: %fields', array('%fields' => $referenced_fields));
   }
 
-  return implode('<br />', $summary);
+  return '<p>' . implode("</p>\n<p>", $summary) . '</p>';
+}
+
+
+/**
+ * Implements hook_field_formatter_prepare_view().
+ * 
+ * Loads the attached nodes for node_reference fields so we can later access the image fields.
+ */
+function galleria_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  if ($field['type'] == 'node_reference') {
+    // Collect ids to load. 
+    $ids = array();
+    foreach ($displays as $id => $display) {
+      foreach ($items[$id] as $item) {
+        if ($item['access']) {
+          $ids[$item['nid']] = $item['nid'];
+        }
+      }
+    }
+
+    // Load the nodes.
+    $nodes = node_load_multiple($ids);
+    field_attach_prepare_view('node', $nodes, 'default', $langcode);
+    entity_prepare_view('node', $nodes, $langcode);
+
+    // Add the loaded nodes to the items.
+    foreach ($displays as $id => $display) {
+      foreach ($items[$id] as &$item) {
+        if ($item['access']) {
+          $item['node'] = $nodes[$item['nid']];
+        }
+      }
+    }
+
+  }
 }
 
 /**
@@ -398,19 +444,38 @@ function galleria_field_formatter_settings_summary($field, $instance, $view_mode
  * Prepares a renderable array of images and adds the neccessary JS and CSS
  */
 function galleria_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  if ($field['type'] == 'node_reference') {
-    $items = galleria_get_referenced_images($display['settings']['galleria_reference_img_src']);
+  if ($field['type'] == 'media') {
+    $items = galleria_prepare_media_images($items);
   }
-  elseif ($field['type'] == 'media') {
-    $image_items = array();
+  elseif ($field['type'] == 'node_reference') {
+    // Cleanup referenced_fields array
+    $referenced_fields = &$display['settings']['referenced_fields'];
+    foreach ($referenced_fields as &$field) {
+      $field = array_filter($field);
+    }
+    $referenced_fields = array_filter($referenced_fields);
+
+    // Collect items
+    $images = array();
     foreach ($items as $item) {
-      if ($item['file']->type == 'image') {
-        $file = (array) $item['file'];
-        $file += array('alt' => '', 'title' => '');
-        $image_items[] = $file;
+      $node = $item['node'];
+      foreach (field_info_instances('node', $node->type) as $field_name => $field_instance) {
+        $field_info = field_info_field($field_name);
+        if ($field_info['type'] == 'image' || $field_info['type'] == 'media') {
+          if (empty($referenced_fields) || !empty($referenced_fields[$node->type][$field_name])) {
+            $lang = field_language('node', $node, $field_name, $langcode);
+            $node_items = $node->{$field_name}[$lang];
+
+            if ($field_info['type'] == 'media') {
+              $node_items = galleria_prepare_media_images($node_items);
+            }
+
+            $images = array_merge($images, $node_items);
+          }
+        }
       }
     }
-    $items = $image_items;
+    $items = $images;
   }
 
   $element = array();
@@ -424,32 +489,19 @@ function galleria_field_formatter_view($entity_type, $entity, $field, $instance,
   return $element;
 }
 
-/*
- * This function returns all images of an image field whose name is passed in argument $field
- */
-function galleria_get_referenced_images($field) {
-  if (empty($field)) {
-    drupal_set_message(t('The referenced field does not contain any image field.'), 'error');
-    return FALSE;
+function galleria_prepare_media_images($items) {
+  $image_items = array();
+  foreach ($items as $item) {
+    if ($item['file']->type == 'image') {
+      $file = (array) $item['file'];
+      $file += array('alt' => '', 'title' => '');
+      $image_items[] = $file;
+    }
   }
-
-  $fid_col_name = $field . '_fid';
-  $alt_col_name = $field . '_alt';
-  $title_col_name = $field . '_title';
-  $result = db_query('SELECT ' . $fid_col_name . ',' . $alt_col_name . ',' . $title_col_name . ' FROM {field_data_' . $field . '}');
-
-  $images = array();
-  while ($row = $result->fetchAssoc()) {
-    $image = (array) file_load($row[$fid_col_name]);
-    $image['alt'] = $row[$alt_col_name];
-    $image['title'] = $row[$title_col_name];
-    $images[] = $image;
-  }
-
-  return $images;
+  return $image_items;
 }
 
-/*
+/**
  * This function loads the required JavaScripts and settings for a Galleria instance.
  */
 function galleria_add_js($id, $optionset) {
