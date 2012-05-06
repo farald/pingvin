@@ -1,0 +1,14 @@
+name = Views Type Block
+description = Exposes blocks as Views objects.
+dependencies[] = views
+dependencies[] = block
+dependencies[] = views_bulk_operations
+package = Views
+core = 7.x
+
+; Information added by drupal.org packaging script on 2012-05-04
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "views_hacks"
+datestamp = "1336135876"
+

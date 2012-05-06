@@ -1,0 +1,14 @@
+name = Views Selective Exposed Filters
+description = Restrict exposed filter values to those present in the result set.
+package = Views
+dependencies[] = views
+dependencies[] = ctools
+core = 7.x
+
+files[] = views_filters_selective_exposed_form_plugin.inc
+; Information added by drupal.org packaging script on 2012-05-04
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "views_hacks"
+datestamp = "1336135876"
+

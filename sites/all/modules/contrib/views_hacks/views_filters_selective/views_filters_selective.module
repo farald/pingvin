@@ -1,0 +1,213 @@
+﻿<?php
+
+/**
+ * Implementation of hook_views_api().
+ */
+function views_filters_selective_views_api() {
+  return array(
+    'api' => 3.0,
+  );
+}
+
+/**
+ * Implementation of hook_views_filters_selective_handler().
+ *
+ * This hook allows filters of different types to be restricted.
+ * @return 
+ *   A keyed array of supported filters:
+ *   'filter_class' => 'filter_handler'
+ * 
+ * Handler signature:
+ * @param $filter
+ *    The filter handler being limited
+ * @param $options
+ *  an options array, that can be passed to FAPI #options
+ * @param $base_ids
+ *    The base ids of the result set
+ * @return
+ *    An array of acceptable values for the filter
+ */
+function views_filters_selective_views_filters_selective_handler() {
+  return array(
+    'views_handler_filter' => 'views_filters_selective_handler_filter',
+    'views_handler_filter_term_node_tid' => 'views_filters_selective_handler_filter_term_node_tid',
+    'views_handler_filter_term_node_tid_depth' => 'views_filters_selective_handler_filter_term_node_tid_depth',
+  );
+}
+
+/**
+ * Wrapper function.
+ * @param $filter
+ *    The filter handler being limited
+ * @param $options
+ *  an options array, that can be passed to FAPI #options
+ * @param $base_ids
+ *    The base ids of the result set
+ * @return
+ *    An array of acceptable values for the filter
+ */
+function views_filters_selective_handler_filter ($filter, $options, $base_ids) {
+	return _views_filters_selective_reduce_options($filter->value_options, $keys);
+}
+/**
+ * @param $filter
+ *    The filter handler being limited
+ * @param $options
+ *  an options array, that can be passed to FAPI #options
+ * @param $base_ids
+ *    The base ids of the result set
+ * @return
+ *    An array of acceptable values for the filter
+ */
+
+function views_filters_selective_handler_filter_term_node_tid($filter, $options, $base_ids) {
+	
+	$keys = array();
+	if (!empty($base_ids)) {
+		// We must look in DB
+		if ($filter->view->base_table == 'node' ) {
+			$query = db_select('taxonomy_index', 'ti');
+			$query->distinct();
+			$query->fields('ti', array('tid'))
+			  	->condition('nid', $base_ids, 'IN');
+			$result = $query->execute();
+			//SELECT tid FROM {taxonomy_index} t WHERE t.nid IN (:base_ids)', array(':base_ids' => $base_ids));
+		}
+		else {
+			//@todo Handle other types of entities.
+		}
+		foreach ($result as $id) {
+			$keys[] = $id->tid;
+		}
+		// If it feets you, you can use this module 'default' reducer function
+		// if don't use another (although this should be enough for most cases;-).
+	}
+	return  _views_filters_selective_reduce_options($options, $keys);
+}
+
+/**
+ * @param $filter
+ *    The filter handler being limited
+ * @param $options
+ *  an options array, that can be passed to FAPI #options
+ * @param $base_ids
+ *    The base ids of the result set
+ * @return
+ *    An array of acceptable values for the filter
+ */
+function views_filters_selective_handler_filter_term_node_tid_depth($filter, $options, $base_ids) {
+	$keys = array();
+	if (!empty($base_ids)) { 
+		// We must look in DB
+		// In this case we have to consider also the depth.
+		$depth = $filter->options['depth'];
+		// if depth == 0 fallback to the normal handler
+		if ($depth == 0) {
+		  return views_filters_selective_handler_filter_term_node_tid($filter, $options, $base_ids);
+		}
+		// It seems this is the only 'right' way to get the exposed input at this level
+		// @todo Find out why $filter->value is null here 
+		$filter_info = $filter->exposed_info();
+		$exposed_info = $filter->view->get_exposed_input();
+		$exposed_data = isset($exposed_info[$filter_info['value']]) ? $exposed_info[$filter_info['value']] : array();
+		
+		if ($filter->view->base_table == 'node' ) {
+		  // Fallowing the spirit of the filter ()
+		  $query = db_select('taxonomy_index', 'tn');
+		  $query->fields('tn',array('nid', 'tid'));
+		  
+		  $last = "tn";
+		  if ($depth > 0) {
+            $query->leftJoin('taxonomy_term_hierarchy', 'th', "th.tid = tn.tid");
+            if (!empty($exposed_data)) {
+              $where = db_or()->condition('tn.tid', $exposed_data, 'IN');
+            }
+            $last = "th";
+            foreach (range(1, abs($depth)) as $count) {
+              $query->leftJoin('taxonomy_term_hierarchy', "th$count", "$last.parent = th$count.tid");
+              if (!empty($exposed_data)) {
+                $where->condition("th$count.tid", $exposed_data, 'IN');
+              }
+			  $last = "th$count";
+            }
+		  }
+          elseif ($depth < 0) {
+            foreach (range(1, abs($depth)) as $count) {
+              $query->leftJoin('taxonomy_term_hierarchy', "th$count", "$last.tid = th$count.parent");
+              $last = "th$count";
+            }
+          }
+          
+          // create the second 'subcondition'
+          $and = db_and()->condition('nid', $base_ids, 'IN');
+          if (isset($where)) {
+            $and->condition($where);
+          }
+		  
+          // AlWAYS return the term the user selected
+          if (!empty($exposed_data)) {
+            $or = db_or()->condition('tn.tid', $exposed_data, 'IN');
+            $or->condition($and);
+          }
+          
+          // Add the final condition to the query
+          if (isset($or)) {
+            $query->condition($or);
+          }
+          else {
+            $query->condition($and);
+          }
+          
+          $result = $query->execute()
+                          ->fetchAllAssoc('tid');
+		}
+		else {
+			//@todo Handle other types of entities. 
+		}
+		foreach ($result as $key) {
+		  $keys[] = $key->tid;
+		}
+		
+		// If it feets you, you can use this module 'default' reducer function
+		// if don't user another (athough this should be enough for most cases;-).
+		  
+	}
+	return  _views_filters_selective_reduce_options($options, $keys);;
+}
+
+/**
+ * Helper function to reduce #options arrays (that can contain arrays or objects).
+ * @see form_select_options()
+ *
+ * @param $options
+ *  an options array, that can be passed to FAPI #options
+ * @param $keys
+ *  array of keys of the options array to reduce to.
+ *
+ * @return
+ *  array of options for select & co, see FAPI #options.
+ */
+function _views_filters_selective_reduce_options($options, $keys) {
+  $return_options = array();
+  foreach ($options as $id => $option) {
+    // option is an optgroup, so check the optgroup children
+    if (is_array($option)) {
+      $result = _views_filters_selective_reduce_options($option, $keys);
+      if (!empty($return)) $return_options[$id] = $result;
+    }
+    // is an object, and could contain multiple items
+    elseif (is_object($option)) {
+      $result = _views_filters_selective_reduce_options($option->option, $keys);
+      if (!empty($result)) {
+        $option->option = $result;
+        $return_options[$id] = $option;
+      }
+    }
+    // default key => string relation
+    elseif (in_array($id, $keys)) {
+      $return_options[$id] = $option;
+    }
+  }  
+  return $return_options;
+}
+
