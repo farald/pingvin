@@ -16,8 +16,8 @@ function template_preprocess_galleria_container(&$vars) {
   $vars['id'] = ++$galleria_id;
 
   // Load the used option set
-  if (!empty($vars['settings']['galleria_optionset'])) {
-    $optionset = galleria_optionset_load($vars['settings']['galleria_optionset']);
+  if (!empty($vars['settings']['optionset'])) {
+    $optionset = galleria_optionset_load($vars['settings']['optionset']);
   }
   if (empty($optionset)) {
     // Fall back to 'default' option set
@@ -32,6 +32,11 @@ function template_preprocess_galleria_container(&$vars) {
   $vars['items'] = array();
   $thumb_style = empty($optionset['imagestyle_thumb']) ? 'galleria_thumb' : $optionset['imagestyle_thumb'];
   foreach ($items as $delta => $item) {
+    // Stop errors for empty URI. See issue [#1319268] for details.
+    if (empty($item['uri'])) {
+      continue;
+    }
+
     // Get URL for "normal" image
     if (empty($optionset['imagestyle_normal'])) {
        $normal_url = file_create_url($item['uri']);

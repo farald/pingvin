@@ -175,6 +175,31 @@ function galleria_update_7001() {
   return t('You have to re-adjust the theme and image styles for your Galleria instances.');
 }
 
+/**
+ * Updates renamed field formatter settings.
+ */
+function galleria_update_7002() {
+  drupal_load('module', 'field');
+
+  foreach (field_info_instances('node') as $node_type => $field_instances) {
+    foreach ($field_instances as $field_instance) {
+      $changed = FALSE;
+      foreach ($field_instance['display'] as &$display) {
+        if (($display['module'] == 'galleria') && ($display['type'] == 'galleria')) {
+          $settings = &$display['settings'];
+          $settings['optionset'] = $settings['galleria_optionset'];
+          unset($settings['galleria_optionset']);
+          unset($settings['galleria_reference_img_src']);
+          $changed = TRUE;
+        }
+      }
+      if ($changed) {
+        field_update_instance($field_instance);
+      }
+    }
+  }
+}
+
 
 /**
  * Implements hook_install().
