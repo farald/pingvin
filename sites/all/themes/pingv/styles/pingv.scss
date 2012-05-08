@@ -45,31 +45,103 @@
 /*         Forms
 *************************************************/
 $border-color: #dddddd;
+$color-button: #3760a0;
+$color-button-border: #5477ac;
+$color-button-hover: #294979;
+$color-button-user: #ffb922;
+$color-button-user-hover: #efa301;
+
+@mixin rounded-corners($radius) {  
+  border-radius: $radius;  
+  -moz-border-radius: $radius;  
+  -webkit-border-radius: $radius;  
+}  
 
 html {
   background: url("../images/background.png") repeat scroll 0 0;
-  }
+}
 
 body {
   font: 12px helvetica,arial,"nimbus sans l",sans-serif;
   color: #555555;
   #header {
+    margin-top:10px;
     #site-name {
       display:none; 
     }
+    #site-slogan {
+      float:right;
+      width:100px;
+      text-align:center;
+      font-style:italic;
+      padding:10px;
+      @include rounded-corners(5px); 
+      
+    }
+    
+    #main-menu,#secondary-menu{
+      float:none;
+      #main-menu-links, #secondary-menu-links{
+        li {
+          margin-top:6px;
+          padding:5px;
+          border: 1px solid $color-button-border;
+          @include rounded-corners(5px); 
+          &:hover {   
+            background-color:$color-button-hover; 
+          } 
+          a {
+            font-weight:bold;
+            background-position: 0 0;
+            color: #F4F4F4;
+            letter-spacing: 0.3px;
+            line-height: 35px;
+            text-align: center;
+            text-shadow: 0 1px 0 #252525;
+            width: 118px;
+            text-decoration :none;
+            &:hover {   
+              /*text-decoration: underline;  */
+            }
+            padding:10px;
+          }
+        }
+        li.active {
+          background-color:$color-button-hover;
+        }
+      }
+      #main-menu-links {
+        li{
+          background-color:$color-button;
+          &:hover {   
+            background-color:$color-button-hover; 
+          }
+        }
+      }
+      #secondary-menu-links {
+        li{
+          background-color:#539377;
+          &:hover {   
+            background-color:$color-button-hover; 
+          }
+        }
+      }
+    }
+    
   }
   .h2 .a {
-      color: #2BAF8A;
-      text-decoration: none;
-      }
+    color: #2BAF8A;
+    text-decoration: none;
+  }
   .field-type-image {
-      clear:none;
-      .field-item {
-            float:left;
-            margin:4px;
-            border-width: 2px;
-            border-style: solid;
-            border-color: $border-color;
-            }
-      }
+    clear:none;
+    .field-item {
+      float:left;
+      margin:4px;
+      border-width: 2px;
+      border-style: solid;
+      border-color: $border-color;
+    }
+  }
+  
 } 
