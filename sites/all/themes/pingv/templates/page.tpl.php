@@ -87,22 +87,23 @@
       <?php if ($site_slogan): ?>
         <div id="site-slogan"><?php print $site_slogan; ?></div>
       <?php endif; ?>
-
-      <?php print render($page['header']); ?>
-    </header><!-- /#header -->
+        
+          <?php if ($secondary_menu_links): ?>
+    <nav id="secondary-menu" role="navigation">
+      <?php print $secondary_menu_links ?>
+    </nav> <!-- /#secondary-menu -->
   <?php endif; ?>
-  
-  <?php if ($main_menu_links): ?>
+        
+          <?php if ($main_menu_links): ?>
     <nav id="main-menu" role="navigation">
       <?php print $main_menu_links; ?>
     </nav><!-- /#main-menu -->
   <?php endif; ?>
 
-  <?php if ($secondary_menu_links): ?>
-    <nav id="secondary-menu" role="navigation">
-      <?php print $secondary_menu_links ?>
-    </nav> <!-- /#secondary-menu -->
+      <?php print render($page['header']); ?>
+    </header><!-- /#header -->
   <?php endif; ?>
+
 
   <?php if ($page['featured']): ?>
     <div id="featured">
