@@ -14,11 +14,11 @@ files[] = geonames_config.inc
 files[] = tests/geonames.test
 files[] = tests/geonames.all.test
 
-configure = admin/config/geonames
+configure = admin/config/search/geonames
 
-; Information added by drupal.org packaging script on 2011-07-14
-version = "7.x-1.x-dev"
+; Information added by drupal.org packaging script on 2012-07-20
+version = "7.x-1.1+5-dev"
 core = "7.x"
 project = "geonames"
-datestamp = "1310602727"
+datestamp = "1342787018"
 

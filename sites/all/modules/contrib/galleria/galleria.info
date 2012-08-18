@@ -10,9 +10,9 @@ files[] = galleria.module
 files[] = includes/galleria.admin.inc
 files[] = includes/views_plugin_style_galleria.inc
 
-; Information added by drupal.org packaging script on 2012-04-21
-version = "7.x-1.0-beta2+10-dev"
+; Information added by drupal.org packaging script on 2012-05-10
+version = "7.x-1.0-beta3"
 core = "7.x"
 project = "galleria"
-datestamp = "1335010609"
+datestamp = "1336662057"
 

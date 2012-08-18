@@ -6,7 +6,7 @@
  */
 
 /**
- *
+ * Implements hook_menu().
  */
 function geonames_tools_menu() {
   $items['geonames/autocomplete'] = array(
@@ -20,25 +20,7 @@ function geonames_tools_menu() {
 }
 
 /**
- *
- */
-function geonames_tools_search_form() {
-  $form['search'] = array(
-    '#type'              => 'textfield',
-    '#title'             => t('Location Search'),
-    '#description'       => t('Search for location'),
-    '#autocomplete_path' => 'geonames/autocomplete',
-  );
-  $form['submit'] = array(
-    '#type' => 'value',
-    '#value' => TRUE,
-  );
-
-  return $form;
-}
-
-/**
- *
+ * Provide JSON results of a location search for $search.
  */
 function geonames_tools_search_autocomplete($search) {
   $matches = array();
@@ -61,4 +43,24 @@ function geonames_tools_search_autocomplete($search) {
   }
   print drupal_json_encode($matches);
   exit();
+}
+
+/**
+ * Add a sample form that uses the autocomplete function provided by this
+ * module.
+ */
+function geonames_tools_form_geonames_admin_settings_alter(&$form, &$form_state, $form_id) {
+  $form['geonames_tools'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Geonames Tools'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => 8,
+  );
+  $form['geonames_tools']['search'] = array(
+    '#type'              => 'textfield',
+    '#title'             => t('Sample Location Search'),
+    '#description'       => t('Search for location'),
+    '#autocomplete_path' => 'geonames/autocomplete',
+  );
 }

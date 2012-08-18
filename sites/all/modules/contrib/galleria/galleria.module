@@ -152,6 +152,7 @@ function galleria_optionsets() {
   $optionsets = db_query("SELECT * FROM {galleria_optionset}")->fetchAllAssoc('name', PDO::FETCH_ASSOC);
   foreach ($optionsets as &$optionset) {
     $optionset['options'] = empty($optionset['options']) ? array() : unserialize($optionset['options']);
+    $optionset['plugins'] = empty($optionset['plugins']) ? array() : unserialize($optionset['plugins']);
   }
   return $optionsets;
 }
@@ -163,6 +164,7 @@ function galleria_optionset_load($optionset_name) {
   $optionset = db_query("SELECT * FROM {galleria_optionset} WHERE name = :name", array(':name' => $optionset_name))->fetchAssoc();
   if ($optionset !== FALSE) {
     $optionset['options'] = empty($optionset['options']) ? array() : unserialize($optionset['options']);
+    $optionset['plugins'] = empty($optionset['plugins']) ? array() : unserialize($optionset['plugins']);
   }
   return $optionset;
 }
@@ -234,7 +236,7 @@ function galleria_get_library_file() {
 
 /**
  * Searches for available themes inside the Galleria folder.
- * The list of themes
+ * The list of themes is cached for performance reasons.
  */
 function galleria_get_themes($nocache = FALSE) {
   if (!$nocache && (($themes = cache_get('galleria_themes')) !== FALSE))
@@ -280,6 +282,53 @@ function galleria_get_theme_file($theme) {
 
 
 /**
+ * Searches for available plugins inside the Galleria folder.
+ * The list of plugins is cached for performance reasons.
+ */
+function galleria_get_plugins($nocache = FALSE) {
+  if (!$nocache && (($plugins = cache_get('galleria_plugins')) !== FALSE))
+    return $plugins->data;
+
+  $plugins = array();
+
+  // Search for theme folders
+  $path = libraries_get_path('galleria') . '/plugins/';
+
+  if (is_dir($path) && (($path_handle = opendir($path)) !== FALSE)) {
+    while (($plugin = readdir($path_handle)) !== FALSE) {
+
+      if (!is_dir($path . $plugin) || $plugin[0] == '.')
+        continue;
+
+      // Search for the theme JavaScript file, minified version first
+      $js = glob($path . $plugin . '/*.min.js');
+      if (count($js) == 0)
+        $js = glob($path . $plugin . '/*.js');
+
+      // Sort by filename to (hopefully) get the newest version.
+      if (count($js) > 0) {
+        rsort($js);
+        $plugins[$plugin] = $js[0];
+      }
+    }
+    closedir($path_handle);
+
+    cache_set('galleria_plugins', $plugins);
+  }
+
+  return $plugins;
+}
+
+/**
+ * Returns the JavaScript file of the given plugin, or FALSE if it could not be found.
+ */
+function galleria_get_plugin_file($plugin) {
+  $plugins = galleria_get_plugins();
+  return isset($plugins[$plugin]) ? $plugins[$plugin] : FALSE;
+}
+
+
+/**
  * Implements hook_field_formatter_info().
  *
  * Adds the Galleria format option within the manage display form of
@@ -289,9 +338,11 @@ function galleria_field_formatter_info() {
   return array(
     'galleria' => array(
       'label' => t('Galleria'),
-      'field types' => array('image', 'media', 'node_reference'),
+      'field types' => array('image', 'media', 'node_reference', 'file'),
       'settings' => array(
         'optionset' => 'default',
+        'title_field' => '',
+        'alt_field' => '',
         'referenced_fields' => array(),
       ),
     ),
@@ -323,6 +374,33 @@ function galleria_field_formatter_settings_form($field, $instance, $view_mode, $
     '#options' => $optionsets,
     '#default_value' => $settings['optionset'],
   );
+
+  if ($field['type'] == 'file') {
+    // Provide alternate settings to allow selection of caption and alt tags.
+    $bundles = field_info_instances('file');
+    // Determine if there are additional fields on the image instance.
+    if (isset($bundles['image']) && !empty($bundles['image'])) {
+      $options = array('' => t('None'));
+      foreach ($bundles['image'] as $field_name => $field_details) {
+        $options[$field_name] = $field_details['label'];
+      }
+      $form['alt_field'] = array(
+        '#title' => t('Alt field'),
+        '#description' => t('Select an optional field to draw alt tags from.'),
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => isset($settings['alt_field']) ? $settings['alt_field'] : ''
+      );
+      $form['title_field'] = array(
+        '#description' => t('Select an optional field to draw images titles from.'),
+        '#title' => t('Title field'),
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => isset($settings['title_field']) ? $settings['title_field'] : ''
+      );
+    }
+    
+  }
 
   // Show select box for image fields if we're formatting a node_reference field
   if ($field['type'] == 'node_reference') {
@@ -382,6 +460,28 @@ function galleria_field_formatter_settings_summary($field, $instance, $view_mode
     }
   }
   $summary[] = t('Option set: %optionset', array('%optionset' => $optionset));
+
+  // Summary for file fields.
+  if ($field['type'] == 'file') {
+    // Prepare options list.
+    if (!empty($settings['alt_field']) ||
+        !empty($settings['title_field'])) {
+      $bundles = field_info_instances('file');
+      // Determine if there are additional fields on the image instance.
+      if (isset($bundles['image']) && !empty($bundles['image'])) {
+        $options = array('' => t('None'));
+        foreach ($bundles['image'] as $field_name => $field_details) {
+          $options[$field_name] = $field_details['label'];
+        }
+      }
+    }
+    if (!empty($settings['alt_field'])) {
+      $summary[] = t('Alt field: @title', array('@title' => $options[$settings['alt_field']]));
+    }
+    if (!empty($settings['title_field'])) {
+      $summary[] = t('Title field: @title', array('@title' => $options[$settings['title_field']]));
+    }
+  }
 
   // For node_reference fields: Referenced image fields
   if ($field['type'] == 'node_reference') {
@@ -447,6 +547,9 @@ function galleria_field_formatter_view($entity_type, $entity, $field, $instance,
   if ($field['type'] == 'media') {
     $items = galleria_prepare_media_images($items);
   }
+  elseif ($field['type'] == 'file') {
+    $items = galleria_prepare_file_images($items, $display['settings'], $langcode);
+  }
   elseif ($field['type'] == 'node_reference') {
     // Cleanup referenced_fields array
     $referenced_fields = &$display['settings']['referenced_fields'];
@@ -489,6 +592,13 @@ function galleria_field_formatter_view($entity_type, $entity, $field, $instance,
   return $element;
 }
 
+/**
+ * Util function to parse media $items and return images in format expected by
+ * galleria formatter.
+ *
+ * @param array $items
+ *   Array of field items.
+ */
 function galleria_prepare_media_images($items) {
   $image_items = array();
   foreach ($items as $item) {
@@ -499,6 +609,56 @@ function galleria_prepare_media_images($items) {
     }
   }
   return $image_items;
+}
+
+/**
+ * Util function to parse file $items and return images in format expected by
+ * galleria formatter.
+ *
+ * @param array $items
+ *   Array of field items.
+ * @param array $settings
+ *   Array of settings
+ * @param string $langcode
+ *   Language code of the field
+ */
+function galleria_prepare_file_images($items, $settings, $langcode) {
+  $image_fids = array();
+  $alt_field = empty($settings['alt_field']) ? FALSE : $settings['alt_field'];
+  $title_field = empty($settings['title_field']) ? FALSE : $settings['title_field'];
+  // First pass, fetch the fids. We pass twice so we can minimize calls to
+  // entity_load which is expensive to call multiple times.
+  foreach ($items as $delta => $item) {
+    if ($item['type'] == 'image') {
+      $image_fids[] = $item['fid'];
+      // Set a sensible default.
+      $items[$delta]['alt'] = $items[$delta]['title'] = '';
+    }
+    else {
+      // Galleria only handles images.
+      unset($items['key']);
+    }
+  }
+  $file_entities = entity_load('file', $image_fids);
+  // Second pass, set the alt/title tag.
+  foreach ($items as $delta => $item) {
+    if ($item['type'] == 'image') {
+      $file_entity = $file_entities[$item['fid']];
+      if ($alt_field) {
+        $alt_field_items = field_get_items('file', $file_entity, $alt_field, $langcode);
+        if (!empty($alt_field_items[0]['safe_value'])) {
+          $items[$delta]['alt'] = $alt_field_items[0]['safe_value'];
+        }
+      }
+      if ($title_field) {
+        $title_field_items = field_get_items('file', $file_entity, $title_field, $langcode);
+        if (!empty($title_field_items[0]['safe_value'])) {
+          $items[$delta]['title'] = $title_field_items[0]['safe_value'];
+        }
+      }
+    }
+  }
+  return $items;
 }
 
 /**
@@ -530,6 +690,18 @@ function galleria_add_js($id, $optionset) {
       $theme_file = galleria_get_theme_file('classic');
     }
     $cache['theme'] = $theme_file;
+  }
+
+  // Plugins
+  $plugins = empty($optionset['plugins']) ? array() : $optionset['plugins'];
+  foreach ($plugins as $plugin) {
+    if (empty($cache['plugins'][$plugin])) {
+      $plugin_file = galleria_get_plugin_file($plugin);
+      if ($plugin_file !== FALSE) {
+        $cache['plugins'][$plugin] = $plugin_file;
+        drupal_add_js($plugin_file);
+      }
+    }
   }
 
   // JavaScript settings

@@ -298,8 +298,14 @@ input.form-submit:hover {
 /**
  * Blocks
  */
-div.messages,
-.block { margin:5px; }
+div.messages {
+  margin:5px;
+  padding: 10px;	
+}
+
+.block { 
+	margin:5px;
+}
 
 .block .block-title {
   background:#08c url(images/cube.png) 0px -190px repeat-x;
@@ -361,7 +367,7 @@ div.node {
   border-width:1px;
   border-color:#ccc #ddd #eee;
 
-  background:#fff url(../images/vrule.png) 65% 0% repeat-y;
+  background:#fff url(images/vrule.png) 65% 0% repeat-y;
   margin:0px 0px 10px;
 
   -moz-box-shadow:#fff 0px 1px 0px;

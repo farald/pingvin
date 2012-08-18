@@ -564,6 +564,18 @@ function galleria_form_optionset_edit($form, &$form_state, $optionset) {
     );
   }
 
+  // Show multi-select field for plugins
+  $plugins = array_keys(galleria_get_plugins(TRUE));
+  asort($plugins);
+  $form['plugins'] = array(
+    '#type' => 'select',
+    '#multiple' => TRUE,
+    '#title' => t('Plugins'),
+    '#description' => t('Please select a subset of plugins to enable for this specific optionset. You may select multiple by holding down the Cmd/Ctrl or Shift key while clicking.'),
+    '#options' => array_combine($plugins, $plugins),
+    '#default_value' => $optionset['plugins'],
+  );
+
   // Show select boxes for the various image styles (thumbnail, normal, big)
   $image_styles = image_style_options(FALSE);
   $form['image_styles'] = array(
@@ -800,8 +812,9 @@ function galleria_form_optionset_edit_submit_delete($form, &$form_state) {
 function galleria_form_optionset_edit_submit($form, &$form_state) {
   $optionset = &$form_state['optionset'];
 
-  $optionset['title'] = $form_state['values']['title'];
-  $optionset['theme'] = $form_state['values']['theme'];
+  $optionset['title']   = $form_state['values']['title'];
+  $optionset['theme']   = $form_state['values']['theme'];
+  $optionset['plugins'] = $form_state['values']['plugins'];
   $optionset['imagestyle_thumb']  = $form_state['values']['image_styles']['thumb'];
   $optionset['imagestyle_normal'] = $form_state['values']['image_styles']['normal'];
   $optionset['imagestyle_big']    = $form_state['values']['image_styles']['big'];
@@ -913,6 +926,27 @@ function galleria_form_settings() {
     $form['library']['themes'][] = array(
       array(
         '#markup' => check_plain($theme),
+      ),
+      array(
+        '#markup' => t('<code>@file</code>', array('@file' => $file)),
+      ),
+    );
+  }
+
+  $form['library']['plugins_title'] = array(
+    '#type' => 'item',
+    '#title' => t('Plugins'),
+    '#description' => t('The following plugins are currently known to the module. Clear the cache to search for new ones.'),
+  );
+  $form['library']['plugins'] = array(
+    '#theme' => 'galleria_form_table',
+    '#header' => array(t('Name'), t('JavaScript file')),
+    '#empty' => t('No plugins found!'),
+  );
+  foreach (galleria_get_plugins() as $plugin => $file) {
+    $form['library']['plugins'][] = array(
+      array(
+        '#markup' => check_plain($plugin),
       ),
       array(
         '#markup' => t('<code>@file</code>', array('@file' => $file)),

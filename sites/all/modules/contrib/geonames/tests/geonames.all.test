@@ -116,7 +116,7 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
     $this->assertEqual($results->total_results_count, 1, 'Found 1 result from "extendedFindNearby" A');
     $result = $results->results[0];
     $this->assertEqual($result['street'], 'Roble Ave', t('Found "Roble Ave" from "extendedFindNearby" A'));
-    $this->assertEqual($result['streetnumber'], '671', t('Found "671" from "extendedFindNearby" A'));
+    $this->assertEqual($result['streetnumber'], '651', t('Found "651" from "extendedFindNearby" A'));
 
     // Test the "extendedFindNearby" service : other countries
     $query = array('lat' => 47.3, 'lng' => 9);
@@ -125,8 +125,8 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
     $this->assertEqual($results->results[0]['name'], 'Earth', t('Found "Earth" from "extendedFindNearby" B'));
     $this->assertEqual($results->results[1]['name'], 'Europe', t('Found "Europe" from "extendedFindNearby" B'));
     $this->assertEqual($results->results[2]['name'], 'Switzerland', t('Found "Switzerland" from "extendedFindNearby" B'));
-    $this->assertEqual($results->results[3]['name'], 'Kanton St. Gallen', t('Found "Kanton St. Gallen" from "extendedFindNearby" B'));
-    $this->assertEqual($results->results[$results->total_results_count - 1]['geonameid'], 6559633, t('Found (geonameid) "6559633" from "extendedFindNearby" B'));
+    $this->assertEqual($results->results[3]['name'], 'Saint Gallen', t('Found "Saint Gallen" from "extendedFindNearby" B'));
+    $this->assertEqual($results->results[$results->total_results_count - 1]['geonameid'], 7910950, t('Found (geonameid) "7910950" from "extendedFindNearby" B'));
 
     // Test the "extendedFindNearby" service : ocean
     $query = array('lat' => 40.78343, 'lng' => -43.96625);
@@ -155,7 +155,7 @@ class GeoNamesAllTestCase extends DrupalWebTestCase {
     $this->assertEqual($results->total_results_count, 1, 'Found 1 result from "findNearestAddress"');
     $result = $results->results[0];
     $this->assertEqual($result['street'], 'Roble Ave', t('Found "Roble Ave" from "findNearestAddress"'));
-    $this->assertEqual($result['streetnumber'], '671', t('Found "671" from "findNearestAddress"'));
+    $this->assertEqual($result['streetnumber'], '651', t('Found "651" from "findNearestAddress"'));
 
     // Test the "findNearestIntersection" service
     $query = array('lat' => 37.451, 'lng' => -122.18);

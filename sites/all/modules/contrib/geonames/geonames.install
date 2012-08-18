@@ -238,7 +238,7 @@ function geonames_requirements($phase) {
       'value' => $t('!updated (!numcountries countries and !numfeaturecodes feature codes)', $values),
     );
     if ($updated == 0 || $values['!numcountries'] == 0 || $values['!numfeaturecodes'] == 0) {
-      $requirements['geonames_metadata']['description'] = $t('Metadata is incomplete. Please check the !link to manually refresh.', array('!link' => l('geonames settings', 'admin/config/geonames')));
+      $requirements['geonames_metadata']['description'] = $t('Metadata is incomplete. Please check the !link to manually refresh.', array('!link' => l('geonames settings', 'admin/config/search/geonames')));
       $requirements['geonames_metadata']['severity'] = REQUIREMENT_WARNING;
     }
   }
@@ -272,7 +272,7 @@ function geonames_update_7001() {
   $server = $commercial_active ? variable_get('geonames_commercial_server', '') : GEONAMES_FREE_SERVER_URL;
   $username = variable_get('geonames_commercial_username', '');
   if ($username === '') {
-    $link = l('GeoNames settings', 'admin/config/geonames');
+    $link = l('GeoNames settings', 'admin/config/search/geonames');
     drupal_set_message('Geonames server username is not set. Please configure this at '. $link, 'warning');
   }
 

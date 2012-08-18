@@ -32,6 +32,12 @@ function galleria_schema() {
           'not null' => TRUE,
           'default' => 'classic',
         ),
+        'plugins' => array(
+          'description' => 'The Galleria plugins to be loaded.',
+          'type' => 'blob',
+          'size' => 'big',
+          'serialize' => TRUE,
+        ),
         'imagestyle_thumb' => array(
           'description' => 'The image style for thumbnails.',
           'type' => 'varchar',
@@ -198,6 +204,24 @@ function galleria_update_7002() {
       }
     }
   }
+}
+
+/**
+ * Add support for Galleria plugins.
+ */
+function galleria_update_7003() {
+  $new_fields = array(
+    'plugins' => array(
+      'description' => 'The Galleria plugins to be loaded.',
+      'type' => 'blob',
+      'size' => 'big',
+      'serialize' => TRUE,
+    ),
+  );
+  foreach ($new_fields as $field => $spec) {
+    db_add_field('galleria_optionset', $field, $spec);
+  }
+  return t('You may now select plugins to be loaded with each Galleria instance.');
 }
 
 

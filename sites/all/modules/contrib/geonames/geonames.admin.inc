@@ -53,12 +53,13 @@ function geonames_admin_settings() {
     '#title' => t('Cache'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#weight' => 15,
   );
   $form['cache']['clear_cache'] = array(
     '#type' => 'markup',
     '#markup' => t('There are currently %num items in the cache. [!clearlink]', array(
       '%num' => db_query("SELECT COUNT(*) FROM {cache_geonames}")->fetchField(),
-      '!clearlink' => l(t('Clear cache'), 'admin/config/geonames/clear_cache'),
+      '!clearlink' => l(t('Clear cache'), 'admin/config/search/geonames/clear_cache'),
     )),
   );
   $form['cache']['geonames_cache'] = array(
@@ -96,6 +97,7 @@ function geonames_admin_settings() {
       '#title' => t('Metadata - Incomplete'),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
+      '#weight' => 20,
     );
   }
   else {
@@ -104,6 +106,7 @@ function geonames_admin_settings() {
       '#title' => t('Metadata'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => 20,
     );
   }
 
@@ -128,7 +131,8 @@ function geonames_admin_settings() {
       '!theirsitelink' => l(t('their site'), 'http://www.geonames.org/'), // should be translated
       '!cclink' =>  l(t('Creative Commons Attribution Licence 3.0'), 'http://creativecommons.org/licenses/by/3.0/'),
     )),
-    '#suffix' => '</div>'
+    '#suffix' => '</div>',
+    '#weight' => 21,
   );
 
   return system_settings_form($form);
@@ -168,7 +172,7 @@ function geonames_cache_clear($adminpage = TRUE) {
   cache_clear_all(NULL, 'cache_geonames');
   if ($adminpage) {
     drupal_set_message(t('Cache cleared.'));
-    drupal_goto('admin/config/geonames');
+    drupal_goto('admin/config/search/geonames');
   }
 }
 
@@ -180,6 +184,6 @@ function geonames_credits_reset($adminpage = TRUE) {
   variable_set('geonames_commercial_credits_since', REQUEST_TIME);
   if ($adminpage) {
     drupal_set_message(t('Credits and time reset.'));
-    drupal_goto('admin/config/geonames');
+    drupal_goto('admin/config/search/geonames');
   }
 }

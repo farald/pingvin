@@ -16,47 +16,42 @@
  *   by the original row number.
  * - $row_classes_flipped: An array of classes to apply to each flipped row,
  *   indexed by the field name.
+ * - $header_row: An array containing the first of the flipped rows, if this is
+ *   to be shown as a table header.
  *   
  * @ingroup views_templates
  */
-?>
-<?php
-  $first = isset($rows_flipped['title']);
 ?>
 <table class="<?php print $classes; ?>">
   <?php if (!empty($title)) : ?>
     <caption><?php print $title; ?></caption>
   <?php endif; ?>
 
-  <?php if ($first) : ?>
+  <?php if (!empty($header_row)) : ?>
     <thead>
-      <tr class="<?php print $row_classes_flipped['title']; ?>">
+      <tr>
         <th>
         </th>
-        <?php foreach ($rows_flipped['title'] as $title) : ?>
+        <?php foreach ($header_row as $item) : ?>
           <th>
-          <?php print $title; ?>
+            <?php print $item; ?>
           </th>
         <?php endforeach; ?>
       </tr>
     </thead>
-  <?php  
-    endif; //$first
-  ?>
+  <?php endif; //$header_row ?>
   <tbody>
     <?php foreach ($rows_flipped as $field_name => $row) : ?>
-      <?php if ($field_name != 'title') : ?>
-        <tr class="<?php print $row_classes_flipped[$field_name]; ?>">
-          <th>
-            <?php echo $header[$field_name]; ?>
-          </th>
-          <?php foreach ($row as $index => $item): ?>
-            <td>
-              <?php echo $item; ?>
-            </td>
-          <?php endforeach; ?>
-        </tr>
-      <?php endif; // field != title ?>
+      <tr class="<?php print $row_classes_flipped[$field_name]; ?>">
+        <th>
+          <?php echo $header[$field_name]; ?>
+        </th>
+        <?php foreach ($row as $index => $item): ?>
+          <td>
+            <?php echo $item; ?>
+          </td>
+        <?php endforeach; ?>
+      </tr>
     <?php endforeach; ?>
   </tbody>
 </table>

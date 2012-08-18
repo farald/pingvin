@@ -12,7 +12,7 @@ function features_tools_js_alter(&$javascript) {
   if (isset($item['path']) && $item['path'] === 'admin/structure/features') {
     $js_path = drupal_get_path('module', 'features') . '/features.js';
     if (isset($javascript[$js_path])) {
-      if (variable_get('featrues_tools_disable_features_page_js', 0)) {
+      if (variable_get('features_tools_disable_features_page_js', 0)) {
         unset($javascript[$js_path]);
       }
     }
@@ -54,9 +54,16 @@ function features_tools_menu() {
  * Implements hook_form_alter().
  */
 function features_tools_form_features_admin_form_alter(&$form, &$form_state) {
-  $form['disable_ajax'] = array('#type' => 'checkbox', '#title' => t('disable the features status ajax loading'), '#default_value' => variable_get('featrues_tools_disable_features_page_js', 0));
+  $form['disable_ajax'] = array('#type' => 'checkbox', '#title' => t('disable the features status ajax loading'), '#default_value' => variable_get('features_tools_disable_features_page_js', 0));
   $form['buttons']['submit']['#submit'][] = 'features_tools_features_admin_form_submit';
-  if (variable_get('featrues_tools_disable_features_page_js', 0) == 0) {
+  $form['buttons']['revert'] = array(
+   '#type' => 'submit',
+   '#value' => t('Revert them All'),
+   '#attributes' => array('onclick' => 'if(!confirm("Are you sure you want to revert all features? \nThis action cannot be undone.")){return false;}'),
+   '#submit' =>  array('features_tools_features_revert_all_submit')
+  );
+  
+  if (variable_get('features_tools_disable_features_page_js', 0) == 0) {
     return;
   }
   drupal_add_css('table.features .admin-check, table.features .admin-default, table.features .admin-overridden, table.features .admin-rebuilding, table.features .admin-needs-review {
@@ -119,7 +126,7 @@ function features_tools_form_features_export_form_alter(&$form, &$form_state) {
     drupal_set_message(t('The directory @path does not exists or not writable', array('@path' => $path)), 'error');
   }
   //TODO: add backup options.
-  if (variable_get('featrues_tools_disable_features_page_js', 0)) {
+  if (variable_get('features_tools_disable_features_page_js', 0)) {
     foreach ($form['export']['sources'] as &$value) {
       if (is_array($value) && isset($value['#ajax'])) {
         unset($value['#ajax']);
@@ -380,5 +387,12 @@ function _features_tools_get_unlink_version($destination) {
 }
 
 function features_tools_features_admin_form_submit($form, &$form_state) {
-  variable_set('featrues_tools_disable_features_page_js', $form_state['values']['disable_ajax']);
+  variable_set('features_tools_disable_features_page_js', $form_state['values']['disable_ajax']);
+}
+
+function features_tools_features_revert_all_submit($form, &$form_state) {
+  module_load_include('inc', 'features', 'features.export');
+  features_include();
+  features_revert();
+  $form_state['redirect'] = 'admin/structure/features';
 }

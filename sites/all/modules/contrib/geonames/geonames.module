@@ -626,6 +626,7 @@ function geonames_query_required_parameters_set($service, $query, $single = 'sin
  */
 function geonames_parse_xml($data, $columns = FALSE) {
   $result = new stdClass();
+  $result->results = array();
 
   // temporary solution; get stuff from XML tag to distinguish between pay-service and free service
   preg_match('/<\?xml version="(.*)" encoding="([a-zA-Z\-0-9]*)"(.*)\?>/', $data, $regs);
@@ -769,7 +770,8 @@ function geonames_credits_pay($service) {
  * Implements hook_menu().
  */
 function geonames_menu() {
-  $items['admin/config/geonames'] = array(
+  $items = array();
+  $items['admin/config/search/geonames'] = array(
     'type' => MENU_NORMAL_ITEM,
     'title' => 'GeoNames',
     'access arguments' => array('administer site configuration'),
@@ -778,14 +780,14 @@ function geonames_menu() {
     'description' => 'GeoNames Configuration.',
     'file' => 'geonames.admin.inc',
   );
-  $items['admin/config/geonames/clear_cache'] = array(
+  $items['admin/config/search/geonames/clear_cache'] = array(
     'type' => MENU_CALLBACK,
     'access arguments' => array('administer site configuration'),
     'page callback' => 'geonames_cache_clear',
     'page arguments' => array(TRUE),
     'file' => 'geonames.admin.inc',
   );
-  $items['admin/config/geonames/reset_credits'] = array(
+  $items['admin/config/search/geonames/reset_credits'] = array(
     'type' => MENU_CALLBACK,
     'access arguments' => array('administer site configuration'),
     'page callback' => 'geonames_credits_reset',
@@ -864,6 +866,7 @@ function _prepare_pager_data($rowsperpage = 15, $startrow, $totalhits) {
  */
 function geonames_fields($type = FALSE, $keys = FALSE) {
   $fields = array(
+    'toponymName'    => array('style' => 's', 'geoname' => 'toponymName',    'name' => t('Toponymy Name')),
     'name'           => array('style' => 's', 'geoname' => 'name',           'name' => t('Place Name')),
     'lat'            => array('style' => 's', 'geoname' => 'lat',            'name' => t('Latitude')),
     'lng'            => array('style' => 's', 'geoname' => 'lng',            'name' => t('Longitude')),
@@ -903,10 +906,10 @@ function geonames_fields($type = FALSE, $keys = FALSE) {
     'areainaqkm'     => array('style' => 'o', 'geoname' => 'areaInSqKm',     'name' => t('Area (Km2)')),
     'currencycode'   => array('style' => 'o', 'geoname' => 'currencyCode',   'name' => t('Currency Code')),
     'languages'      => array('style' => 'o', 'geoname' => 'languages',      'name' => t('Languages')),
-    'bboxwest'       => array('style' => 'o', 'geoname' => 'bBoxWest',       'name' => t('Bound West')),
-    'bboxeast'       => array('style' => 'o', 'geoname' => 'bBoxNorth',      'name' => t('Bound East')),
-    'bboxnorth'      => array('style' => 'o', 'geoname' => 'bBoxEast',       'name' => t('Bound North')),
-    'bboxsouth'      => array('style' => 'o', 'geoname' => 'bBoxSouth',      'name' => t('Bound South')),
+    'west'           => array('style' => 'o', 'geoname' => 'West',           'name' => t('Bound West')),
+    'east'           => array('style' => 'o', 'geoname' => 'East',           'name' => t('Bound East')),
+    'north'          => array('style' => 'o', 'geoname' => 'North',          'name' => t('Bound North')),
+    'south'          => array('style' => 'o', 'geoname' => 'South',          'name' => t('Bound South')),
     'numpostalcodes' => array('style' => 'o', 'geoname' => 'numpostalcodes', 'name' => t('Number of Postal Codes')),
     'minpostalcode'  => array('style' => 'o', 'geoname' => 'minpostalcode', 'name' => t('Minimum Postal Code')),
     'maxpostalcode'  => array('style' => 'o', 'geoname' => 'maxpostalcode', 'name' => t('Maximum Postal Code')),
@@ -1072,6 +1075,9 @@ function theme_geonames_table($resultobj) {
  *   string, descending=DESC (ascending (ASC) is default)
  */
 function _geonames_sort(&$results, $key, $order) {
+  if (empty($results)) {
+    return;
+  }
   if (array_key_exists($key, $results[0])) {
     global $_geonames_sort_by_key;
     $_geonames_sort_by_key = $key;

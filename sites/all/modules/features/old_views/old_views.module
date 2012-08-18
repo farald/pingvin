@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Old views feature.
+ */
+
+include_once 'old_views.features.inc';

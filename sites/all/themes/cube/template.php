@@ -72,7 +72,7 @@ function _cube_user_links() {
   }
   else {
     $user_links['account'] = array('title' => t('Hello @username', array('@username' => $user->name)), 'href' => 'user', 'html' => TRUE);
-    $user_links['logout'] = array('title' => t('Logout'), 'href' => "logout");
+    $user_links['logout'] = array('title' => t('Logout'), 'href' => "user/logout");
   }
   return $user_links;
 }
