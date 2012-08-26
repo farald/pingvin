@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Node displays feature.
+ */
+
+include_once 'node_displays.features.inc';
