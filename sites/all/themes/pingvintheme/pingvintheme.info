@@ -1,0 +1,14 @@
+name = Pingvintheme
+description = Pingvin theme
+screenshot = images/screenshot.jpeg
+core = 7.x
+base theme = twitter_bootstrap
+
+; Styles
+stylesheets[all][] = styles/style.css
+
+; Scripts
+scripts[] = scripts/strap.js
+
+; Panels layouts
+plugins[panels][layouts] = layouts

@@ -1,0 +1,22 @@
+
+.panel-tbs-homepanel { 
+  overflow: hidden;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.panel-tbs-homepanel .panel-separator {
+  margin: 0 0 1em;
+}
+
+.panel-tbs-homepanel .panel-panel {
+  clear: both;
+}
+
+.panel-tbs-homepanel .span8,
+.panel-tbs-homepanel .span6,
+.panel-tbs-homepanel .span4 {
+  float: left;
+  width: 48%;
+  margin: 0 1% 1em;
+}

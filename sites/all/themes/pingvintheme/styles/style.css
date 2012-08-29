@@ -1,0 +1,1431 @@
+/*         Libraries
+ *************************************************/
+/*  Font Awesome
+    the iconic font designed for use with Twitter Bootstrap
+    -------------------------------------------------------
+    The full suite of pictographic icons, examples, and documentation
+    can be found at: http://fortawesome.github.com/Font-Awesome/
+
+    License
+    -------------------------------------------------------
+    The Font Awesome webfont, CSS, and LESS files are licensed under CC BY 3.0:
+    http://creativecommons.org/licenses/by/3.0/ A mention of
+    'Font Awesome - http://fortawesome.github.com/Font-Awesome' in human-readable
+    source code is considered acceptable attribution (most common on the web).
+    If human readable source code is not available to the end user, a mention in
+    an 'About' or 'Credits' screen is considered acceptable (most common in desktop
+    or mobile software).
+
+    Contact
+    -------------------------------------------------------
+    Email: dave@davegandy.com
+    Twitter: http://twitter.com/fortaweso_me
+    Work: Lead Product Designer @ http://kyruus.com
+
+    */
+@font-face {
+  font-family: "FontAwesome";
+  src: url('fonts/../font/fontawesome-webfont.eot');
+  src: url('fonts/../font/fontawesome-webfont.eot?#iefix') format('eot'), url('fonts/../font/fontawesome-webfont.woff') format('woff'), url('fonts/../font/fontawesome-webfont.ttf') format('truetype'), url('fonts/../font/fontawesome-webfont.svg#FontAwesomeRegular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/*  Font Awesome styles
+    ------------------------------------------------------- */
+[class^="icon-"]:before,
+[class*=" icon-"]:before {
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  text-decoration: inherit;
+}
+
+a [class^="icon-"],
+a [class*=" icon-"] {
+  display: inline-block;
+  text-decoration: inherit;
+}
+
+/* makes the font 33% larger relative to the icon container */
+.icon-large:before {
+  vertical-align: middle;
+  font-size: 4/3em;
+}
+
+.btn [class^="icon-"],
+.btn [class*=" icon-"], .nav-tabs [class^="icon-"], .nav-tabs [class*=" icon-"] {
+  /* keeps button heights with and without icons the same */
+  line-height: .9em;
+}
+
+li [class^="icon-"],
+li [class*=" icon-"] {
+  display: inline-block;
+  width: 1.25em;
+  text-align: center;
+}
+li .icon-large:before,
+li .icon-large:before {
+  /* 1.5 increased font size for icon-large * 1.25 width */
+  width: 1.875em;
+}
+
+ul.icons {
+  list-style-type: none;
+  margin-left: 2em;
+  text-indent: -0.8em;
+}
+ul.icons li [class^="icon-"],
+ul.icons li [class*=" icon-"] {
+  width: .8em;
+}
+ul.icons li .icon-large:before,
+ul.icons li .icon-large:before {
+  /* 1.5 increased font size for icon-large * 1.25 width */
+  vertical-align: initial;
+}
+
+/*  Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
+    readers do not read off random characters that represent icons */
+.icon-glass:before {
+  content: "\f000";
+}
+
+.icon-music:before {
+  content: "\f001";
+}
+
+.icon-search:before {
+  content: "\f002";
+}
+
+.icon-envelope:before {
+  content: "\f003";
+}
+
+.icon-heart:before {
+  content: "\f004";
+}
+
+.icon-star:before {
+  content: "\f005";
+}
+
+.icon-star-empty:before {
+  content: "\f006";
+}
+
+.icon-user:before {
+  content: "\f007";
+}
+
+.icon-film:before {
+  content: "\f008";
+}
+
+.icon-th-large:before {
+  content: "\f009";
+}
+
+.icon-th:before {
+  content: "\f00a";
+}
+
+.icon-th-list:before {
+  content: "\f00b";
+}
+
+.icon-ok:before {
+  content: "\f00c";
+}
+
+.icon-remove:before {
+  content: "\f00d";
+}
+
+.icon-zoom-in:before {
+  content: "\f00e";
+}
+
+.icon-zoom-out:before {
+  content: "\f010";
+}
+
+.icon-off:before {
+  content: "\f011";
+}
+
+.icon-signal:before {
+  content: "\f012";
+}
+
+.icon-cog:before {
+  content: "\f013";
+}
+
+.icon-trash:before {
+  content: "\f014";
+}
+
+.icon-home:before {
+  content: "\f015";
+}
+
+.icon-file:before {
+  content: "\f016";
+}
+
+.icon-time:before {
+  content: "\f017";
+}
+
+.icon-road:before {
+  content: "\f018";
+}
+
+.icon-download-alt:before {
+  content: "\f019";
+}
+
+.icon-download:before {
+  content: "\f01a";
+}
+
+.icon-upload:before {
+  content: "\f01b";
+}
+
+.icon-inbox:before {
+  content: "\f01c";
+}
+
+.icon-play-circle:before {
+  content: "\f01d";
+}
+
+.icon-repeat:before {
+  content: "\f01e";
+}
+
+/* \f020 doesn't work in Safari. all shifted one down */
+.icon-refresh:before {
+  content: "\f021";
+}
+
+.icon-list-alt:before {
+  content: "\f022";
+}
+
+.icon-lock:before {
+  content: "\f023";
+}
+
+.icon-flag:before {
+  content: "\f024";
+}
+
+.icon-headphones:before {
+  content: "\f025";
+}
+
+.icon-volume-off:before {
+  content: "\f026";
+}
+
+.icon-volume-down:before {
+  content: "\f027";
+}
+
+.icon-volume-up:before {
+  content: "\f028";
+}
+
+.icon-qrcode:before {
+  content: "\f029";
+}
+
+.icon-barcode:before {
+  content: "\f02a";
+}
+
+.icon-tag:before {
+  content: "\f02b";
+}
+
+.icon-tags:before {
+  content: "\f02c";
+}
+
+.icon-book:before {
+  content: "\f02d";
+}
+
+.icon-bookmark:before {
+  content: "\f02e";
+}
+
+.icon-print:before {
+  content: "\f02f";
+}
+
+.icon-camera:before {
+  content: "\f030";
+}
+
+.icon-font:before {
+  content: "\f031";
+}
+
+.icon-bold:before {
+  content: "\f032";
+}
+
+.icon-italic:before {
+  content: "\f033";
+}
+
+.icon-text-height:before {
+  content: "\f034";
+}
+
+.icon-text-width:before {
+  content: "\f035";
+}
+
+.icon-align-left:before {
+  content: "\f036";
+}
+
+.icon-align-center:before {
+  content: "\f037";
+}
+
+.icon-align-right:before {
+  content: "\f038";
+}
+
+.icon-align-justify:before {
+  content: "\f039";
+}
+
+.icon-list:before {
+  content: "\f03a";
+}
+
+.icon-indent-left:before {
+  content: "\f03b";
+}
+
+.icon-indent-right:before {
+  content: "\f03c";
+}
+
+.icon-facetime-video:before {
+  content: "\f03d";
+}
+
+.icon-picture:before {
+  content: "\f03e";
+}
+
+.icon-pencil:before {
+  content: "\f040";
+}
+
+.icon-map-marker:before {
+  content: "\f041";
+}
+
+.icon-adjust:before {
+  content: "\f042";
+}
+
+.icon-tint:before {
+  content: "\f043";
+}
+
+.icon-edit:before {
+  content: "\f044";
+}
+
+.icon-share:before {
+  content: "\f045";
+}
+
+.icon-check:before {
+  content: "\f046";
+}
+
+.icon-move:before {
+  content: "\f047";
+}
+
+.icon-step-backward:before {
+  content: "\f048";
+}
+
+.icon-fast-backward:before {
+  content: "\f049";
+}
+
+.icon-backward:before {
+  content: "\f04a";
+}
+
+.icon-play:before {
+  content: "\f04b";
+}
+
+.icon-pause:before {
+  content: "\f04c";
+}
+
+.icon-stop:before {
+  content: "\f04d";
+}
+
+.icon-forward:before {
+  content: "\f04e";
+}
+
+.icon-fast-forward:before {
+  content: "\f050";
+}
+
+.icon-step-forward:before {
+  content: "\f051";
+}
+
+.icon-eject:before {
+  content: "\f052";
+}
+
+.icon-chevron-left:before {
+  content: "\f053";
+}
+
+.icon-chevron-right:before {
+  content: "\f054";
+}
+
+.icon-plus-sign:before {
+  content: "\f055";
+}
+
+.icon-minus-sign:before {
+  content: "\f056";
+}
+
+.icon-remove-sign:before {
+  content: "\f057";
+}
+
+.icon-ok-sign:before {
+  content: "\f058";
+}
+
+.icon-question-sign:before {
+  content: "\f059";
+}
+
+.icon-info-sign:before {
+  content: "\f05a";
+}
+
+.icon-screenshot:before {
+  content: "\f05b";
+}
+
+.icon-remove-circle:before {
+  content: "\f05c";
+}
+
+.icon-ok-circle:before {
+  content: "\f05d";
+}
+
+.icon-ban-circle:before {
+  content: "\f05e";
+}
+
+.icon-arrow-left:before {
+  content: "\f060";
+}
+
+.icon-arrow-right:before {
+  content: "\f061";
+}
+
+.icon-arrow-up:before {
+  content: "\f062";
+}
+
+.icon-arrow-down:before {
+  content: "\f063";
+}
+
+.icon-share-alt:before {
+  content: "\f064";
+}
+
+.icon-resize-full:before {
+  content: "\f065";
+}
+
+.icon-resize-small:before {
+  content: "\f066";
+}
+
+.icon-plus:before {
+  content: "\f067";
+}
+
+.icon-minus:before {
+  content: "\f068";
+}
+
+.icon-asterisk:before {
+  content: "\f069";
+}
+
+.icon-exclamation-sign:before {
+  content: "\f06a";
+}
+
+.icon-gift:before {
+  content: "\f06b";
+}
+
+.icon-leaf:before {
+  content: "\f06c";
+}
+
+.icon-fire:before {
+  content: "\f06d";
+}
+
+.icon-eye-open:before {
+  content: "\f06e";
+}
+
+.icon-eye-close:before {
+  content: "\f070";
+}
+
+.icon-warning-sign:before {
+  content: "\f071";
+}
+
+.icon-plane:before {
+  content: "\f072";
+}
+
+.icon-calendar:before {
+  content: "\f073";
+}
+
+.icon-random:before {
+  content: "\f074";
+}
+
+.icon-comment:before {
+  content: "\f075";
+}
+
+.icon-magnet:before {
+  content: "\f076";
+}
+
+.icon-chevron-up:before {
+  content: "\f077";
+}
+
+.icon-chevron-down:before {
+  content: "\f078";
+}
+
+.icon-retweet:before {
+  content: "\f079";
+}
+
+.icon-shopping-cart:before {
+  content: "\f07a";
+}
+
+.icon-folder-close:before {
+  content: "\f07b";
+}
+
+.icon-folder-open:before {
+  content: "\f07c";
+}
+
+.icon-resize-vertical:before {
+  content: "\f07d";
+}
+
+.icon-resize-horizontal:before {
+  content: "\f07e";
+}
+
+.icon-bar-chart:before {
+  content: "\f080";
+}
+
+.icon-twitter-sign:before {
+  content: "\f081";
+}
+
+.icon-facebook-sign:before {
+  content: "\f082";
+}
+
+.icon-camera-retro:before {
+  content: "\f083";
+}
+
+.icon-key:before {
+  content: "\f084";
+}
+
+.icon-cogs:before {
+  content: "\f085";
+}
+
+.icon-comments:before {
+  content: "\f086";
+}
+
+.icon-thumbs-up:before {
+  content: "\f087";
+}
+
+.icon-thumbs-down:before {
+  content: "\f088";
+}
+
+.icon-star-half:before {
+  content: "\f089";
+}
+
+.icon-heart-empty:before {
+  content: "\f08a";
+}
+
+.icon-signout:before {
+  content: "\f08b";
+}
+
+.icon-linkedin-sign:before {
+  content: "\f08c";
+}
+
+.icon-pushpin:before {
+  content: "\f08d";
+}
+
+.icon-external-link:before {
+  content: "\f08e";
+}
+
+.icon-signin:before {
+  content: "\f090";
+}
+
+.icon-trophy:before {
+  content: "\f091";
+}
+
+.icon-github-sign:before {
+  content: "\f092";
+}
+
+.icon-upload-alt:before {
+  content: "\f093";
+}
+
+.icon-lemon:before {
+  content: "\f094";
+}
+
+.icon-phone:before {
+  content: "\f095";
+}
+
+.icon-check-empty:before {
+  content: "\f096";
+}
+
+.icon-bookmark-empty:before {
+  content: "\f097";
+}
+
+.icon-phone-sign:before {
+  content: "\f098";
+}
+
+.icon-twitter:before {
+  content: "\f099";
+}
+
+.icon-facebook:before {
+  content: "\f09a";
+}
+
+.icon-github:before {
+  content: "\f09b";
+}
+
+.icon-unlock:before {
+  content: "\f09c";
+}
+
+.icon-credit-card:before {
+  content: "\f09d";
+}
+
+.icon-rss:before {
+  content: "\f09e";
+}
+
+.icon-hdd:before {
+  content: "\f0a0";
+}
+
+.icon-bullhorn:before {
+  content: "\f0a1";
+}
+
+.icon-bell:before {
+  content: "\f0a2";
+}
+
+.icon-certificate:before {
+  content: "\f0a3";
+}
+
+.icon-hand-right:before {
+  content: "\f0a4";
+}
+
+.icon-hand-left:before {
+  content: "\f0a5";
+}
+
+.icon-hand-up:before {
+  content: "\f0a6";
+}
+
+.icon-hand-down:before {
+  content: "\f0a7";
+}
+
+.icon-circle-arrow-left:before {
+  content: "\f0a8";
+}
+
+.icon-circle-arrow-right:before {
+  content: "\f0a9";
+}
+
+.icon-circle-arrow-up:before {
+  content: "\f0aa";
+}
+
+.icon-circle-arrow-down:before {
+  content: "\f0ab";
+}
+
+.icon-globe:before {
+  content: "\f0ac";
+}
+
+.icon-wrench:before {
+  content: "\f0ad";
+}
+
+.icon-tasks:before {
+  content: "\f0ae";
+}
+
+.icon-filter:before {
+  content: "\f0b0";
+}
+
+.icon-briefcase:before {
+  content: "\f0b1";
+}
+
+.icon-fullscreen:before {
+  content: "\f0b2";
+}
+
+.icon-group:before {
+  content: "\f0c0";
+}
+
+.icon-link:before {
+  content: "\f0c1";
+}
+
+.icon-cloud:before {
+  content: "\f0c2";
+}
+
+.icon-beaker:before {
+  content: "\f0c3";
+}
+
+.icon-cut:before {
+  content: "\f0c4";
+}
+
+.icon-copy:before {
+  content: "\f0c5";
+}
+
+.icon-paper-clip:before {
+  content: "\f0c6";
+}
+
+.icon-save:before {
+  content: "\f0c7";
+}
+
+.icon-sign-blank:before {
+  content: "\f0c8";
+}
+
+.icon-reorder:before {
+  content: "\f0c9";
+}
+
+.icon-list-ul:before {
+  content: "\f0ca";
+}
+
+.icon-list-ol:before {
+  content: "\f0cb";
+}
+
+.icon-strikethrough:before {
+  content: "\f0cc";
+}
+
+.icon-underline:before {
+  content: "\f0cd";
+}
+
+.icon-table:before {
+  content: "\f0ce";
+}
+
+.icon-magic:before {
+  content: "\f0d0";
+}
+
+.icon-truck:before {
+  content: "\f0d1";
+}
+
+.icon-pinterest:before {
+  content: "\f0d2";
+}
+
+.icon-pinterest-sign:before {
+  content: "\f0d3";
+}
+
+.icon-google-plus-sign:before {
+  content: "\f0d4";
+}
+
+.icon-google-plus:before {
+  content: "\f0d5";
+}
+
+.icon-money:before {
+  content: "\f0d6";
+}
+
+.icon-caret-down:before {
+  content: "\f0d7";
+}
+
+.icon-caret-up:before {
+  content: "\f0d8";
+}
+
+.icon-caret-left:before {
+  content: "\f0d9";
+}
+
+.icon-caret-right:before {
+  content: "\f0da";
+}
+
+.icon-columns:before {
+  content: "\f0db";
+}
+
+.icon-sort:before {
+  content: "\f0dc";
+}
+
+.icon-sort-down:before {
+  content: "\f0dd";
+}
+
+.icon-sort-up:before {
+  content: "\f0de";
+}
+
+.icon-envelope-alt:before {
+  content: "\f0e0";
+}
+
+.icon-linkedin:before {
+  content: "\f0e1";
+}
+
+.icon-undo:before {
+  content: "\f0e2";
+}
+
+.icon-legal:before {
+  content: "\f0e3";
+}
+
+.icon-dashboard:before {
+  content: "\f0e4";
+}
+
+.icon-comment-alt:before {
+  content: "\f0e5";
+}
+
+.icon-comments-alt:before {
+  content: "\f0e6";
+}
+
+.icon-bolt:before {
+  content: "\f0e7";
+}
+
+.icon-sitemap:before {
+  content: "\f0e8";
+}
+
+.icon-umbrella:before {
+  content: "\f0e9";
+}
+
+.icon-paste:before {
+  content: "\f0ea";
+}
+
+.icon-user-md:before {
+  content: "\f200";
+}
+
+/*         General Sitewide Styles
+ *************************************************/
+/* Kill */
+.filter-guidelines-item {
+  display: none;
+}
+
+/* Layout */
+/* General Styles (Colors, Backgrounds etc.) */
+/* Typography */
+/* Links */
+/* Header */
+#navbar form {
+  margin-top: 5px;
+  margin-right: 1em;
+}
+#navbar form div {
+  display: inline-block;
+  margin: 0;
+}
+#navbar form input, #navbar form button {
+  margin: 0;
+  -webkit-border-radius: 1.1em;
+  -moz-border-radius: 1.1em;
+  -ms-border-radius: 1.1em;
+  -o-border-radius: 1.1em;
+  border-radius: 1.1em;
+}
+#navbar form .form-submit {
+  display: none;
+}
+
+#page-header {
+  clear: both;
+}
+#page-header hgroup {
+  margin: 0.5em 0 2em;
+  overflow: hidden;
+}
+#page-header hgroup h1 {
+  font-weight: normal;
+  vertical-align: middle;
+  float: left;
+}
+#page-header hgroup h1 img {
+  display: inline-block;
+  margin-right: 0.25em;
+}
+#page-header hgroup .service-links {
+  float: right;
+}
+#page-header hgroup .service-links ul {
+  background-color: #f5f5f5;
+  margin: 0.35em 0 0;
+  padding: 0.7em 0 0.25em 2.75em;
+  list-style: none;
+  overflow: hidden;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+#page-header hgroup .service-links li {
+  float: left;
+}
+#page-header .block-commerce-cart {
+  float: right;
+}
+#page-header .block-commerce-cart .dropdown-menu ul {
+  text-align: right;
+  margin: 0;
+  list-style: none;
+}
+#page-header .block-commerce-cart .dropdown-menu .contextual-links-wrapper {
+  display: none;
+}
+#page-header .block-commerce-cart .dropdown-menu .line-item-summary {
+  margin: 0;
+}
+#page-header .block-commerce-cart .dropdown-menu .line-item-quantity,
+#page-header .block-commerce-cart .dropdown-menu .view-content {
+  text-align: right;
+  width: 91%;
+}
+#page-header .block-commerce-cart .dropdown-menu .line-item-quantity span,
+#page-header .block-commerce-cart .dropdown-menu .line-item-quantity .views-field,
+#page-header .block-commerce-cart .dropdown-menu .view-content span,
+#page-header .block-commerce-cart .dropdown-menu .view-content .views-field {
+  color: #333;
+  font-weight: bold;
+  line-height: 18px;
+  padding: 3px 0;
+  white-space: nowrap;
+}
+#page-header .block-menu {
+  float: left;
+  margin-bottom: 2em;
+}
+#page-header .block-menu .block-title {
+  position: absolute !important;
+  clip: rect(1px 1px 1px 1px);
+  /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px);
+}
+#page-header .block-menu div {
+  display: inline-block;
+}
+#page-header .block-menu .menu li {
+  float: left;
+  margin-right: 1em;
+}
+
+.qtip .qtip-wrapper {
+  overflow: visible!important;
+}
+.qtip .qtip-contentWrapper {
+  margin-top: 13px;
+  border-width: 1px!important;
+  border-color: #ccd2da!important;
+  border-top-color: #c6cdd6!important;
+  border-bottom-color: #dee2e8!important;
+  -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+  -moz-box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+}
+.qtip .qtip-contentWrapper:before {
+  content: '';
+  background: transparent url("../images/icon_megamenu-caret.png") no-repeat 0 0;
+  display: inline-block;
+  width: 22px;
+  height: 13px;
+  position: absolute;
+  top: -12px;
+  left: 14px;
+}
+.qtip .menu-minipanels {
+  min-width: 50px;
+}
+.qtip .menu-minipanels .inside {
+  margin: 0;
+}
+.qtip .menu-minipanels .pane-title {
+  font-size: 16px;
+  line-height: 1;
+  font-weight: normal;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.qtip .menu-minipanels .panel-tbs-multicolspanel {
+  margin: 0;
+  padding: 23px 9px 15px;
+}
+.qtip .menu-minipanels .panel-tbs-multicolspanel .col-one {
+  margin: 0;
+}
+.qtip .pane-block ul.menu {
+  margin: 0;
+}
+.qtip .pane-block ul.menu li {
+  float: none;
+}
+.qtip .pane-block ul.menu a {
+  font-size: 16px;
+  line-height: 1;
+  padding: 6px 7px;
+}
+
+.breadcrumb {
+  clear: both;
+  color: #999;
+}
+.breadcrumb span {
+  color: #666;
+}
+
+/* Sidebars */
+/* Footer */
+#block-block-9 {
+  width: 100%;
+  clear: both;
+  margin: 0;
+}
+
+/*         Front Page
+ *************************************************/
+.pane-product-display-teasers-panel-pane-godbok,
+.pane-product-display-teasers-panel-pane-mostsold,
+.pane-product-display-teasers-panel-pane-serie {
+  margin-bottom: 5em;
+}
+.pane-product-display-teasers-panel-pane-godbok .pane-title,
+.pane-product-display-teasers-panel-pane-mostsold .pane-title,
+.pane-product-display-teasers-panel-pane-serie .pane-title {
+  margin-bottom: 1em;
+  padding-bottom: 17px;
+  border-bottom: 1px solid #eee;
+}
+.pane-product-display-teasers-panel-pane-godbok .views-row-1,
+.pane-product-display-teasers-panel-pane-mostsold .views-row-1,
+.pane-product-display-teasers-panel-pane-serie .views-row-1 {
+  margin-left: 0;
+}
+.pane-product-display-teasers-panel-pane-godbok .views-row .commerce-product-field-field-product-image,
+.pane-product-display-teasers-panel-pane-mostsold .views-row .commerce-product-field-field-product-image,
+.pane-product-display-teasers-panel-pane-serie .views-row .commerce-product-field-field-product-image {
+  margin-bottom: 1em;
+}
+.pane-product-display-teasers-panel-pane-godbok .views-row h3,
+.pane-product-display-teasers-panel-pane-mostsold .views-row h3,
+.pane-product-display-teasers-panel-pane-serie .views-row h3 {
+  line-height: 1em;
+}
+.pane-product-display-teasers-panel-pane-godbok .views-row .field-commerce-price,
+.pane-product-display-teasers-panel-pane-mostsold .views-row .field-commerce-price,
+.pane-product-display-teasers-panel-pane-serie .views-row .field-commerce-price {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.pane-product-display-top-promoted-panel-pane-1 {
+  margin-bottom: 3em;
+}
+.pane-product-display-top-promoted-panel-pane-1 .pane-title {
+  margin-bottom: 1em;
+  padding-bottom: 17px;
+  border-bottom: 1px solid #eee;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row {
+  margin-bottom: 1em;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row .thumbnail {
+  float: left;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row h3 {
+  font-size: 1.1em;
+  line-height: 1em;
+  margin: 0.5em 0;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row .field-name-field-teaser {
+  color: #555;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row .commerce-add-to-cart {
+  margin: 0;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row .commerce-add-to-cart button {
+  font-size: 11px;
+  padding: 2px 8px;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row .group-left {
+  width: 30%;
+}
+.pane-product-display-top-promoted-panel-pane-1 .views-row .group-right {
+  width: 70%;
+}
+
+.pane-1 iframe {
+  width: 347px;
+  height: 260px;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid #f3f3f3;
+  background-color: #f6f6f6;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/*         Inner Pages
+ *************************************************/
+.page-taxonomy .page-header {
+  margin-top: 0;
+  padding-bottom: 0;
+  border: none;
+}
+.page-taxonomy .pane-term-description p {
+  color: #999;
+  font-size: 18px;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-filters {
+  float: left;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-filters form, .page-taxonomy .view-taxonomy-facet-display .view-filters div {
+  margin: 0;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-filters input {
+  display: none;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-filters label {
+  padding-left: 0;
+  cursor: pointer;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-filters label[for='edit-sort-bef-combine'] {
+  display: none;
+}
+.page-taxonomy .view-taxonomy-facet-display .pagination {
+  float: right;
+  margin-top: 8px;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-content {
+  clear: both;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-content table {
+  width: 100%;
+  border: none;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-content table tr, .page-taxonomy .view-taxonomy-facet-display .view-content table td {
+  background: transparent;
+  border: none;
+  padding: 1em 1em 1em 0;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-content table tr:hover, .page-taxonomy .view-taxonomy-facet-display .view-content table td:hover {
+  background: transparent;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-content .thumbnail {
+  display: inline-block;
+  margin-bottom: 1em;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-content h3 {
+  line-height: 1em;
+}
+.page-taxonomy .view-taxonomy-facet-display .view-content .field-commerce-price {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+.page-taxonomy .region-sidebar-first .block-title {
+  display: block;
+  padding: 3px 15px;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 18px;
+  color: #999999;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  padding-left: 0;
+}
+.page-taxonomy .region-sidebar-first ul.menu,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links {
+  padding-left: 14px;
+  padding-right: 14px;
+  margin-bottom: 0;
+  margin: 0 0 0.5em;
+  padding: 0;
+}
+.page-taxonomy .region-sidebar-first ul.menu > li > a, .page-taxonomy .region-sidebar-first ul.menu .nav-list .nav-header,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links > li > a,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links .nav-list .nav-header {
+  margin-left: -15px;
+  margin-right: -15px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.page-taxonomy .region-sidebar-first ul.menu > li > a,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links > li > a {
+  padding: 3px 15px;
+}
+.page-taxonomy .region-sidebar-first ul.menu .active > a, .page-taxonomy .region-sidebar-first ul.menu .active > a:hover,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links .active > a,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links .active > a:hover {
+  color: #ffffff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
+  background-color: #0088cc;
+}
+.page-taxonomy .region-sidebar-first ul.menu li,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links li {
+  float: none;
+  display: block;
+}
+.page-taxonomy .region-sidebar-first ul.menu a,
+.page-taxonomy .region-sidebar-first ul.facetapi-facetapi-links a {
+  background: none;
+  padding: 0;
+}
+
+.node-type-produktvisning .view-mode-full .group-left {
+  margin-left: 0;
+}
+.node-type-produktvisning .view-mode-full .group-footer {
+  clear: both;
+  padding-top: 2em;
+}
+.node-type-produktvisning .view-mode-full .field-field-product-image .gallery-slides {
+  padding: 5px;
+  border: 1px solid #ddd;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+.node-type-produktvisning .view-mode-full .field-name-service-links-displays-group {
+  margin-bottom: 1em;
+}
+.node-type-produktvisning .view-mode-full h2.muted {
+  margin-bottom: 0.25em;
+}
+.node-type-produktvisning .view-mode-full .group_details .commerce-product-field {
+  display: inline-block;
+  margin: 0.1em 1em 0.1em 0;
+}
+.node-type-produktvisning .view-mode-full .group_details .label-inline {
+  font-weight: bold;
+  display: inline-block;
+  margin: 0;
+}
+.node-type-produktvisning .view-mode-full .view-mode-author_info {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #eee;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+.node-type-produktvisning .view-mode-full .group_cart .commerce-product-field {
+  float: left;
+}
+.node-type-produktvisning .view-mode-full .group_cart .commerce-product-field table {
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 36px;
+  margin: 0.4em 0;
+  background: transparent;
+  border: none;
+}
+.node-type-produktvisning .view-mode-full .group_cart .commerce-product-field table td {
+  font-size: 1em;
+  padding: 0;
+  border: none;
+}
+.node-type-produktvisning .view-mode-full .group_cart .commerce-product-field table .price-label {
+  color: #999;
+  padding-right: 0.25em;
+}
+.node-type-produktvisning .view-mode-full .group_cart .commerce-product-field table .price-amount {
+  color: #000;
+}
+.node-type-produktvisning .view-mode-full .group_cart .field-name-field-display-product {
+  float: right;
+}
+.node-type-produktvisning .view-mode-full .group_cart .field-name-field-display-product form {
+  margin: 0;
+}
+.node-type-produktvisning .view-mode-full .group-additional {
+  clear: both;
+}
+.node-type-produktvisning .view-mode-full .group-additional .tab-pane .label-above {
+  display: none;
+}
+.node-type-produktvisning .view-mode-full .group-additional > .field {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #eee;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.view-product-display-other-things-from-us .view-content {
+  margin-left: -30px;
+}
+.view-product-display-other-things-from-us .view-content .commerce-product-field-field-product-image {
+  margin-bottom: 1em;
+}
+.view-product-display-other-things-from-us .view-content h3 {
+  line-height: 1em;
+}
+.view-product-display-other-things-from-us .view-content .field-commerce-price {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+/*         Forms
+ *************************************************/
