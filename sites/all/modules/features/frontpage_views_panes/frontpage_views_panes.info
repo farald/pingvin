@@ -1,6 +1,7 @@
 name = Frontpage views & panes
 core = 7.x
 package = Features
+php = 5.2.4
 version = 7.x-1.0
 project = frontpage_views_panes
 dependencies[] = ctools

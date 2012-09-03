@@ -201,15 +201,6 @@ function frontpage_views_panes_views_default_views() {
     ),
   );
   $handler->display->display_options['defaults']['header'] = FALSE;
-  /* Topptekst: Global: Tekstområde */
-  $handler->display->display_options['header']['area']['id'] = 'area';
-  $handler->display->display_options['header']['area']['table'] = 'views';
-  $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['label'] = 'Liste';
-  $handler->display->display_options['header']['area']['empty'] = FALSE;
-  $handler->display->display_options['header']['area']['content'] = 'Velg mellom loggførte dykk.';
-  $handler->display->display_options['header']['area']['format'] = 'filtered_html';
-  $handler->display->display_options['header']['area']['tokenize'] = 0;
   $handler->display->display_options['defaults']['footer'] = FALSE;
   $handler->display->display_options['defaults']['sorts'] = FALSE;
   /* Sorteringskriterium: Innhold: Tidspunkt (field_glob_date) */
@@ -354,8 +345,6 @@ function frontpage_views_panes_views_default_views() {
     t('Tidspunkt'),
     t('Page'),
     t('Sortering'),
-    t('Liste'),
-    t('Velg mellom loggførte dykk.'),
     t('Dybde'),
     t('Dykketid'),
     t('Feed'),
@@ -376,7 +365,7 @@ function frontpage_views_panes_views_default_views() {
 
   /* Display: Defaults */
   $handler = $view->new_display('default', 'Defaults', 'default');
-  $handler->display->display_options['title'] = 'Dykkesteder';
+  $handler->display->display_options['title'] = 'Steder verdt å dykke';
   $handler->display->display_options['css_class'] = 'site-list-view';
   $handler->display->display_options['use_more_text'] = 'mer';
   $handler->display->display_options['access']['type'] = 'none';
@@ -576,14 +565,6 @@ function frontpage_views_panes_views_default_views() {
   $handler->display->display_options['row_options']['default_fieldset']['view_mode'] = 'divesite_small_teaser';
   $handler->display->display_options['defaults']['row_options'] = FALSE;
   $handler->display->display_options['defaults']['header'] = FALSE;
-  /* Topptekst: Global: Tekstområde */
-  $handler->display->display_options['header']['area']['id'] = 'area';
-  $handler->display->display_options['header']['area']['table'] = 'views';
-  $handler->display->display_options['header']['area']['field'] = 'area';
-  $handler->display->display_options['header']['area']['label'] = 'Liste';
-  $handler->display->display_options['header']['area']['empty'] = FALSE;
-  $handler->display->display_options['header']['area']['content'] = 'Velg mellom dykkesteder som er registrert i databasen.';
-  $handler->display->display_options['header']['area']['format'] = 'filtered_html';
   $handler->display->display_options['defaults']['footer'] = FALSE;
   $handler->display->display_options['defaults']['sorts'] = FALSE;
   /* Sorteringskriterium: Innhold: Oppdatert dato */
@@ -695,7 +676,7 @@ function frontpage_views_panes_views_default_views() {
   $handler->display->display_options['inherit_exposed_filters'] = 1;
   $translatables['site_list'] = array(
     t('Defaults'),
-    t('Dykkesteder'),
+    t('Steder verdt å dykke'),
     t('mer'),
     t('Bruk'),
     t('Nullstill'),
@@ -711,8 +692,6 @@ function frontpage_views_panes_views_default_views() {
     t('Oppdatert dato'),
     t('Page'),
     t('-'),
-    t('Liste'),
-    t('Velg mellom dykkesteder som er registrert i databasen.'),
     t('Feed'),
     t('Sites with no images'),
     t('Andre dykkesteder'),
