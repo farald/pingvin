@@ -1,0 +1,4 @@
+name = Pingvin Kode
+description = Div kode til pingvin
+core = 7.x
+files[] = pingvincode.module

@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file pingvincode.module
+ * Various stuff
+ */
+
+/**
+ * Implements hook_form_alter();
+ */
+function pingvincode_form_alter(&$form, &$form_state, $form_id) {
+  //xdebug_break();
+  $form_ids = array(
+    'views-exposed-form-dive-list-page-1',
+    'views-exposed-form-site-list-page-1'
+  );
+  if (in_array($form['#id'], $form_ids)) {
+    // Dive
+    // Last dive
+    if (!empty($form['sort_bef_combine']['#options']['field_log_depth_value DESC'])) {
+      $form['sort_bef_combine']['#options']['field_log_depth_value DESC'] = t('Nyeste');
+      unset($form['sort_bef_combine']['#options']['field_log_depth_value ASC']);
+    }
+    // Depth
+    if (!empty($form['sort_bef_combine']['#options']['field_glob_date_value DESC'])) {
+      $form['sort_bef_combine']['#options']['field_glob_date_value DESC'] = t('Dypest');
+      $form['sort_bef_combine']['#options']['field_glob_date_value ASC'] = t('Grunnest');
+      //unset($form['sort_bef_combine']['#options']['field_glob_date_value ASC']);
+    }
+    // Duration
+    if (!empty($form['sort_bef_combine']['#options']['field_log_downtime_value DESC'])) {
+      $form['sort_bef_combine']['#options']['field_log_downtime_value DESC'] = t('Lengst');
+      $form['sort_bef_combine']['#options']['field_log_downtime_value ASC'] = t('Kortest');
+      //unset($form['sort_bef_combine']['#options']['field_log_downtime_value ASC']);
+    }
+    
+    // Site
+    // Updated
+        if (!empty($form['sort_bef_combine']['#options']['changed DESC'])) {
+      $form['sort_bef_combine']['#options']['changed DESC'] = t('Sist endret');
+      $form['sort_bef_combine']['#options']['changed ASC'] = t('Kortest');
+      unset($form['sort_bef_combine']['#options']['changed ASC']);
+    }
+  }
+}
