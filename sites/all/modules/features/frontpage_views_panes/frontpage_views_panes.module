@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Frontpage views & panes feature.
+ */
+
+include_once 'frontpage_views_panes.features.inc';
