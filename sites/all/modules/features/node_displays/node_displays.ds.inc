@@ -227,6 +227,51 @@ function node_displays_ds_view_modes_info() {
 
   $ds_view_mode = new stdClass();
   $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'club_full_node';
+  $ds_view_mode->label = 'Club full node';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['club_full_node'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'club_large_teaser';
+  $ds_view_mode->label = 'Club large teaser';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['club_large_teaser'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'club_small_teaser';
+  $ds_view_mode->label = 'Club small teaser';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['club_small_teaser'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'divesite_full_node';
+  $ds_view_mode->label = 'Divesite full node';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['divesite_full_node'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'divesite_large_teaser';
+  $ds_view_mode->label = 'Divesite large teaser';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['divesite_large_teaser'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
   $ds_view_mode->view_mode = 'divesite_small_teaser';
   $ds_view_mode->label = 'Divesite small teaser';
   $ds_view_mode->entities = array(
@@ -236,12 +281,39 @@ function node_displays_ds_view_modes_info() {
 
   $ds_view_mode = new stdClass();
   $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'log_full_node';
+  $ds_view_mode->label = 'Log full node';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['log_full_node'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'log_large_teaser';
+  $ds_view_mode->label = 'Log large teaser';
+  $ds_view_mode->entities = array(
+    'node' => 'node',
+  );
+  $export['log_large_teaser'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
   $ds_view_mode->view_mode = 'log_small_teaser';
   $ds_view_mode->label = 'Log small teaser';
   $ds_view_mode->entities = array(
     'node' => 'node',
   );
   $export['log_small_teaser'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'user_mini_teaser';
+  $ds_view_mode->label = 'User mini teaser';
+  $ds_view_mode->entities = array(
+    'user' => 'user',
+  );
+  $export['user_mini_teaser'] = $ds_view_mode;
 
   return $export;
 }
