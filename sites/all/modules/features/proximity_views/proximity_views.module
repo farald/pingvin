@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Proximity views feature.
+ */
+
+include_once 'proximity_views.features.inc';

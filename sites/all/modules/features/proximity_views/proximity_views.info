@@ -1,0 +1,14 @@
+name = Proximity views
+description = All system proximity views
+core = 7.x
+package = Features
+version = 7.x-1.0
+project = proximity_views
+dependencies[] = ctools
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:1
+features[views_view][] = _users_dived_on_site_proximity_via_user
+features[views_view][] = dives_registered_on_divesite
+features[views_view][] = sites_close_to_other_sites
+features[views_view][] = users_dived_on_site_proximity

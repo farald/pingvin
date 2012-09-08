@@ -18,23 +18,22 @@ function node_displays_field_group_info() {
   $field_group->entity_type = 'node';
   $field_group->bundle = 'divesite';
   $field_group->mode = 'form';
-  $field_group->parent_name = 'group_tab1';
+  $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Generelt',
-    'weight' => '3',
+    'weight' => '4',
     'children' => array(
       0 => 'field_place_notes',
       1 => 'field_place_radius',
     ),
-    'format_type' => 'fieldset',
+    'format_type' => 'tab',
     'format_settings' => array(
-      'label' => 'Generelt',
+      'formatter' => 'closed',
       'instance_settings' => array(
-        'required_fields' => 1,
-        'classes' => '',
         'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
       ),
-      'formatter' => 'open',
     ),
   );
   $export['group_basic|node|divesite|form'] = $field_group;
@@ -148,10 +147,8 @@ function node_displays_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Grunnleggende',
-    'weight' => '1',
-    'children' => array(
-      0 => 'group_basic',
-    ),
+    'weight' => '2',
+    'children' => array(),
     'format_type' => 'tab',
     'format_settings' => array(
       'label' => 'Grunnleggende',
@@ -176,7 +173,7 @@ function node_displays_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Stuff som skal settes automatisk',
-    'weight' => '6',
+    'weight' => '7',
     'children' => array(
       0 => 'field_map_name_browser',
       1 => 'field_map_country',
@@ -209,7 +206,7 @@ function node_displays_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Bilder',
-    'weight' => '5',
+    'weight' => '6',
     'children' => array(
       0 => 'field_place_images',
     ),
@@ -236,7 +233,7 @@ function node_displays_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Lenker',
-    'weight' => '4',
+    'weight' => '5',
     'children' => array(
       0 => 'field_place_links',
     ),
@@ -263,7 +260,7 @@ function node_displays_field_group_info() {
   $field_group->parent_name = '';
   $field_group->data = array(
     'label' => 'Kart',
-    'weight' => '2',
+    'weight' => '3',
     'children' => array(
       0 => 'field_map_point',
     ),

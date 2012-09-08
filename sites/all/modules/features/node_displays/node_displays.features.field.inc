@@ -10,6 +10,1101 @@
 function node_displays_field_default_fields() {
   $fields = array();
 
+  // Exported field: 'node-club-field_club_about'.
+  $fields['node-club-field_club_about'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_club_about',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'text',
+      'settings' => array(),
+      'translatable' => '1',
+      'type' => 'text_long',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Gi litt generell informasjon om klubben. Mer er generelt bedre enn mindre, da denne siden praktisk talt fungerer som en reklameplakat for klubben.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'hidden',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '0',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'hidden',
+          'module' => 'text',
+          'settings' => array(
+            'trim_length' => '200',
+          ),
+          'type' => 'text_trimmed',
+          'weight' => '2',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '0',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '0',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_club_about',
+      'label' => 'Om klubben',
+      'required' => 1,
+      'settings' => array(
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'rows' => '5',
+        ),
+        'type' => 'text_textarea',
+        'weight' => '-2',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_club_address'.
+  $fields['node-club-field_club_address'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_club_address',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '1',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Klubbens gateadresse, hvis det finnes en.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '5',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '9',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '4',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '4',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_club_address',
+      'label' => 'Gateadresse',
+      'required' => 0,
+      'settings' => array(
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '2',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_club_docs'.
+  $fields['node-club-field_club_docs'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '-1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_club_docs',
+      'foreign keys' => array(
+        'fid' => array(
+          'columns' => array(
+            'fid' => 'fid',
+          ),
+          'table' => 'file_managed',
+        ),
+      ),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'fid' => array(
+          0 => 'fid',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'file',
+      'settings' => array(
+        'display_default' => 0,
+        'display_field' => 0,
+        'uri_scheme' => 'private',
+      ),
+      'translatable' => '1',
+      'type' => 'file',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'deleted' => '0',
+      'description' => 'Her kan du legge inn påmeldingsskjemaer, lederinstrukser og annet som man ønsker skal være tilgjengelig.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'hidden',
+          'module' => 'file',
+          'settings' => array(),
+          'type' => 'file_default',
+          'weight' => '3',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '13',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'file',
+          'settings' => array(),
+          'type' => 'file_default',
+          'weight' => '8',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'file',
+          'settings' => array(),
+          'type' => 'file_default',
+          'weight' => '8',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_club_docs',
+      'label' => 'Dokumenter',
+      'required' => 0,
+      'settings' => array(
+        'description_field' => 0,
+        'file_directory' => 'user-[current-user:uid]/docs-club',
+        'file_extensions' => 'txt',
+        'max_filesize' => '',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'file',
+        'settings' => array(
+          'insert' => 0,
+          'insert_class' => '',
+          'insert_default' => array(
+            0 => 'auto',
+          ),
+          'insert_styles' => array(
+            0 => 'auto',
+          ),
+          'insert_width' => '',
+          'progress_indicator' => 'throbber',
+        ),
+        'type' => 'file_generic',
+        'weight' => '8',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_club_image'.
+  $fields['node-club-field_club_image'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_club_image',
+      'foreign keys' => array(
+        'fid' => array(
+          'columns' => array(
+            'fid' => 'fid',
+          ),
+          'table' => 'file_managed',
+        ),
+      ),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'fid' => array(
+          0 => 'fid',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'image',
+      'settings' => array(
+        'default_image' => '59',
+        'uri_scheme' => 'public',
+      ),
+      'translatable' => '1',
+      'type' => 'image',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'deleted' => '0',
+      'description' => 'Deres klubblogo. Bør være en logo på hvit eller gjennomsiktig bakgrunn.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'hidden',
+          'module' => 'image',
+          'settings' => array(
+            'image_link' => '',
+            'image_style' => '',
+          ),
+          'type' => 'image',
+          'weight' => '1',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'hidden',
+          'module' => 'image',
+          'settings' => array(
+            'image_link' => 'content',
+            'image_style' => 'thumbnail',
+          ),
+          'type' => 'image',
+          'weight' => '0',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'image',
+          'settings' => array(
+            'image_link' => '',
+            'image_style' => '',
+          ),
+          'type' => 'image',
+          'weight' => '3',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'image',
+          'settings' => array(
+            'image_link' => '',
+            'image_style' => '',
+          ),
+          'type' => 'image',
+          'weight' => '3',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_club_image',
+      'label' => 'Logo',
+      'required' => 1,
+      'settings' => array(
+        'alt_field' => 0,
+        'default_image' => 0,
+        'file_directory' => '',
+        'file_extensions' => 'png gif jpg jpeg',
+        'max_filesize' => '',
+        'max_resolution' => '1000x1000',
+        'min_resolution' => '50x50',
+        'title_field' => 0,
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'image',
+        'settings' => array(
+          'insert' => 0,
+          'insert_class' => '',
+          'insert_default' => array(
+            0 => 'auto',
+          ),
+          'insert_styles' => array(
+            0 => 'auto',
+          ),
+          'insert_width' => '',
+          'preview_image_style' => 'thumbnail',
+          'progress_indicator' => 'bar',
+        ),
+        'type' => 'image_image',
+        'weight' => '1',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_club_mail_list'.
+  $fields['node-club-field_club_mail_list'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_club_mail_list',
+      'foreign keys' => array(),
+      'global_block_settings' => '1',
+      'indexes' => array(),
+      'locked' => '0',
+      'module' => 'email',
+      'settings' => array(),
+      'translatable' => '1',
+      'type' => 'email',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Klubbens mailingliste, hvis den har noen. Hvis ikke, skriv inn en epost som klubben kan kontaktes på.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '12',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '8',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'email',
+          'settings' => array(),
+          'type' => 'email_default',
+          'weight' => '1',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'email',
+          'settings' => array(),
+          'type' => 'email_default',
+          'weight' => '1',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_club_mail_list',
+      'label' => 'Mailingliste',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'email',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'email_textfield',
+        'weight' => '-3',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_club_members'.
+  $fields['node-club-field_club_members'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_club_members',
+      'foreign keys' => array(),
+      'global_block_settings' => '1',
+      'indexes' => array(),
+      'locked' => '0',
+      'module' => 'number',
+      'settings' => array(),
+      'translatable' => '1',
+      'type' => 'number_integer',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'module' => 'number',
+          'settings' => array(
+            'decimal_separator' => '.',
+            'prefix_suffix' => TRUE,
+            'scale' => 0,
+            'thousand_separator' => ' ',
+          ),
+          'type' => 'number_integer',
+          'weight' => '4',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '10',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'number',
+          'settings' => array(
+            'decimal_separator' => '.',
+            'prefix_suffix' => TRUE,
+            'scale' => 0,
+            'thousand_separator' => ' ',
+          ),
+          'type' => 'number_integer',
+          'weight' => '5',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'number',
+          'settings' => array(
+            'decimal_separator' => '.',
+            'prefix_suffix' => TRUE,
+            'scale' => 0,
+            'thousand_separator' => ' ',
+          ),
+          'type' => 'number_integer',
+          'weight' => '5',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_club_members',
+      'label' => 'Antall medlemmer',
+      'required' => 0,
+      'settings' => array(
+        'max' => '500',
+        'min' => '0',
+        'prefix' => '',
+        'suffix' => ' medlemmer',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 0,
+        'module' => 'number',
+        'settings' => array(),
+        'type' => 'number',
+        'weight' => '3',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_map_country_1'.
+  $fields['node-club-field_map_country_1'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_map_country_1',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '1',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '15',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '15',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '11',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '11',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_map_country_1',
+      'label' => 'Land',
+      'required' => 0,
+      'settings' => array(
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '13',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_map_name_browser'.
+  $fields['node-club-field_map_name_browser'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '2',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_map_name_browser',
+      'foreign keys' => array(
+        'tid' => array(
+          'columns' => array(
+            'tid' => 'tid',
+          ),
+          'table' => 'taxonomy_term_data',
+        ),
+      ),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'tid' => array(
+          0 => 'tid',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'taxonomy',
+      'settings' => array(
+        'allowed_values' => array(
+          0 => array(
+            'vocabulary' => 'countries',
+            'parent' => '0',
+          ),
+        ),
+      ),
+      'translatable' => '1',
+      'type' => 'taxonomy_term_reference',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Denne skal være avslått for brukeren, så denne skal man ikke kunne se. Ser du den, gi beskjed til administrator.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '13',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '12',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'taxonomy',
+          'settings' => array(),
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => '7',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'taxonomy',
+          'settings' => array(),
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => '7',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_map_name_browser',
+      'label' => 'Landshiearki',
+      'required' => 0,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'options',
+        'settings' => array(),
+        'type' => 'options_select',
+        'weight' => '7',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_map_point'.
+  $fields['node-club-field_map_point'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_map_point',
+      'foreign keys' => array(),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'lid' => array(
+          0 => 'lid',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'location_cck',
+      'settings' => array(
+        'gmap_macro' => '[gmap overlay=tile/1.0:http://opencache.statkart.no/gatekeeper/gk/gk.open_gmaps?layers=sjo_hovedkart2&zoom={Z}&x={X}&y={Y} | zoom=3 |center=44.715513732021336,-40.60546875 |width=600px |height=400px |control=Small |type=Map]',
+        'gmap_marker' => 'drupal',
+        'location_settings' => array(
+          'display' => array(
+            'hide' => array(
+              'additional' => 'additional',
+              'city' => 'city',
+              'coords' => 'coords',
+              'country' => 'country',
+              'country_name' => 'country_name',
+              'locpick' => 'locpick',
+              'map_link' => 'map_link',
+              'name' => 'name',
+              'postal_code' => 'postal_code',
+              'province' => 'province',
+              'province_name' => 'province_name',
+              'street' => 'street',
+            ),
+          ),
+          'form' => array(
+            'fields' => array(
+              'additional' => array(
+                'collect' => '0',
+                'default' => '',
+                'weight' => '6',
+              ),
+              'city' => array(
+                'collect' => '0',
+                'default' => '',
+                'weight' => '8',
+              ),
+              'country' => array(
+                'collect' => '4',
+                'default' => 'no',
+                'weight' => '14',
+              ),
+              'locpick' => array(
+                'collect' => '2',
+                'weight' => '20',
+              ),
+              'name' => array(
+                'collect' => '0',
+                'default' => '',
+                'weight' => '2',
+              ),
+              'postal_code' => array(
+                'collect' => '0',
+                'default' => '',
+                'weight' => '12',
+              ),
+              'province' => array(
+                'collect' => '0',
+                'default' => '',
+                'weight' => '10',
+              ),
+              'street' => array(
+                'collect' => '0',
+                'default' => '',
+                'weight' => '4',
+              ),
+            ),
+          ),
+        ),
+      ),
+      'translatable' => '1',
+      'type' => 'location',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Klubbens lokalitet, vanligvis lokaliteten til klubbhuset.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'hidden',
+          'module' => 'location_cck',
+          'settings' => array(),
+          'type' => 'location_default',
+          'weight' => '2',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '11',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'location_cck',
+          'settings' => array(),
+          'type' => 'location_default',
+          'weight' => '6',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'location_cck',
+          'settings' => array(),
+          'type' => 'location_default',
+          'weight' => '6',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_map_point',
+      'label' => 'Lokalitet',
+      'required' => 1,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 0,
+        'module' => 'location_cck',
+        'settings' => array(),
+        'type' => 'location',
+        'weight' => '5',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_map_region_1'.
+  $fields['node-club-field_map_region_1'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_map_region_1',
+      'foreign keys' => array(
+        'format' => array(
+          'columns' => array(
+            'format' => 'format',
+          ),
+          'table' => 'filter_format',
+        ),
+      ),
+      'global_block_settings' => '1',
+      'indexes' => array(
+        'format' => array(
+          0 => 'format',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'text',
+      'settings' => array(
+        'max_length' => '255',
+      ),
+      'translatable' => '1',
+      'type' => 'text',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '14',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '14',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '10',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'text',
+          'settings' => array(),
+          'type' => 'text_default',
+          'weight' => '10',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_map_region_1',
+      'label' => 'Region',
+      'required' => 0,
+      'settings' => array(
+        'text_processing' => '0',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'text',
+        'settings' => array(
+          'size' => '60',
+        ),
+        'type' => 'text_textfield',
+        'weight' => '11',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_place_radius'.
+  $fields['node-club-field_place_radius'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_place_radius',
+      'foreign keys' => array(),
+      'global_block_settings' => '1',
+      'indexes' => array(),
+      'locked' => '0',
+      'module' => 'number',
+      'settings' => array(),
+      'translatable' => '1',
+      'type' => 'number_integer',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => array(
+        0 => array(
+          'value' => '100000',
+        ),
+      ),
+      'deleted' => '0',
+      'description' => 'Den statistiske radius for dykkesteder av interesse. NB: Måles i meter.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'number',
+          'settings' => array(
+            'decimal_separator' => '.',
+            'prefix_suffix' => TRUE,
+            'scale' => 0,
+            'thousand_separator' => ' ',
+          ),
+          'type' => 'number_integer',
+          'weight' => 13,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_place_radius',
+      'label' => 'Statistisk radius',
+      'required' => 1,
+      'settings' => array(
+        'max' => '100000',
+        'min' => '1',
+        'prefix' => '',
+        'suffix' => ' Meter',
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 0,
+        'module' => 'number',
+        'settings' => array(),
+        'type' => 'number',
+        'weight' => '32',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-group_group'.
+  $fields['node-club-group_group'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'group_group',
+      'foreign keys' => array(),
+      'indexes' => array(
+        'value' => array(
+          0 => 'value',
+        ),
+      ),
+      'locked' => '0',
+      'module' => 'list',
+      'no_ui' => TRUE,
+      'settings' => array(
+        'allowed_values' => array(
+          0 => 'Not a group type',
+          1 => 'Group type',
+        ),
+        'allowed_values_function' => '',
+      ),
+      'translatable' => '0',
+      'type' => 'list_boolean',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => array(
+        0 => array(
+          'value' => 1,
+        ),
+      ),
+      'deleted' => '0',
+      'description' => '',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '16',
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '16',
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'module' => 'list',
+          'settings' => array(),
+          'type' => 'list_default',
+          'weight' => '12',
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'list',
+          'settings' => array(),
+          'type' => 'list_default',
+          'weight' => '12',
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'group_group',
+      'label' => 'Group type',
+      'required' => TRUE,
+      'settings' => array(
+        'user_register_form' => FALSE,
+      ),
+      'view modes' => array(
+        'full' => array(
+          'custom settings' => FALSE,
+          'label' => 'Full',
+          'type' => 'og_group_subscribe',
+        ),
+        'teaser' => array(
+          'custom settings' => FALSE,
+          'label' => 'Teaser',
+          'type' => 'og_group_subscribe',
+        ),
+      ),
+      'widget' => array(
+        'module' => 'options',
+        'settings' => array(),
+        'type' => 'options_buttons',
+        'weight' => '14',
+      ),
+      'widget_type' => 'options_select',
+    ),
+  );
+
   // Exported field: 'node-divesite-field_map_country'.
   $fields['node-divesite-field_map_country'] = array(
     'field_config' => array(
@@ -629,7 +1724,7 @@ $entity_field[0][\'value\'] = $me[0];',
         'module' => 'location_cck',
         'settings' => array(),
         'type' => 'location',
-        'weight' => '4',
+        'weight' => '1',
       ),
     ),
   );
@@ -4872,6 +5967,7 @@ $entity_field[0][\'value\'] = $me[0];',
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('Antall medlemmer');
   t('BIlder hjelper til å identifisere stedet. Ta gjerne noen oversiktsbilder neste gang du er der, det holder med overflatebilder selv om det er gøy med undervannsbilder også. 
 Undervannsbilder har vi nok av i loggene.');
   t('Bilde');
@@ -4879,8 +5975,12 @@ Undervannsbilder har vi nok av i loggene.');
   t('Buddyer');
   t('Bunntype');
   t('Den radius som statistikken skal regnes utifra. For stor radius resulterer i mer uspesifikk data, mens en liten radius kan forårsake dårlig datagrunnlag på steder som blir trafikkert av få dykkere. Det kan være lurt å la statistikken ha en stor radius i begynnelse, for deretter å endre den etterhvert som datagrunnlaget blir bedre.');
+  t('Den statistiske radius for dykkesteder av interesse. NB: Måles i meter.');
   t('Denne skal ikke vises! Ser du denne, gi beskjed til admin!');
+  t('Denne skal være avslått for brukeren, så denne skal man ikke kunne se. Ser du den, gi beskjed til administrator.');
+  t('Deres klubblogo. Bør være en logo på hvit eller gjennomsiktig bakgrunn.');
   t('Dine tagger');
+  t('Dokumenter');
   t('Du kan bruke dette feltet til å importere geografiske data fra en annen lokalitet. Dette feltet vil da overskrive kartet nedenfor.');
   t('Dybde');
   t('Dykketid');
@@ -4893,6 +5993,10 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
   t('Flasketrykk slutt');
   t('Flasketrykk start');
   t('Flaskevolum');
+  t('Gateadresse');
+  t('Gi litt generell informasjon om klubben. Mer er generelt bedre enn mindre, da denne siden praktisk talt fungerer som en reklameplakat for klubben.');
+  t('Group type');
+  t('Her kan du legge inn påmeldingsskjemaer, lederinstrukser og annet som man ønsker skal være tilgjengelig.');
   t('Her kan du skrive inn korte, gjenkjennende tagger på dykket, separert med komma. Eksempel: Kamskjell, vanskelig, prøvedykk');
   t('Hvem andre var deltakende på dette dykket sammen med deg?');
   t('Hvor mye luft fantes på starten av dykket?');
@@ -4901,20 +6005,28 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
   t('Inporter en posisjon');
   t('Kart');
   t('Kartdata');
+  t('Klubbens gateadresse, hvis det finnes en.');
+  t('Klubbens lokalitet, vanligvis lokaliteten til klubbhuset.');
+  t('Klubbens mailingliste, hvis den har noen. Hvis ikke, skriv inn en epost som klubben kan kontaktes på.');
   t('Kommentarer');
   t('Land');
+  t('Landshiearki');
   t('Landskode');
   t('Legg til et beskrivende bilde av denne kategorien.');
   t('Lenker som kan være av hjelp ved dykking i området. Kun lenker som er relevante på dette stedet. Hvis det blir mer generelle lenker, tenk heller på å legge dem inn under regionen som det dykkes i. ');
   t('Loggfør detaljerte data');
   t('Loggfør et godt dokumentert dykk, eller bare det mest nødvendige.');
+  t('Logo');
+  t('Lokalitet');
   t('Luft-type');
   t('Luftforbruk');
+  t('Mailingliste');
   t('Maks dybde på dykket');
   t('Map marker');
   t('Marker');
   t('Not to be shown for the current user.');
   t('Not to be shown publicly');
+  t('Om klubben');
   t('Om stedet');
   t('Rapporter et problem');
   t('Rapporter feil på dykket. Hvis du ønsker det, kan du rapportere om problem ved å klikke her. 

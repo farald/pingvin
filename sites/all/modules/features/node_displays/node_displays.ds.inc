@@ -12,6 +12,66 @@ function node_displays_ds_layout_settings_info() {
 
   $ds_layout = new stdClass();
   $ds_layout->api_version = 1;
+  $ds_layout->id = 'node|club|club_full_node';
+  $ds_layout->entity_type = 'node';
+  $ds_layout->bundle = 'club';
+  $ds_layout->view_mode = 'club_full_node';
+  $ds_layout->layout = 'ds_2col';
+  $ds_layout->settings = array(
+    'hide_empty_regions' => 0,
+    'hide_sidebars' => 0,
+    'regions' => array(
+      'left' => array(
+        0 => 'field_club_about',
+      ),
+      'right' => array(
+        0 => 'field_club_image',
+        1 => 'field_map_point',
+        2 => 'field_club_docs',
+        3 => 'field_club_members',
+        4 => 'field_club_address',
+      ),
+    ),
+    'fields' => array(
+      'field_club_about' => 'left',
+      'field_club_image' => 'right',
+      'field_map_point' => 'right',
+      'field_club_docs' => 'right',
+      'field_club_members' => 'right',
+      'field_club_address' => 'right',
+    ),
+    'classes' => array(),
+  );
+  $export['node|club|club_full_node'] = $ds_layout;
+
+  $ds_layout = new stdClass();
+  $ds_layout->api_version = 1;
+  $ds_layout->id = 'node|club|club_large_teaser';
+  $ds_layout->entity_type = 'node';
+  $ds_layout->bundle = 'club';
+  $ds_layout->view_mode = 'club_large_teaser';
+  $ds_layout->layout = 'ds_1col';
+  $ds_layout->settings = array(
+    'hide_empty_regions' => 0,
+    'hide_sidebars' => 0,
+    'regions' => array(
+      'ds_content' => array(
+        0 => 'field_club_image',
+        1 => 'title',
+        2 => 'field_club_about',
+      ),
+    ),
+    'fields' => array(
+      'field_club_image' => 'ds_content',
+      'title' => 'ds_content',
+      'field_club_about' => 'ds_content',
+    ),
+    'classes' => array(),
+  );
+  $export['node|club|club_large_teaser'] = $ds_layout;
+
+  $ds_layout = new stdClass();
+  $ds_layout->api_version = 1;
   $ds_layout->id = 'node|divesite|default';
   $ds_layout->entity_type = 'node';
   $ds_layout->bundle = 'divesite';

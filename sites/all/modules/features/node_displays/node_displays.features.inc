@@ -23,6 +23,14 @@ function node_displays_ctools_plugin_api() {
  */
 function node_displays_node_info() {
   $items = array(
+    'club' => array(
+      'name' => t('Klubb'),
+      'base' => 'node_content',
+      'description' => t('Dette er basen for en klubbkonto. Her er alle innstillinger for klubben, samt tilgangsrettigheter osv. Kun en klubb-administrator kan ha eierskap til en slik artikkel. Tabbene på artikkelen vil samle sammen relevant informasjon om klubben.'),
+      'has_title' => '1',
+      'title_label' => t('Tittel'),
+      'help' => t('Dette er baseartikkelen for din dykkerklubb. '),
+    ),
     'divesite' => array(
       'name' => t('Dykkested'),
       'base' => 'node_content',
