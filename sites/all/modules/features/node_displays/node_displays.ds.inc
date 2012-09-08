@@ -216,6 +216,66 @@ function node_displays_ds_layout_settings_info() {
   );
   $export['node|log|log_small_teaser'] = $ds_layout;
 
+  $ds_layout = new stdClass();
+  $ds_layout->api_version = 1;
+  $ds_layout->id = 'user|user|user_mini_teaser';
+  $ds_layout->entity_type = 'user';
+  $ds_layout->bundle = 'user';
+  $ds_layout->view_mode = 'user_mini_teaser';
+  $ds_layout->layout = 'ds_2col';
+  $ds_layout->settings = array(
+    'hide_empty_regions' => 0,
+    'hide_sidebars' => 0,
+    'regions' => array(
+      'left' => array(
+        0 => 'ds_user_picture',
+      ),
+      'right' => array(
+        0 => 'name',
+        1 => 'field_user_certificate',
+        2 => 'group_audience',
+      ),
+    ),
+    'fields' => array(
+      'ds_user_picture' => 'left',
+      'name' => 'right',
+      'field_user_certificate' => 'right',
+      'group_audience' => 'right',
+    ),
+    'classes' => array(),
+  );
+  $export['user|user|user_mini_teaser'] = $ds_layout;
+
+  $ds_layout = new stdClass();
+  $ds_layout->api_version = 1;
+  $ds_layout->id = 'user|user|user_teaser';
+  $ds_layout->entity_type = 'user';
+  $ds_layout->bundle = 'user';
+  $ds_layout->view_mode = 'user_teaser';
+  $ds_layout->layout = 'ds_2col';
+  $ds_layout->settings = array(
+    'hide_empty_regions' => 0,
+    'hide_sidebars' => 0,
+    'regions' => array(
+      'right' => array(
+        0 => 'name',
+        1 => 'field_user_aboutme',
+        2 => 'group_audience',
+      ),
+      'left' => array(
+        0 => 'ds_user_picture',
+      ),
+    ),
+    'fields' => array(
+      'name' => 'right',
+      'ds_user_picture' => 'left',
+      'field_user_aboutme' => 'right',
+      'group_audience' => 'right',
+    ),
+    'classes' => array(),
+  );
+  $export['user|user|user_teaser'] = $ds_layout;
+
   return $export;
 }
 
@@ -314,6 +374,15 @@ function node_displays_ds_view_modes_info() {
     'user' => 'user',
   );
   $export['user_mini_teaser'] = $ds_view_mode;
+
+  $ds_view_mode = new stdClass();
+  $ds_view_mode->api_version = 1;
+  $ds_view_mode->view_mode = 'user_teaser';
+  $ds_view_mode->label = 'User teaser';
+  $ds_view_mode->entities = array(
+    'user' => 'user',
+  );
+  $export['user_teaser'] = $ds_view_mode;
 
   return $export;
 }
