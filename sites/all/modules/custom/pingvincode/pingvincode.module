@@ -6,6 +6,36 @@
  */
 
 /**
+ * Returns a node's field's items' specified key (raw data).
+ */
+function pingvincode_field_get_values($node, $fieldname, $index = NULL, $key = 'value') {
+  $values = array();
+
+  $items = field_get_items('node', $node, $fieldname);
+  if (is_array($items)) {
+    foreach ($items as $item) {
+      $values[] = $key ? $item[$key] : $item;
+    }
+  }
+
+  return (is_int($index) && isset($values[$index]) ? $values[$index] : $values);
+}
+
+function pingvincode_field_view_values($node, $fieldname, $index = NULL, $key = '#markup') {
+  $values = array();
+
+  $items = field_get_items('node', $node, $fieldname);
+  if (is_array($items)) {
+    foreach ($items as $item) {
+      $value = field_view_value('node', $node, $fieldname, $item);
+      $values[] = $key ? $value[$key] : $value;
+    }
+  }
+
+  return (is_int($index) && isset($values[$index]) ? $values[$index] : $values);
+}
+
+/**
  * Implements hook_form_alter();
  */
 function pingvincode_form_alter(&$form, &$form_state, $form_id) {
@@ -33,13 +63,66 @@ function pingvincode_form_alter(&$form, &$form_state, $form_id) {
       $form['sort_bef_combine']['#options']['field_log_downtime_value ASC'] = t('Kortest');
       //unset($form['sort_bef_combine']['#options']['field_log_downtime_value ASC']);
     }
-    
+
     // Site
     // Updated
-        if (!empty($form['sort_bef_combine']['#options']['changed DESC'])) {
+    if (!empty($form['sort_bef_combine']['#options']['changed DESC'])) {
       $form['sort_bef_combine']['#options']['changed DESC'] = t('Sist endret');
       $form['sort_bef_combine']['#options']['changed ASC'] = t('Kortest');
       unset($form['sort_bef_combine']['#options']['changed ASC']);
     }
   }
+}
+
+/**
+ * Token for creating address.
+ */
+function pingvincode_token_info($type = 'all') {
+  $data['tokens']['node']['location_argument_parser'] = array(
+    'name' => t('Location argument parser'),
+    'description' => t('A custom location parser for location views.'),
+  );
+  $data['tokens']['node']['location_argument_20000'] = array(
+    'name' => t('Location argument parser, fixed distance'),
+    'description' => t('A custom location parser for location views.'),
+  );
+
+  return $data;
+}
+
+/**
+ * Implements hook_token().
+ */
+function pingvincode_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  if ($type == 'entity') {
+
+    $replacements = array();
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'location_argument_parser' :
+          $entity = $data['entity'];
+          if (isset($entity->field_map_point)) {
+            $lat = pingvincode_field_get_values($entity, 'field_map_point', 0, 'latitude');
+            $lon = pingvincode_field_get_values($entity, 'field_map_point', 0, 'longitude');
+            $dist = pingvincode_field_get_values($entity, 'field_place_radius', 0, 'value');
+            if (!empty($lat) && !empty($lon) && !empty($dist)) {
+              $replacements[$original] = $lat . "," . $lon . "_" . $dist;
+            }
+          }
+          break;
+        case 'location_argument_20000' :
+          $entity = $data['entity'];
+          if (isset($entity->field_map_point)) {
+            $lat = pingvincode_field_get_values($entity, 'field_map_point', 0, 'latitude');
+            $lon = pingvincode_field_get_values($entity, 'field_map_point', 0, 'longitude');
+            $dist = 20000;
+            if (!empty($lat) && !empty($lon) && !empty($dist)) {
+              $replacements[$original] = $lat . "," . $lon . "_" . $dist;
+            }
+          }
+          break;
+      }
+    }
+  }
+  return $replacements;
 }
