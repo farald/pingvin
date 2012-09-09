@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Site discussions feature.
+ */
+
+include_once 'site_discussions.features.inc';
