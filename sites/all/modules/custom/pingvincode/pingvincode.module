@@ -126,3 +126,43 @@ function pingvincode_tokens($type, $tokens, array $data = array(), array $option
   }
   return $replacements;
 }
+
+function pingvincode_preprocess_views_view(&$vars) {
+  // Get my view
+  if ($vars['view']->name == 'discussions_on_divesites') {
+    //get the title of the node shown in the view
+    $nid = $vars['view']->argument[field_nodekobling_target_id]->argument;
+    $node = node_load($nid);
+    $my_title = 'Diskusjoner om ' . $node->title;
+
+    /* Code to dynamically set title here...
+      Override view's title since drupal_set_title() is not working. */
+    $vars['view']->build_info['title'] = $my_title;
+  }
+}
+
+/**
+ * Implements hook_menu_alter().
+ *
+ * Use a title callback to replace the text shown on nodes' "View" tab.
+ */
+function pingvincode_menu_alter(&$items) {
+  $items['node/%node/view']['title callback'] = 'pingvincode_view_tab_title';
+  $items['node/%node/view']['title arguments'] = array(1);
+}
+
+/**
+ * Callback for the menu title
+ */
+function pingvincode_view_tab_title($node) {
+  switch ($node->type) {
+    case 'divesite':
+      return t('Dykkested');
+    case 'log':
+      return t('Loggføring');
+      case 'club':
+        return('Dykkerklubb');
+    default:
+      return t('View');
+  }
+}
