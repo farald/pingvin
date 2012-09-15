@@ -15,8 +15,21 @@
   position:relative;
 }
 
+.openlayers-views-map {
+  z-index:0;
+  position:relative;
+}
+
+.openlayers-views-map img {
+  max-width: none;
+}
+
+.openlayers-views-map .olLayerDiv {
+  direction: ltr;
+}
+
 /**
- * prevent rtl translations from mirroring 
+ * prevent rtl translations from mirroring
  * vector layers
  */
 .openlayers-map .olLayerDiv {
@@ -46,6 +59,6 @@ body .olControlAttribution {
  * This is a 'sensible default' for a weird decision
  * by OpenLayers to make 404 tiles pink.
  */
-.olImageLoadError {
+body .olImageLoadError {
   background: transparent;
 }
