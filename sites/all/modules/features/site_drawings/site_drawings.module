@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Site drawings feature.
+ */
+
+include_once 'site_drawings.features.inc';
