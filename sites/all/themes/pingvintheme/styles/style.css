@@ -1090,3 +1090,8 @@ ul.icons li .icon-large:before {
 .page-sted .bef-sort-combined .controls .controls label, .page-dykk .bef-sort-combined .controls .controls label {
   display: block !important;
 }
+
+.page-kart .openlayers-popup {
+  color: #555555;
+  max-width: 280px;
+}

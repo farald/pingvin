@@ -199,10 +199,18 @@
     .controls {
       .controls{
         label {
-        display:block !important;
+          display:block !important;
         }
         //display:none;
       }
     }
+  }
+}
+
+//map
+.page-kart{
+  .openlayers-popup {
+    color: #555555;
+    max-width: 280px;
   }
 }
