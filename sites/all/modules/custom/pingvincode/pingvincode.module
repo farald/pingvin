@@ -86,6 +86,10 @@ function pingvincode_token_info($type = 'all') {
     'name' => t('Location argument parser, fixed distance'),
     'description' => t('A custom location parser for location views.'),
   );
+  $data['tokens']['node']['location_argument_300000'] = array(
+    'name' => t('Location argument parser, fixed distance'),
+    'description' => t('A custom location parser for location views.'),
+  );
 
   return $data;
 }
@@ -116,6 +120,17 @@ function pingvincode_tokens($type, $tokens, array $data = array(), array $option
             $lat = pingvincode_field_get_values($entity, 'field_map_point', 0, 'latitude');
             $lon = pingvincode_field_get_values($entity, 'field_map_point', 0, 'longitude');
             $dist = 20000;
+            if (!empty($lat) && !empty($lon) && !empty($dist)) {
+              $replacements[$original] = $lat . "," . $lon . "_" . $dist;
+            }
+          }
+          break;
+        case 'location_argument_300000' :
+          $entity = $data['entity'];
+          if (isset($entity->field_map_point)) {
+            $lat = pingvincode_field_get_values($entity, 'field_map_point', 0, 'latitude');
+            $lon = pingvincode_field_get_values($entity, 'field_map_point', 0, 'longitude');
+            $dist = 300000;
             if (!empty($lat) && !empty($lon) && !empty($dist)) {
               $replacements[$original] = $lat . "," . $lon . "_" . $dist;
             }
@@ -160,8 +175,8 @@ function pingvincode_view_tab_title($node) {
       return t('Dykkested');
     case 'log':
       return t('Loggføring');
-      case 'club':
-        return('Dykkerklubb');
+    case 'club':
+      return('Dykkerklubb');
     default:
       return t('View');
   }
