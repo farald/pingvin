@@ -1,36 +1,20 @@
 <?php
-/*
- * This file is part of the sfMapFishPlugin package.
- * (c) Camptocamp <info@camptocamp.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 /**
- * MultiLineString : a MultiLineString geometry.
- *
- * @package    sfMapFishPlugin
- * @subpackage GeoJSON
- * @author     Camptocamp <info@camptocamp.com>
- * @version    
+ * MultiLineString: A collection of LineStrings
  */
-class MultiLineString extends Collection 
+class MultiLineString extends Collection
 {
   protected $geom_type = 'MultiLineString';
-  
-  /**
-   * Constructor
-   *
-   * @param array $linestrings The LineString array
-   */
-  public function __construct(array $linestrings) 
-  {
-    parent::__construct($linestrings);
+
+  // MultiLineString is closed if all it's components are closed
+  public function isClosed() {
+    foreach ($this->components as $line) {
+      if (!$line->isClosed()) {
+        return FALSE;
+      }
+    }
+    return TRUE;
   }
-  
-  public function intersects($distance) {
-    //TODO
-  }
+
 }
 
