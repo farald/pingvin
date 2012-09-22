@@ -166,10 +166,10 @@
 }
 
 // Divesite node edit
-.page-node-edit {
+.page-node-edit, .page-node-add {
   .vertical-tabs {
     .control-label {
-      margin-top:5px;
+      margin:15px 0 5px 0;
       font-weight:bold;
     }
     
@@ -180,6 +180,11 @@
         width:auto;
         //width:250px;
         //padding:10px;
+      }
+    }
+    .field-type-geofield {
+      .description {
+        margin: 10px 0 10px 0;
       }
     }
   }

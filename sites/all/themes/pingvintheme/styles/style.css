@@ -1071,14 +1071,17 @@ ul.icons li .icon-large:before {
   padding: 2px;
 }
 
-.page-node-edit .vertical-tabs .control-label {
-  margin-top: 5px;
+.page-node-edit .vertical-tabs .control-label, .page-node-add .vertical-tabs .control-label {
+  margin: 15px 0 5px 0;
   font-weight: bold;
 }
-.page-node-edit .vertical-tabs .form-type-textfield input {
+.page-node-edit .vertical-tabs .form-type-textfield input, .page-node-add .vertical-tabs .form-type-textfield input {
   -moz-box-sizing: inherit !important;
   height: 2em;
   width: auto;
+}
+.page-node-edit .vertical-tabs .field-type-geofield .description, .page-node-add .vertical-tabs .field-type-geofield .description {
+  margin: 10px 0 10px 0;
 }
 
 .page-sted .field-slideshow, .page-dykk .field-slideshow {
