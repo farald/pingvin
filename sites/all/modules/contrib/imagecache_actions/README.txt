@@ -8,23 +8,12 @@ Current and past maintainers for Imagecache Actions:
 - sidneyshan (http://drupal.org/user/652426)
 - fietserwin (http://drupal.org/user/750928)
 
-Release notes for 7.x-1.x-dev
------------------------------
-- Clear the (menu) cache after installing or updating.
-
 
 Release notes for 7.x-1.0
 -------------------------
-- Clear the (registry) cache after installing or updating to 7.x-1.0.
 - If you use custom actions, run update.php.
-- If you use custom actions, be sure to enable the 'PHP filter' module and give
-  image style editors that may create custom actions the 'use PHP for settings'
-  permission. The module must also be enabled on image creation.
-- If you use custom actions, please read the README.txt from that sub-module to
-  find out about how information and resources are available to you. You will
-  probably have to change your code snippets.
 - If you use effects that use files (mask, overlays, underlays, text fonts),
-  check the way they are specified. From 7.x-1.0 on, you have to specify the
+  check the way they are specified. From 7.x-1.0 on, you have to specfiy the
   location using one of the schemes private://, public://, module:// or
   temporary://. If no scheme is specified, the file is searched for as is, thus
   relative to the current directory or as an absolute path.
@@ -46,10 +35,6 @@ The Imagecache Actions module provides a suite of additional image effects that
 can be added to image styles. Image styles let you create derivations of images
 by applying (a series of) effect(s) to it. Think of resizing, desaturating,
 masking, etc.
-
-Furthermore, imagecache_actions extends the administrative interface for image
-styles by providing additional features. It does so in the "Image styles admin"
-sub module.
 
 The additional effects that Imagecache Actions provides include:
 - Watermark: place a image with transparency anywhere over a source picture.
@@ -86,6 +71,17 @@ Image styles are part of Drupal 7 core and are the successor of the Drupal 6
 imagecache module. In Drupal 6 image styles were called (imagecache) presets and
 the separate effects that made up a style were called (imagecache) actions. In
 porting to D7, that name has not been changed (yet).
+
+
+Augmenting the Drupal core image module
+---------------------------------------
+This module might also provide additional features to the Drupal core image
+module. Currently no such features are implemented, but they might be in the
+future, think e.g. of adding a "copy image style" feature. This allows to test
+D8 image module features in real life.
+
+Solving errors in the core image handling:
+- [#1554074]: scale does not work with imagemagick when dimensions are unknown?
 
 
 Which toolkit to use?
@@ -145,8 +141,10 @@ Backwards compatibility
 -----------------------
 Future releases will not be guaranteed to be backwards compatible. Implementing
 Imagemagick support e.g. might give unforeseen problems that can only be solved
-by changing the details of what an effect does.We will document these kind of
-incompatibilities in the changelog and the release notes.
+by changing the details of what an effect does. furhtermore current behavior of
+the image mask effect is to also change the file format to png. This effect
+should not do so, and thus will probably be changed in a future release. We will
+document these kind of incompatibilities in the changelog and the release notes.
 
 
 File form fields
