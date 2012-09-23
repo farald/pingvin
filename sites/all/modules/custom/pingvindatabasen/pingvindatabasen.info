@@ -1,4 +1,4 @@
-name = General PingvinDB stuff
+name = General PingvinDB stuff *DEPRECATED*
 description = Collection parts needed for Pingvindatabasen. The .info-file refers further to the necessary files.
 package = Pingvindatabasen
 version = VERSION
