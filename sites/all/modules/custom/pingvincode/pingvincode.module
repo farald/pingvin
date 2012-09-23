@@ -39,7 +39,7 @@ function pingvincode_field_view_values($node, $fieldname, $index = NULL, $key = 
  * Implements hook_form_alter();
  */
 function pingvincode_form_alter(&$form, &$form_state, $form_id) {
-  //xdebug_break();
+  // Fix the cool exposed buttons
   $form_ids = array(
     'views-exposed-form-dive-list-page-1',
     'views-exposed-form-site-list-page-1'
@@ -179,5 +179,139 @@ function pingvincode_view_tab_title($node) {
       return('Dykkerklubb');
     default:
       return t('View');
+  }
+}
+
+/**
+ * Primarily for sites, we programmatically collect information.
+ * 
+ * - Move lat / lon from geofield to location.
+ * - Call geonames and get country / region
+ */
+function pingvincode_node_presave($node) {
+  // If some location info...
+  if (isset($node->field_map_geofield['und'][0]['lat'])) {
+    // We use these..
+    $lat = $node->field_map_geofield['und'][0]['lat'];
+    $lon = $node->field_map_geofield['und'][0]['lon'];
+    //Move coordinates from geofield to location
+    $location = array(
+      'lid' => '',
+      'name' => '',
+      'street' => '',
+      'additional' => '',
+      'city' => '',
+      'province' => '',
+      'postal_code' => '',
+      'country' => 'no',
+      'latitude' => $lat,
+      'longitude' => $lon,
+      'source' => '1',
+      'is_primary' => '0',
+      'locpick' =>
+      array(
+        'user_latitude' => (float) $lat,
+        'user_longitude' => (float) $lon,
+      ),
+      'province_name' => '',
+      'country_name' => 'Norway',
+    );
+    $node->field_map_point['und']['0'] = $location;
+
+    // Add geonames to the lot
+    $locative = pingvincode_geonames_info($lat, $lon);
+
+    // First we set the text fields. (TODO remove these?)
+    $node->field_map_region_1['und']['0']['value'] = $locative['region'];
+    $node->field_map_country_1['und']['0']['value'] = $locative['country'];
+
+    // Then we take berlin (the taxonomy).
+    $country_tid = pingvincode_tax_search($locative['country']);
+    if (!is_numeric($country_tid)) {
+      $Cterms = new stdClass();
+      $Cterms->vid = 7;
+      $Cterms->name = $locative['country'];
+      $Cterms->description = "";
+      taxonomy_term_save($Cterms);
+      $country_tid = $Cterms->tid;
+    }
+
+    // Now that we've created a term for country,
+    // let's do this for region as well. Now we need the country's parent.
+    $region_tid = pingvincode_tax_search($locative['region'], $country_tid);
+
+    // If none, create one.
+    if (!is_numeric($region_tid)) {
+      $Rterms = new stdClass();
+      $Rterms->vid = 7;
+      $Rterms->name = $locative['region'];
+      $Rterms->description = t("Et administrativt område i ") . l($country_value, "taxonomy/");
+      $Rterms->format = "full_html";
+      $Rterms->parent = $country_tid;
+      taxonomy_term_save($Rterms);
+      $region_tid = $Rterms->tid;
+    }
+    // We save the term to the node before it is saved in the database.
+    $node->field_map_name_browser['und']['0']['tid'] = $region_tid;
+
+    // Fix previous translations. Remove them. Gonna be deleted.
+    unset($node->field_map_country);
+    unset($node->field_map_region);
+
+    // In case we have en or no on the ones we use, unset.
+    unset($node->field_map_country_1['no']);
+    unset($node->field_map_region_1['no']);
+    
+    // In some occations we have map_point [nb] defined. Remove that.
+    unset($field_map_point['nb']);
+
+    return $node;
+  }
+}
+
+/**
+ * Calls geonames & returns country & region
+ */
+function pingvincode_geonames_info($lat, $lon) {
+  $query = array('lat' => $lat, 'lng' => $lon, 'radius' => 100, 'maxrows' => 1);
+  $result = geonames_query('countrysubdivision', $query); // Call geonames.module
+  dpm($result);
+  if (!empty($result->results)) {
+    foreach ($result->results as $place) {
+      $region_value = $place[adminname1];
+      $country_value = $place[countryname];
+    }
+  }
+  else {
+    $country_value = "Ukjent land";
+    $region_value = "Ukjent region";
+  };
+  return array(
+    'country' => $country_value,
+    'region' => $region_value,
+  );
+}
+
+/**
+ * Search for a term in a specific taxonomy.
+ */
+function pingvincode_tax_search($item, $level = 0) {
+  $result = db_query(
+      "SELECT termdata.name, termdata.tid FROM `taxonomy_term_data` termdata
+                    INNER JOIN taxonomy_term_hierarchy termhi ON termdata.tid = termhi.tid
+                    WHERE termdata.name = :name AND termdata.vid = 7 AND termhi.parent = :level ;", array(
+    ':name' => $item,
+    ':level' => (is_numeric($level)) ? $level : 0
+      )
+  );
+  foreach ($result as $record) {
+    $tid = $record->tid;
+  };
+  return $tid;
+}
+
+function update_nodes(){
+  for ($i=1;$i<241;$i++){
+    $node = node_load($i);
   }
 }
