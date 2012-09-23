@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Map markers feature.
+ */
+
+include_once 'map_markers.features.inc';
