@@ -235,7 +235,7 @@ function site_drawings_field_default_fields() {
           'module' => 'list',
           'settings' => array(),
           'type' => 'list_default',
-          'weight' => 3,
+          'weight' => '3',
         ),
         'drawing_full_node' => array(
           'label' => 'above',

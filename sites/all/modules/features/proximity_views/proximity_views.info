@@ -1,7 +1,7 @@
 name = Proximity views
 description = All system proximity views
 core = 7.x
-package = Features
+package = All pingvin
 version = 7.x-1.0
 project = proximity_views
 dependencies[] = ctools

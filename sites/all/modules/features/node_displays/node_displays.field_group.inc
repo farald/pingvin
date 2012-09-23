@@ -13,6 +13,34 @@ function node_displays_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_air|node|log|form';
+  $field_group->group_name = 'group_air';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'log';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Luft',
+    'weight' => '4',
+    'children' => array(
+      0 => 'field_log_press_start',
+      1 => 'field_log_press_end',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_air|node|log|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_basic|node|divesite|form';
   $field_group->group_name = 'group_basic';
   $field_group->entity_type = 'node';
@@ -37,6 +65,33 @@ function node_displays_field_group_info() {
     ),
   );
   $export['group_basic|node|divesite|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_buddies|node|log|form';
+  $field_group->group_name = 'group_buddies';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'log';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Buddyer',
+    'weight' => '6',
+    'children' => array(
+      0 => 'field_log_buddies',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_buddies|node|log|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -107,6 +162,127 @@ function node_displays_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_environment|node|log|form';
+  $field_group->group_name = 'group_environment';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'log';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Miljø',
+    'weight' => '3',
+    'children' => array(
+      0 => 'field_log_env_temp_air',
+      1 => 'field_log_env_temp_water',
+      2 => 'field_log_seabed',
+      3 => 'field_log_startpoint',
+      4 => 'field_log_visibility',
+      5 => 'field_log_env_current',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_environment|node|log|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_gear|node|log|form';
+  $field_group->group_name = 'group_gear';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'log';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Utstyr',
+    'weight' => '5',
+    'children' => array(
+      0 => 'field_log_press_total',
+      1 => 'field_log_press_capacity',
+      2 => 'field_log_press_gastype',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_gear|node|log|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_images|node|log|form';
+  $field_group->group_name = 'group_images';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'log';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Bilder',
+    'weight' => '7',
+    'children' => array(
+      0 => 'field_log_images',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_images|node|log|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_mandatory|node|log|form';
+  $field_group->group_name = 'group_mandatory';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'log';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Obligatorisk',
+    'weight' => '2',
+    'children' => array(
+      0 => 'field_log_depth',
+      1 => 'field_log_comments',
+      2 => 'field_log_tag',
+      3 => 'field_glob_date',
+      4 => 'field_log_downtime',
+      5 => 'field_log_stop',
+      6 => 'field_log_tag_locked',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_mandatory|node|log|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_mapdata|node|log|form';
   $field_group->group_name = 'group_mapdata';
   $field_group->entity_type = 'node';
@@ -120,9 +296,12 @@ function node_displays_field_group_info() {
       0 => 'field_map_point',
       1 => 'field_map_country',
       2 => 'field_map_region',
-      3 => 'field_map_marker',
-      4 => 'field_map_country_1',
-      5 => 'field_map_region_1',
+      3 => 'field_map_name_browser',
+      4 => 'field_map_marker',
+      5 => 'field_map_country_1',
+      6 => 'field_map_region_1',
+      7 => 'field_map_inherit_data',
+      8 => 'field_map_geofield',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -183,11 +362,15 @@ function node_displays_field_group_info() {
       5 => 'field_map_marker',
       6 => 'path',
     ),
-    'format_type' => 'tab',
+    'format_type' => 'div',
     'format_settings' => array(
-      'formatter' => 'closed',
+      'formatter' => 'open',
       'instance_settings' => array(
         'description' => '',
+        'show_label' => 1,
+        'label_element' => 'h3',
+        'effect' => 'none',
+        'speed' => 'fast',
         'classes' => '',
         'required_fields' => 1,
       ),
@@ -263,6 +446,7 @@ function node_displays_field_group_info() {
     'weight' => '3',
     'children' => array(
       0 => 'field_map_point',
+      1 => 'field_map_geofield',
     ),
     'format_type' => 'tab',
     'format_settings' => array(

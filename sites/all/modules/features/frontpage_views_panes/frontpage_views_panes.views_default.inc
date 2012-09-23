@@ -404,7 +404,6 @@ function frontpage_views_panes_views_default_views() {
     'trim_length' => '200',
   );
   $handler->display->display_options['fields']['field_log_comments']['field_api_classes'] = 0;
-  $handler->display->display_options['filter_groups']['operator'] = 'OR';
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Innhold: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
@@ -503,21 +502,6 @@ function frontpage_views_panes_views_default_views() {
   $handler->display->display_options['empty']['area']['empty'] = FALSE;
   $handler->display->display_options['empty']['area']['content'] = 'Det finnes ingen steder med disse kriteriene.';
   $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
-  /* Relasjon: Innhold: Taxonomy terms on node */
-  $handler->display->display_options['relationships']['term_node_tid']['id'] = 'term_node_tid';
-  $handler->display->display_options['relationships']['term_node_tid']['table'] = 'node';
-  $handler->display->display_options['relationships']['term_node_tid']['field'] = 'term_node_tid';
-  $handler->display->display_options['relationships']['term_node_tid']['required'] = 1;
-  $handler->display->display_options['relationships']['term_node_tid']['vocabularies'] = array(
-    'countries' => 'countries',
-    'seabed' => 0,
-    'certificates' => 0,
-    'enrance' => 0,
-    'ideelt_for' => 0,
-    'airtype' => 0,
-    'life' => 0,
-    'tags' => 0,
-  );
   /* Felt: Innhold: Tittel */
   $handler->display->display_options['fields']['title_2']['id'] = 'title_2';
   $handler->display->display_options['fields']['title_2']['table'] = 'node';
@@ -642,13 +626,8 @@ function frontpage_views_panes_views_default_views() {
     ),
   );
   $handler->display->display_options['defaults']['pager'] = FALSE;
-  $handler->display->display_options['pager']['type'] = 'full';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '22';
+  $handler->display->display_options['pager']['type'] = 'none';
   $handler->display->display_options['pager']['options']['offset'] = '0';
-  $handler->display->display_options['pager']['options']['id'] = '0';
-  $handler->display->display_options['pager']['options']['expose']['items_per_page_label'] = 'Elementer per side';
-  $handler->display->display_options['pager']['options']['expose']['items_per_page_options_all'] = 0;
-  $handler->display->display_options['pager']['options']['expose']['items_per_page_options_all_label'] = '- Alle -';
   $handler->display->display_options['defaults']['style_plugin'] = FALSE;
   $handler->display->display_options['style_plugin'] = 'grid';
   $handler->display->display_options['style_options']['fill_single_line'] = 1;
@@ -748,7 +727,6 @@ function frontpage_views_panes_views_default_views() {
   $handler->display->display_options['fields']['field_place_notes']['empty_zero'] = 0;
   $handler->display->display_options['fields']['field_place_notes']['type'] = 'text_plain';
   $handler->display->display_options['fields']['field_place_notes']['field_api_classes'] = 0;
-  $handler->display->display_options['filter_groups']['operator'] = 'OR';
   $handler->display->display_options['defaults']['filters'] = FALSE;
   /* Filter criterion: Innhold: Type */
   $handler->display->display_options['filters']['type']['id'] = 'type';
@@ -782,7 +760,6 @@ function frontpage_views_panes_views_default_views() {
     t('- Alle -'),
     t('Offset'),
     t('Det finnes ingen steder med disse kriteriene.'),
-    t('ord'),
     t('<b>[title_2]</b>'),
     t('Oppdatert dato'),
     t('Page'),

@@ -1,7 +1,7 @@
 name = Site discussions
 description = Functions for discussion on sites
 core = 7.x
-package = Features
+package = All pingvin
 version = 7.x-1.0
 project = site_discussions
 dependencies[] = ctools

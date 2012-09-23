@@ -988,7 +988,7 @@ function node_displays_field_default_fields() {
             'thousand_separator' => ' ',
           ),
           'type' => 'number_integer',
-          'weight' => 13,
+          'weight' => '13',
         ),
       ),
       'entity_type' => 'node',
@@ -1202,6 +1202,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '13',
         ),
+        'map_bubble_view' => array(
+          'label' => 'hidden',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '12',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -1312,6 +1318,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '16',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '15',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -1329,12 +1341,99 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
+        'type' => 'field_extrawidgets_hidden',
         'weight' => '11',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-divesite-field_map_geofield'.
+  $fields['node-divesite-field_map_geofield'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_map_geofield',
+      'foreign keys' => array(),
+      'indexes' => array(),
+      'locked' => '0',
+      'module' => 'geofield',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'geofield',
+    ),
+    'field_instance' => array(
+      'bundle' => 'divesite',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Mest mulig nøyaktig kartpunkt.',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'geofield',
+          'settings' => array(
+            'data' => 'full',
+          ),
+          'type' => 'geofield_wkt',
+          'weight' => 17,
+        ),
+        'divesite_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'divesite_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'divesite_small_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_map_geofield',
+      'label' => 'Koordinater (geo)',
+      'required' => 0,
+      'settings' => array(
+        'local_solr' => array(
+          'enabled' => FALSE,
+          'lat_field' => 'lat',
+          'lng_field' => 'lng',
+        ),
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'geofield',
+        'settings' => array(
+          'data_storage' => 'single',
+          'openlayers_map' => 'geofield_widget_map',
+        ),
+        'type' => 'geofield_openlayers',
+        'weight' => '2',
       ),
     ),
   );
@@ -1425,6 +1524,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '17',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '16',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -1442,11 +1547,11 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
+        'type' => 'field_extrawidgets_hidden',
         'weight' => '16',
       ),
     ),
@@ -1542,6 +1647,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '12',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '8',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -1558,9 +1669,9 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'options',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'options_select',
+        'type' => 'field_extrawidgets_hidden',
         'weight' => '15',
       ),
     ),
@@ -1705,6 +1816,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '11',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '11',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -1721,9 +1838,9 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 0,
-        'module' => 'location_cck',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'location',
+        'type' => 'field_extrawidgets_hidden',
         'weight' => '1',
       ),
     ),
@@ -1825,6 +1942,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'settings' => array(),
           'type' => 'hidden',
           'weight' => '14',
+        ),
+        'map_bubble_view' => array(
+          'label' => 'hidden',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '13',
         ),
         'teaser' => array(
           'label' => 'above',
@@ -1936,6 +2059,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '15',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '14',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -1953,11 +2082,11 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
+        'type' => 'field_extrawidgets_hidden',
         'weight' => '13',
       ),
     ),
@@ -2110,6 +2239,16 @@ Undervannsbilder har vi nok av i loggene.',
           'type' => 'galleria',
           'weight' => '0',
         ),
+        'map_bubble_view' => array(
+          'label' => 'hidden',
+          'module' => 'image',
+          'settings' => array(
+            'image_link' => 'content',
+            'image_style' => 'four_x_four',
+          ),
+          'type' => 'image',
+          'weight' => '0',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -2240,6 +2379,12 @@ Undervannsbilder har vi nok av i loggene.',
           'settings' => array(),
           'type' => 'hidden',
           'weight' => '9',
+        ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '10',
         ),
         'teaser' => array(
           'label' => 'above',
@@ -2374,6 +2519,15 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '10',
         ),
+        'map_bubble_view' => array(
+          'label' => 'hidden',
+          'module' => 'text',
+          'settings' => array(
+            'trim_length' => '150',
+          ),
+          'type' => 'text_trimmed',
+          'weight' => '2',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -2494,6 +2648,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '8',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '9',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -2600,6 +2760,19 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '14',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'module' => 'date',
+          'settings' => array(
+            'format_type' => 'long',
+            'fromto' => 'both',
+            'multiple_from' => '',
+            'multiple_number' => '',
+            'multiple_to' => '',
+          ),
+          'type' => 'date_default',
+          'weight' => '3',
+        ),
         'teaser' => array(
           'label' => 'hidden',
           'settings' => array(),
@@ -2632,7 +2805,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'year_range' => '-15:+1',
         ),
         'type' => 'date_select',
-        'weight' => '4',
+        'weight' => '5',
       ),
     ),
   );
@@ -2719,6 +2892,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '21',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '12',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -2742,7 +2921,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'size' => 60,
         ),
         'type' => 'user_reference_autocomplete',
-        'weight' => '23',
+        'weight' => '21',
       ),
     ),
   );
@@ -2820,6 +2999,15 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'text_trimmed',
           'weight' => '2',
         ),
+        'map_bubble_view' => array(
+          'label' => 'hidden',
+          'module' => 'text',
+          'settings' => array(
+            'trim_length' => 600,
+          ),
+          'type' => 'text_trimmed',
+          'weight' => '2',
+        ),
         'teaser' => array(
           'label' => 'hidden',
           'settings' => array(),
@@ -2842,7 +3030,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'rows' => '5',
         ),
         'type' => 'text_textarea',
-        'weight' => '12',
+        'weight' => '9',
       ),
     ),
   );
@@ -2913,6 +3101,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'settings' => array(),
           'type' => 'hidden',
           'weight' => '19',
+        ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '15',
         ),
         'teaser' => array(
           'label' => 'hidden',
@@ -3012,6 +3206,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'settings' => array(),
           'type' => 'hidden',
           'weight' => '16',
+        ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '11',
         ),
         'teaser' => array(
           'label' => 'hidden',
@@ -3115,6 +3315,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '13',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '9',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -3207,6 +3413,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '9',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '13',
+        ),
         'teaser' => array(
           'label' => 'inline',
           'settings' => array(),
@@ -3230,7 +3442,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
         'module' => 'number',
         'settings' => array(),
         'type' => 'number',
-        'weight' => '15',
+        'weight' => '19',
       ),
     ),
   );
@@ -3303,6 +3515,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '10',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '14',
+        ),
         'teaser' => array(
           'label' => 'inline',
           'settings' => array(),
@@ -3326,7 +3544,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
         'module' => 'number',
         'settings' => array(),
         'type' => 'number',
-        'weight' => '17',
+        'weight' => '18',
       ),
     ),
   );
@@ -3460,6 +3678,16 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'slideshow',
           'weight' => '0',
         ),
+        'map_bubble_view' => array(
+          'label' => 'hidden',
+          'module' => 'image',
+          'settings' => array(
+            'image_link' => 'content',
+            'image_style' => 'four_x_four',
+          ),
+          'type' => 'image',
+          'weight' => '0',
+        ),
         'teaser' => array(
           'label' => 'hidden',
           'module' => 'colorbox',
@@ -3507,7 +3735,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'progress_indicator' => 'bar',
         ),
         'type' => 'image_image',
-        'weight' => '2',
+        'weight' => '5',
       ),
     ),
   );
@@ -3584,6 +3812,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '20',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '24',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -3603,7 +3837,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '11',
+        'weight' => '14',
       ),
     ),
   );
@@ -3674,6 +3908,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '28',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '23',
+        ),
         'teaser' => array(
           'label' => 'hidden',
           'settings' => array(),
@@ -3697,7 +3937,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
         'module' => 'number',
         'settings' => array(),
         'type' => 'number',
-        'weight' => '8',
+        'weight' => '16',
       ),
     ),
   );
@@ -3783,6 +4023,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '22',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '21',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -3802,7 +4048,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '14',
+        'weight' => '13',
       ),
     ),
   );
@@ -3873,6 +4119,12 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
           'type' => 'hidden',
           'weight' => '23',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '22',
+        ),
         'teaser' => array(
           'label' => 'hidden',
           'settings' => array(),
@@ -3896,7 +4148,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
         'module' => 'number',
         'settings' => array(),
         'type' => 'number',
-        'weight' => '5',
+        'weight' => '15',
       ),
     ),
   );
@@ -3976,6 +4228,12 @@ $entity_field[0][\'value\'] = $out;
           'type' => 'hidden',
           'weight' => '17',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '17',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -3995,7 +4253,7 @@ $entity_field[0][\'value\'] = $out;
         'module' => 'computed_field',
         'settings' => array(),
         'type' => 'computed',
-        'weight' => '10',
+        'weight' => '17',
       ),
     ),
   );
@@ -4068,6 +4326,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'type' => 'hidden',
           'weight' => '31',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '30',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -4089,7 +4353,7 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'display_label' => 1,
         ),
         'type' => 'options_onoff',
-        'weight' => '18',
+        'weight' => '10',
       ),
     ),
   );
@@ -4172,6 +4436,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'type' => 'hidden',
           'weight' => '11',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '19',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -4191,7 +4461,7 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '22',
+        'weight' => '17',
       ),
     ),
   );
@@ -4263,6 +4533,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'type' => 'hidden',
           'weight' => '30',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '29',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -4279,12 +4555,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'options',
+        'module' => NULL,
         'settings' => array(
           'display_label' => 0,
         ),
-        'type' => 'options_onoff',
-        'weight' => '26',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '12',
       ),
     ),
   );
@@ -4366,6 +4642,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'type' => 'hidden',
           'weight' => '15',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '20',
+        ),
         'teaser' => array(
           'label' => 'inline',
           'settings' => array(),
@@ -4385,7 +4667,7 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '19',
+        'weight' => '16',
       ),
     ),
   );
@@ -4462,6 +4744,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'type' => 'hidden',
           'weight' => '18',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '18',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -4481,7 +4769,7 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_select',
-        'weight' => '9',
+        'weight' => '8',
       ),
     ),
   );
@@ -4563,6 +4851,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'type' => 'hidden',
           'weight' => '25',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '26',
+        ),
         'teaser' => array(
           'label' => 'inline',
           'settings' => array(),
@@ -4585,7 +4879,7 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'size' => 60,
         ),
         'type' => 'taxonomy_autocomplete',
-        'weight' => '16',
+        'weight' => '11',
       ),
     ),
   );
@@ -4661,6 +4955,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'type' => 'hidden',
           'weight' => '35',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '34',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -4680,7 +4980,7 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_buttons',
-        'weight' => '13',
+        'weight' => '10',
       ),
     ),
   );
@@ -4752,6 +5052,12 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
           'settings' => array(),
           'type' => 'hidden',
           'weight' => '12',
+        ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '10',
         ),
         'teaser' => array(
           'label' => 'above',
@@ -4825,6 +5131,7 @@ $entity_field[0][\'value\'] = $me[0];',
     ),
     'field_instance' => array(
       'bundle' => 'log',
+      'default_value' => NULL,
       'deleted' => '0',
       'description' => '',
       'display' => array(
@@ -4864,6 +5171,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '26',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '25',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -4880,10 +5193,10 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 0,
-        'module' => 'computed_field',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'computed',
-        'weight' => '31',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '28',
       ),
     ),
   );
@@ -4954,6 +5267,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '33',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '32',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -4971,12 +5290,99 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
-        'weight' => '33',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '30',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-log-field_map_geofield'.
+  $fields['node-log-field_map_geofield'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_map_geofield',
+      'foreign keys' => array(),
+      'indexes' => array(),
+      'locked' => '0',
+      'module' => 'geofield',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'geofield',
+    ),
+    'field_instance' => array(
+      'bundle' => 'log',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Stedet du har dykket på.',
+      'display' => array(
+        'default' => array(
+          'label' => 'above',
+          'module' => 'geofield',
+          'settings' => array(
+            'data' => 'full',
+          ),
+          'type' => 'geofield_wkt',
+          'weight' => 32,
+        ),
+        'log_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'log_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'log_small_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_map_geofield',
+      'label' => 'Koordinater (geo)',
+      'required' => 0,
+      'settings' => array(
+        'local_solr' => array(
+          'enabled' => FALSE,
+          'lat_field' => 'lat',
+          'lng_field' => 'lng',
+        ),
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'geofield',
+        'settings' => array(
+          'data_storage' => 'single',
+          'openlayers_map' => 'geofield_widget_map',
+        ),
+        'type' => 'geofield_openlayers',
+        'weight' => '25',
       ),
     ),
   );
@@ -5063,6 +5469,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '36',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '35',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -5079,10 +5491,10 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'options',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'options_select',
-        'weight' => '24',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '33',
       ),
     ),
   );
@@ -5157,6 +5569,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '32',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '31',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -5174,12 +5592,12 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
-        'weight' => '30',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '27',
       ),
     ),
   );
@@ -5262,6 +5680,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '24',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '16',
+        ),
         'teaser' => array(
           'label' => 'hidden',
           'settings' => array(),
@@ -5278,10 +5702,10 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'options',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'options_select',
-        'weight' => '3',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '32',
       ),
     ),
   );
@@ -5413,6 +5837,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '29',
         ),
+        'map_bubble_view' => array(
+          'label' => 'hidden',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '28',
+        ),
         'teaser' => array(
           'label' => 'hidden',
           'settings' => array(),
@@ -5429,10 +5859,10 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 0,
-        'module' => 'location_cck',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'location',
-        'weight' => '29',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '26',
       ),
     ),
   );
@@ -5481,6 +5911,7 @@ $entity_field[0][\'value\'] = $me[0];',
     ),
     'field_instance' => array(
       'bundle' => 'log',
+      'default_value' => NULL,
       'deleted' => '0',
       'description' => '',
       'display' => array(
@@ -5520,6 +5951,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '27',
         ),
+        'map_bubble_view' => array(
+          'label' => 'inline',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '27',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -5536,10 +5973,10 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 0,
-        'module' => 'computed_field',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'computed',
-        'weight' => '34',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '31',
       ),
     ),
   );
@@ -5610,6 +6047,12 @@ $entity_field[0][\'value\'] = $me[0];',
           'type' => 'hidden',
           'weight' => '34',
         ),
+        'map_bubble_view' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => '33',
+        ),
         'teaser' => array(
           'label' => 'above',
           'settings' => array(),
@@ -5627,12 +6070,12 @@ $entity_field[0][\'value\'] = $me[0];',
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
-        'weight' => '32',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '29',
       ),
     ),
   );
@@ -6009,6 +6452,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
   t('Klubbens lokalitet, vanligvis lokaliteten til klubbhuset.');
   t('Klubbens mailingliste, hvis den har noen. Hvis ikke, skriv inn en epost som klubben kan kontaktes på.');
   t('Kommentarer');
+  t('Koordinater (geo)');
   t('Land');
   t('Landshiearki');
   t('Landskode');
@@ -6024,6 +6468,7 @@ Ting som bør være med i en god beskrivelse er: Informasjon om stedet, tilkomst
   t('Maks dybde på dykket');
   t('Map marker');
   t('Marker');
+  t('Mest mulig nøyaktig kartpunkt.');
   t('Not to be shown for the current user.');
   t('Not to be shown publicly');
   t('Om klubben');
@@ -6040,6 +6485,7 @@ Loggen vil da lyse opp med et rødt lite kryss på kart, og du kan evnt skrive o
   t('Startpunkt');
   t('Statistisk radius');
   t('Sted');
+  t('Stedet du har dykket på.');
   t('Strøm');
   t('Temp luft');
   t('Temp vann');

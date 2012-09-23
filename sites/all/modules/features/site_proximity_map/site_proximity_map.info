@@ -1,6 +1,6 @@
 name = Site proximity map
 core = 7.x
-package = Features
+package = All pingvin
 version = 7.x-1.0
 project = site_proximity_map
 dependencies[] = ctools

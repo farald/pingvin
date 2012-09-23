@@ -35,7 +35,7 @@ function site_drawings_node_info() {
       'base' => 'node_content',
       'description' => t('En tegning av et dykkested. '),
       'has_title' => '1',
-      'title_label' => t('Title'),
+      'title_label' => t('Tittel'),
       'help' => t('Du kan bruke andre tegninger, og bygge på dem.'),
     ),
   );
