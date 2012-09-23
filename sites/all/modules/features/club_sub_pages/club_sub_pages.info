@@ -1,0 +1,10 @@
+name = Club sub pages
+core = 7.x
+package = All pingvin
+version = 7.x-1.0
+project = club_sub_pages
+dependencies[] = ctools
+dependencies[] = page_manager
+features[ctools][] = page_manager:pages_default:1
+features[features_api][] = api:1
+features[page_manager_pages][] = club_members_dive_here

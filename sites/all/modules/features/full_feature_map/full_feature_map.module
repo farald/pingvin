@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Full feature map feature.
+ */
+
+include_once 'full_feature_map.features.inc';

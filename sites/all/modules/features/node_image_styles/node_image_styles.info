@@ -1,0 +1,9 @@
+name = Node image styles
+core = 7.x
+package = All pingvin
+version = 7.x-1.0
+project = node_image_styles
+dependencies[] = image
+features[features_api][] = api:1
+features[image][] = four_x_four
+features[image][] = two_x_two

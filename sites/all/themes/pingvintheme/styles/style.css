@@ -1098,3 +1098,9 @@ ul.icons li .icon-large:before {
   color: #555555;
   max-width: 280px;
 }
+.page-kart .olControlPanZoomBar {
+  margin-top: 30px;
+}
+.page-kart .olControlLayerSwitcher {
+  margin-top: 13px;
+}

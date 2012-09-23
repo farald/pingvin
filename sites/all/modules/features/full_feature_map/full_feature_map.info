@@ -1,0 +1,15 @@
+name = Full feature map
+description = The main map
+core = 7.x
+package = All pingvin
+version = 7.x-1.0
+project = full_feature_map
+dependencies[] = ctools
+dependencies[] = openlayers
+features[ctools][] = openlayers:openlayers_layers:1
+features[ctools][] = openlayers:openlayers_maps:1
+features[ctools][] = openlayers:openlayers_styles:1
+features[features_api][] = api:1
+features[openlayers_layers][] = norsk_sj_kart
+features[openlayers_maps][] = map_of_everything
+features[openlayers_styles][] = clone_of_default_marker_red
