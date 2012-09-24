@@ -162,6 +162,33 @@ function node_displays_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_documents|node|club|form';
+  $field_group->group_name = 'group_documents';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'club';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Dokumenter',
+    'weight' => '3',
+    'children' => array(
+      0 => 'field_club_docs',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_documents|node|club|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_environment|node|log|form';
   $field_group->group_name = 'group_environment';
   $field_group->entity_type = 'node';
@@ -250,6 +277,36 @@ function node_displays_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_info|node|club|form';
+  $field_group->group_name = 'group_info';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'club';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Informasjon',
+    'weight' => '2',
+    'children' => array(
+      0 => 'field_club_mail_list',
+      1 => 'field_club_about',
+      2 => 'field_club_image',
+      3 => 'field_club_address',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_info|node|club|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_mandatory|node|log|form';
   $field_group->group_name = 'group_mandatory';
   $field_group->entity_type = 'node';
@@ -279,6 +336,35 @@ function node_displays_field_group_info() {
     ),
   );
   $export['group_mandatory|node|log|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_mapdata|node|club|form';
+  $field_group->group_name = 'group_mapdata';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'club';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Kart',
+    'weight' => '1',
+    'children' => array(
+      0 => 'field_map_point',
+      1 => 'field_place_radius',
+      2 => 'field_map_geofield',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_mapdata|node|club|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -314,6 +400,34 @@ function node_displays_field_group_info() {
     ),
   );
   $export['group_mapdata|node|log|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_settings|node|club|form';
+  $field_group->group_name = 'group_settings';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'club';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Gruppeinstillinger',
+    'weight' => '4',
+    'children' => array(
+      0 => 'field_club_members',
+      1 => 'group_group',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_settings|node|club|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */

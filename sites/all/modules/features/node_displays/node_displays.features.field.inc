@@ -90,7 +90,7 @@ function node_displays_field_default_fields() {
           'rows' => '5',
         ),
         'type' => 'text_textarea',
-        'weight' => '-2',
+        'weight' => '15',
       ),
     ),
   );
@@ -174,7 +174,7 @@ function node_displays_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'text_textfield',
-        'weight' => '2',
+        'weight' => '18',
       ),
     ),
   );
@@ -271,7 +271,7 @@ function node_displays_field_default_fields() {
           'progress_indicator' => 'throbber',
         ),
         'type' => 'file_generic',
-        'weight' => '8',
+        'weight' => '6',
       ),
     ),
   );
@@ -385,7 +385,7 @@ function node_displays_field_default_fields() {
           'progress_indicator' => 'bar',
         ),
         'type' => 'image_image',
-        'weight' => '1',
+        'weight' => '17',
       ),
     ),
   );
@@ -454,7 +454,7 @@ function node_displays_field_default_fields() {
           'size' => '60',
         ),
         'type' => 'email_textfield',
-        'weight' => '-3',
+        'weight' => '16',
       ),
     ),
   );
@@ -541,7 +541,7 @@ function node_displays_field_default_fields() {
         'module' => 'number',
         'settings' => array(),
         'type' => 'number',
-        'weight' => '3',
+        'weight' => '10',
       ),
     ),
   );
@@ -619,12 +619,87 @@ function node_displays_field_default_fields() {
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
-        'weight' => '13',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '8',
+      ),
+    ),
+  );
+
+  // Exported field: 'node-club-field_map_geofield'.
+  $fields['node-club-field_map_geofield'] = array(
+    'field_config' => array(
+      'active' => '1',
+      'cardinality' => '1',
+      'deleted' => '0',
+      'entity_types' => array(),
+      'field_name' => 'field_map_geofield',
+      'foreign keys' => array(),
+      'indexes' => array(),
+      'locked' => '0',
+      'module' => 'geofield',
+      'settings' => array(),
+      'translatable' => '0',
+      'type' => 'geofield',
+    ),
+    'field_instance' => array(
+      'bundle' => 'club',
+      'default_value' => NULL,
+      'deleted' => '0',
+      'description' => 'Det nærmeste man kommer en hjemlokalitet for klubben, da typisk et klubbhus.',
+      'display' => array(
+        'club_full_node' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'club_large_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'club_small_teaser' => array(
+          'label' => 'above',
+          'settings' => array(),
+          'type' => 'hidden',
+          'weight' => 0,
+        ),
+        'default' => array(
+          'label' => 'above',
+          'module' => 'geofield',
+          'settings' => array(
+            'data' => 'full',
+          ),
+          'type' => 'geofield_wkt',
+          'weight' => 14,
+        ),
+      ),
+      'entity_type' => 'node',
+      'field_name' => 'field_map_geofield',
+      'label' => 'Koordinater (geo)',
+      'required' => 1,
+      'settings' => array(
+        'local_solr' => array(
+          'enabled' => FALSE,
+          'lat_field' => 'lat',
+          'lng_field' => 'lng',
+        ),
+        'user_register_form' => FALSE,
+      ),
+      'widget' => array(
+        'active' => 1,
+        'module' => 'geofield',
+        'settings' => array(
+          'data_storage' => 'single',
+          'openlayers_map' => 'geofield_widget_map',
+        ),
+        'type' => 'geofield_openlayers',
+        'weight' => '6',
       ),
     ),
   );
@@ -706,10 +781,10 @@ function node_displays_field_default_fields() {
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'options',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'options_select',
-        'weight' => '7',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '6',
       ),
     ),
   );
@@ -842,10 +917,10 @@ function node_displays_field_default_fields() {
       ),
       'widget' => array(
         'active' => 0,
-        'module' => 'location_cck',
+        'module' => NULL,
         'settings' => array(),
-        'type' => 'location',
-        'weight' => '5',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '4',
       ),
     ),
   );
@@ -923,12 +998,12 @@ function node_displays_field_default_fields() {
       ),
       'widget' => array(
         'active' => 1,
-        'module' => 'text',
+        'module' => NULL,
         'settings' => array(
           'size' => '60',
         ),
-        'type' => 'text_textfield',
-        'weight' => '11',
+        'type' => 'field_extrawidgets_hidden',
+        'weight' => '7',
       ),
     ),
   );
@@ -1007,7 +1082,7 @@ function node_displays_field_default_fields() {
         'module' => 'number',
         'settings' => array(),
         'type' => 'number',
-        'weight' => '32',
+        'weight' => '5',
       ),
     ),
   );
@@ -1099,7 +1174,7 @@ function node_displays_field_default_fields() {
         'module' => 'options',
         'settings' => array(),
         'type' => 'options_buttons',
-        'weight' => '14',
+        'weight' => '9',
       ),
       'widget_type' => 'options_select',
     ),
@@ -6422,6 +6497,7 @@ Undervannsbilder har vi nok av i loggene.');
   t('Denne skal ikke vises! Ser du denne, gi beskjed til admin!');
   t('Denne skal være avslått for brukeren, så denne skal man ikke kunne se. Ser du den, gi beskjed til administrator.');
   t('Deres klubblogo. Bør være en logo på hvit eller gjennomsiktig bakgrunn.');
+  t('Det nærmeste man kommer en hjemlokalitet for klubben, da typisk et klubbhus.');
   t('Dine tagger');
   t('Dokumenter');
   t('Du kan bruke dette feltet til å importere geografiske data fra en annen lokalitet. Dette feltet vil da overskrive kartet nedenfor.');
