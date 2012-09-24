@@ -80,7 +80,7 @@ function node_displays_field_default_fields() {
       'label' => 'Om klubben',
       'required' => 1,
       'settings' => array(
-        'text_processing' => '0',
+        'text_processing' => '1',
         'user_register_form' => FALSE,
       ),
       'widget' => array(
