@@ -275,7 +275,6 @@ function pingvincode_node_presave($node) {
 function pingvincode_geonames_info($lat, $lon) {
   $query = array('lat' => $lat, 'lng' => $lon, 'radius' => 100, 'maxrows' => 1);
   $result = geonames_query('countrysubdivision', $query); // Call geonames.module
-  dpm($result);
   if (!empty($result->results)) {
     foreach ($result->results as $place) {
       $region_value = $place[adminname1];
