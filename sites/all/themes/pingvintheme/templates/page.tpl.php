@@ -80,7 +80,6 @@
       <a id="main-content"></a>
       <?php print render($title_prefix); ?>
       <?php if ($title): ?>
-      <?php dpm($node);?>
         <h1 class="page-header"><?php print $title; ?>
           <?php if(!empty($node)): ?>
           <span class="test" style="font-size: 0.5em;padding-left: 20px; font-weight: normal;"><?php print pingvintheme_custom_theme_mod('node', $node->nid);?></span> 
