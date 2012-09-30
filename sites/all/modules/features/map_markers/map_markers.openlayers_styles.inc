@@ -585,31 +585,32 @@ function map_markers_openlayers_styles() {
     'labelAlign' => 'cm',
   );
   $export['f_club_yellow'] = $openlayers_styles;
-//
-//  $openlayers_styles = new stdClass();
-//  $openlayers_styles->disabled = FALSE; /* Edit this to true to make a default openlayers_styles disabled initially */
-//  $openlayers_styles->api_version = 1;
-//  $openlayers_styles->name = '';
-//  $openlayers_styles->title = '';
-//  $openlayers_styles->description = '';
-//  $openlayers_styles->data = array(
-//    'externalGraphic' => 'sites/all/themes/pingvintheme/mapicons/.png',
-//    'pointRadius' => 16,
-//    'fillColor' => '#EE9900',
-//    'strokeColor' => '#EE9900',
-//    'strokeWidth' => 1,
-//    'fillOpacity' => 1,
-//    'strokeOpacity' => 1,
-//    'strokeLinecap' => 'round',
-//    'strokeDashstyle' => 'solid',
-//    'graphicWidth' => 32,
-//    'graphicHeight' => 37,
-//    'graphicOpacity' => 1,
-//    'graphicXOffset' => -16,
-//    'graphicYOffset' => -37,
-//    'labelAlign' => 'cm',
-//  );
-//  $export[''] = $openlayers_styles;
+
+  $openlayers_styles = new stdClass();
+  $openlayers_styles->disabled = FALSE; /* Edit this to true to make a default openlayers_styles disabled initially */
+  $openlayers_styles->api_version = 1;
+  $openlayers_styles->name = 'g_dive_general_orange';
+  $openlayers_styles->title = 'g_dive_general_orange';
+  $openlayers_styles->description = 'g_dive_general_orange';
+  $openlayers_styles->data = array(
+    'externalGraphic' => 'sites/all/themes/pingvintheme/mapicons/g_dive_general_orange.png',
+    'pointRadius' => 16,
+    'fillColor' => '#EE9900',
+    'strokeColor' => '#EE9900',
+    'strokeWidth' => 1,
+    'fillOpacity' => 1,
+    'strokeOpacity' => 1,
+    'strokeLinecap' => 'round',
+    'strokeDashstyle' => 'solid',
+    'graphicWidth' => 32,
+    'graphicHeight' => 37,
+    'graphicOpacity' => 1,
+    'graphicXOffset' => -16,
+    'graphicYOffset' => -37,
+    'labelAlign' => 'cm',
+  );
+  $export['g_dive_general_orange'] = $openlayers_styles;
+  
 //  $openlayers_styles = new stdClass();
 //  $openlayers_styles->disabled = FALSE; /* Edit this to true to make a default openlayers_styles disabled initially */
 //  $openlayers_styles->api_version = 1;
