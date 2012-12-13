@@ -10,3 +10,7 @@ sites/all/libraries/galleria/themes/miniml
 
 # Ignore private backup dir
 sites/default/private-files
+
+# Ignore more
+/sites/all/themes/shiny/.sass-cache/
+
