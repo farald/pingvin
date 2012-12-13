@@ -7,3 +7,6 @@ sites/*/private
 
 # Ignore proprietary galleria
 sites/all/libraries/galleria/themes/miniml
+
+# Ignore private backup dir
+sites/default/private-files
