@@ -38,6 +38,6 @@
     <div class="message">Pingvindatabasen</div>
   </div>
   <div id="powered">
-    Gjort mulig av <a href="http://ndf.no">Norges dykkeforbund</a>
+    Gjort mulig av <a href="http://pingvindykk.no">Pingvin Sportsdykkerklubb</a>. Prosjektet er åpent for alle dykkerklubber.
   </div>
   </div>

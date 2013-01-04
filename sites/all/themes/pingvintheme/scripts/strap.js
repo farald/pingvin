@@ -12,5 +12,5 @@
   window.onload = function ()  {
     $('.openlayers_behavior_fullscreen_buttonItemInactive').click();
     $('.openlayers_behavior_fullscreen_buttonItemInactive').click();
-  };
+  };$('#example').popover
 })(jQuery);
